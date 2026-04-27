@@ -1,0 +1,85 @@
+<div class="page-container">
+
+    <header class="dashboard-header">
+        <div class="header-text">
+            <h1>My Properties</h1>
+            <p>Manage your listings, update statuses, and track performance.</p>
+        </div>
+        <button class="btn-primary" routerLink="/list-property">
+            <mat-icon>add</mat-icon> Add New Listing
+        </button>
+    </header>
+
+    <div class="loading-state" *ngIf="isLoading">
+        <div class="modern-spinner"></div>
+        <p>Loading your portfolio...</p>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && listings.length === 0">
+        <div class="empty-icon-circle">
+            <mat-icon>holiday_village</mat-icon>
+        </div>
+        <h3>No properties listed yet</h3>
+        <p>Get started by listing your first property today. It's fast and easy!</p>
+        <button class="btn-primary mt-4" routerLink="/list">List Your Property</button>
+    </div>
+
+    <div class="listings-grid" *ngIf="!isLoading && listings.length > 0">
+
+        <div class="property-card" *ngFor="let prop of listings">
+
+            <div class="card-image" (click)="editProperty(prop.id)" style="cursor: pointer;">
+                <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
+                
+                <div class="status-badge" [ngClass]="'badge-' + getStatusLabel(prop.isRented).toLowerCase()">
+                    <span class="dot"></span> {{ getStatusLabel(prop.isRented) | titlecase }}
+                </div>
+            </div>
+
+            <div class="card-content">
+                <div class="header-row">
+                    <h3>{{ prop.propertyName || prop.propertyType }}</h3>
+                    <span class="price">{{ formatPrice(prop.rentAmount) }}</span>
+                </div>
+
+                <p class="location">
+                    <mat-icon>location_on</mat-icon> {{ prop.city }}, {{ prop.state }}
+                </p>
+
+                <div class="stats-row">
+                    <span><mat-icon>bed</mat-icon> {{ prop.bedrooms }} Bed</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize }} SqFt</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>home</mat-icon> {{ prop.propertyType }}</span>
+                </div>
+
+               <div class="action-row">
+                    
+                    <mat-select 
+                        [value]="prop.isRented" 
+                        (selectionChange)="changeStatus(prop, $event)"
+                        class="custom-status-select"
+                        [ngClass]="'select-' + getStatusLabel(prop.isRented).toLowerCase()"
+                        panelClass="custom-select-panel">
+                        <mat-option [value]="0">Active</mat-option>
+                        <mat-option [value]="1">Rented</mat-option>
+                        <mat-option [value]="2">Hidden</mat-option>
+                    </mat-select>
+
+                    <div class="btn-group">
+                        <a [routerLink]="['/property-details', prop.id]" class="btn-icon" title="View Property">
+                            <mat-icon>visibility</mat-icon>
+                        </a>
+                        <button class="btn-icon edit" (click)="editProperty(prop.id)" title="Edit Property">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

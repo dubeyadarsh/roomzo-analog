@@ -1,0 +1,93 @@
+<div class="page-container">
+  
+  <div class="page-header">
+    <button class="back-btn" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon> Back
+    </button>
+    <h1>Edit Property</h1>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="modern-spinner"></div>
+    <p>Loading property details...</p>
+  </div>
+
+  <form *ngIf="!isLoading && listing" (submit)="onSubmit()" class="edit-form">
+
+    <section class="card locked-section">
+      <div class="card-header">
+        <h3><mat-icon>lock_outline</mat-icon> Fixed Details</h3>
+        <span class="lock-badge">Read Only</span>
+      </div>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Property Name</label>
+          <input type="text" [value]="listing.propertyName" disabled>
+        </div>
+        <div class="form-group">
+          <label>Property Type</label>
+          <input type="text" [value]="listing.propertyType" disabled>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" [value]="listing.city + ', ' + listing.state" disabled>
+        </div>
+        <div class="form-group">
+          <label>Area (Sq Ft)</label>
+          <input type="text" [value]="listing.propertySize" disabled>
+        </div>
+        <div class="form-group">
+          <label>Bedrooms</label>
+          <input type="text" [value]="listing.bedrooms" disabled>
+        </div>
+        <div class="form-group">
+          <label>Bathrooms</label>
+          <input type="text" [value]="listing.bathrooms" disabled>
+        </div>
+      </div>
+    </section>
+
+    <section class="card editable-section">
+      <div class="card-header">
+        <h3><mat-icon>edit_note</mat-icon> Update Information</h3>
+      </div>
+      
+      <div class="form-group">
+        <label>Monthly Rent (₹)</label>
+        <div class="input-with-icon">
+          <mat-icon>currency_rupee</mat-icon>
+          <input type="number" [(ngModel)]="listing.rentAmount" name="rentAmount" placeholder="Enter rent amount" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Property Description</label>
+        <textarea [(ngModel)]="listing.description" name="description" rows="5" placeholder="Highlight the best features of your property..." required></textarea>
+      </div>
+
+      <div class="amenities-group">
+        <label>Amenities</label>
+        <p class="helper-text">Select all that apply to your property.</p>
+        
+        <div class="amenities-grid">
+          <label class="amenity-pill" *ngFor="let item of amenitiesList" [class.selected]="listing[item.key]">
+            <input type="checkbox" [(ngModel)]="listing[item.key]" [name]="item.key">
+            <mat-icon *ngIf="listing[item.key]">check_circle</mat-icon>
+            {{ item.label }}
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+    <div class="actions-footer">
+      <button type="button" class="btn-outline" (click)="cancel()" [disabled]="isSaving">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        <mat-icon *ngIf="isSaving" class="spinner">sync</mat-icon>
+        {{ isSaving ? 'Saving...' : 'Save Changes' }}
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,139 @@
+.rz-search-pill {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 8px 8px 8px 24px;
+  border-radius: var(--rz-radius-pill, 50px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  gap: 16px;
+}
+
+/* Input Area */
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 2;
+  height: 100%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0;
+  color: var(--rz-primary);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+
+.input-group input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1.05rem;
+  color: var(--rz-text-main);
+  background: transparent;
+  padding: 12px 12px 12px 36px;
+  font-family: inherit;
+}
+
+.input-group input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background: var(--rz-border);
+}
+
+/* --- MATERIAL SELECT STYLING --- */
+.filter-group {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding: 0 8px; /* Breathing room */
+}
+
+.custom-mat-select {
+  width: 100%;
+  font-size: 1.05rem;
+  font-family: inherit;
+}
+
+/* Remove default material underlines and fix colors */
+::ng-deep .custom-mat-select .mat-mdc-select-value {
+  color: var(--rz-text-main);
+  font-weight: 500;
+}
+
+::ng-deep .custom-mat-select .mat-mdc-select-placeholder {
+  color: #6b7280; /* Nice grey for the placeholder */
+  font-weight: 500;
+}
+
+::ng-deep .custom-mat-select .mat-mdc-select-trigger {
+  padding: 8px 0;
+}
+
+/* Style the built-in animated arrow */
+::ng-deep .custom-mat-select .mat-mdc-select-arrow svg {
+  fill: var(--rz-text-muted);
+}
+
+.search-btn {
+  border-radius: var(--rz-radius-pill, 50px);
+  padding: 14px 32px;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+/* --- Bulletproof Responsive Mobile Layout --- */
+@media (max-width: 900px) {
+  .rz-search-pill {
+    flex-direction: column;
+    border-radius: 16px;
+    padding: 20px; /* More breathing room inside the card */
+    gap: 0;
+    box-sizing: border-box;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15); /* Stronger shadow for depth */
+  }
+  
+  .hide-mobile { display: none !important; }
+  
+  .input-group {
+    width: 100%;
+    flex: none; /* Override desktop flex */
+    border-bottom: 1px solid var(--rz-border);
+    padding: 0 0 12px 0;
+    margin-bottom: 12px;
+  }
+  
+  .filter-group {
+    width: 100%;
+    flex: none; /* Override desktop flex */
+    border-bottom: 1px solid var(--rz-border);
+    padding: 0 0 12px 0;
+    margin-bottom: 12px;
+  }
+  
+  /* Remove the bottom border/margin from the last filter so it sits flush with the button */
+  .filter-group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 4px;
+  }
+  
+  .search-btn {
+    width: 100%;
+    border-radius: 12px;
+    margin-top: 16px;
+    padding: 16px; /* Taller, extremely touch-friendly button */
+    font-size: 1.15rem;
+  }
+}

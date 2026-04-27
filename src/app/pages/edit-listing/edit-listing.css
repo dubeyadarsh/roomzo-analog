@@ -1,0 +1,164 @@
+/* --- 1. Global Setup --- */
+:host {
+  display: block;
+  background-color: var(--rz-bg);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+* { box-sizing: border-box; }
+h1, h2, h3, h4, p { margin: 0; }
+
+.page-container {
+  max-width: 800px; /* Keep it narrow for optimal reading length */
+  margin: 0 auto;
+  padding: 100px 20px 80px; /* 100px top padding fixes the header overlap */
+}
+
+/* --- 2. Header --- */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.page-header h1 { font-size: 2rem; font-weight: 700; color: var(--rz-text-main); }
+
+.back-btn {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  background: white; border: 1px solid var(--rz-border);
+  padding: 8px 16px; border-radius: var(--rz-radius-pill, 50px);
+  color: var(--rz-text-muted); font-weight: 600; cursor: pointer;
+  transition: 0.2s; font-family: inherit; box-shadow: var(--rz-shadow-sm);
+}
+.back-btn:hover { color: var(--rz-primary); border-color: var(--rz-primary); }
+.back-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* --- 3. Cards & Structure --- */
+.card {
+  background: var(--rz-bg-card, #ffffff);
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius, 16px);
+  padding: 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--rz-shadow-sm);
+}
+
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 24px; border-bottom: 1px solid var(--rz-border); padding-bottom: 16px;
+}
+.card-header h3 { 
+  display: flex; align-items: center; gap: 8px;
+  font-size: 1.25rem; color: var(--rz-text-main); font-weight: 700; 
+}
+.card-header h3 mat-icon { color: var(--rz-primary); }
+
+/* --- 4. Locked Section Specifics --- */
+.locked-section { background: #f8fafc; border: 1px dashed var(--rz-border); }
+.lock-badge {
+  background: #e2e8f0; color: #475569; padding: 4px 12px;
+  border-radius: var(--rz-radius-pill, 50px); font-size: 0.8rem; font-weight: 600; text-transform: uppercase;
+}
+.locked-section input {
+  background: #e2e8f0; color: #64748b; cursor: not-allowed; border-color: transparent;
+}
+
+/* --- 5. Form Elements --- */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.form-group label { font-size: 0.95rem; font-weight: 600; color: var(--rz-text-main); }
+.helper-text { font-size: 0.85rem; color: var(--rz-text-muted); margin-bottom: 12px; }
+
+input, textarea {
+  padding: 14px 16px; border: 1px solid var(--rz-border); border-radius: var(--rz-radius-sm, 8px);
+  font-size: 1rem; width: 100%; box-sizing: border-box; font-family: inherit;
+  background: #f8fafc; color: var(--rz-text-main); transition: all 0.2s;
+}
+input:focus, textarea:focus {
+  outline: none; background: #ffffff; border-color: var(--rz-primary);
+  box-shadow: 0 0 0 3px rgba(25, 97, 83, 0.15); /* Soft teal glow */
+}
+
+/* Input with Icon (Currency) */
+.input-with-icon { position: relative; display: flex; align-items: center; }
+.input-with-icon mat-icon { position: absolute; left: 16px; color: var(--rz-text-muted); font-size: 20px; width: 20px; height: 20px; }
+.input-with-icon input { padding-left: 44px; } /* Room for icon */
+
+/* --- 6. Modern Amenity Pills --- */
+.amenities-group { margin-top: 12px; }
+.amenities-grid {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;
+}
+
+.amenity-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: #f8fafc; border: 1px solid var(--rz-border); color: var(--rz-text-muted);
+  padding: 10px 16px; border-radius: var(--rz-radius-pill, 50px);
+  font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  user-select: none;
+}
+.amenity-pill input { display: none; } /* Hide the actual checkbox */
+
+.amenity-pill:hover { background: #f1f5f9; color: var(--rz-text-main); }
+
+/* Selected State */
+.amenity-pill.selected {
+  background: var(--rz-primary); color: white; border-color: var(--rz-primary);
+  box-shadow: 0 4px 10px rgba(25, 97, 83, 0.2);
+}
+.amenity-pill.selected mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* --- 7. Buttons & Footers --- */
+.actions-footer {
+  display: flex; justify-content: flex-end; gap: 16px; margin-top: 32px;
+}
+
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--rz-primary); color: white; border: none;
+  padding: 14px 28px; border-radius: var(--rz-radius-pill, 50px);
+  font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; font-family: inherit;
+}
+.btn-primary:hover:not([disabled]) { background: var(--rz-primary-hover); transform: translateY(-2px); box-shadow: var(--rz-shadow-md); }
+.btn-primary[disabled] { opacity: 0.7; cursor: not-allowed; }
+
+.btn-outline {
+  background: white; border: 1px solid var(--rz-border); color: var(--rz-text-main);
+  padding: 14px 28px; border-radius: var(--rz-radius-pill, 50px);
+  font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; font-family: inherit;
+}
+.btn-outline:hover:not([disabled]) { border-color: var(--rz-text-muted); background: #f8fafc; }
+.btn-outline[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* Loaders */
+.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 20px; color: var(--rz-text-muted); gap: 16px; }
+.modern-spinner { width: 40px; height: 40px; border: 3px solid rgba(25, 97, 83, 0.1); border-left-color: var(--rz-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+
+/* ========================================================
+   MOBILE RESPONSIVENESS
+======================================================== */
+@media (max-width: 768px) {
+  
+  .page-container { 
+    padding: 100px 16px calc(100px + env(safe-area-inset-bottom)); 
+  }
+  
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .page-header h1 { font-size: 1.75rem; }
+
+  .card { padding: 20px; }
+  
+  .form-grid { grid-template-columns: 1fr; gap: 0; }
+  .form-group { margin-bottom: 16px; }
+  
+  .amenities-grid { gap: 8px; }
+  .amenity-pill { font-size: 0.9rem; padding: 8px 12px; }
+
+  /* Stack action buttons on mobile */
+  .actions-footer { flex-direction: column-reverse; gap: 12px; }
+  .btn-primary, .btn-outline { width: 100%; padding: 16px; }
+}

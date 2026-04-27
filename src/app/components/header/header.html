@@ -1,0 +1,118 @@
+<header class="rz-header" [class.scrolled]="isScrolled || !isHomePage">
+  <div class="container">
+    
+    <div class="brand">
+      <a routerLink="/" class="logo">
+        <mat-icon>home</mat-icon> RoomZo
+      </a>
+    </div>
+
+    <nav class="nav-desktop">
+      <a routerLink="/explore-listing">Rent</a>
+      <a routerLink="/list-property">List Property</a>
+      <a routerLink="/about">About</a>
+      <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
+    </nav>
+
+    <div class="actions">
+      <div class="auth-desktop">
+        <ng-container *ngIf="!isLoggedIn">
+          <a routerLink="/owner-auth" class="login-link">Login/SignUp</a>
+        </ng-container>
+
+        <ng-container *ngIf="isLoggedIn">
+          <div class="profile-menu desktop-only">
+            <button class="profile-btn" (click)="toggleDropdown($event)">
+              <div class="avatar-circle">{{ userMobile.charAt(0) | uppercase }}</div>
+              <mat-icon class="dropdown-icon" [class.rotated]="isDropdownOpen">expand_more</mat-icon>
+            </button>
+
+            <div class="dropdown" *ngIf="isDropdownOpen">
+              <div class="user-info">
+                <strong>Your Account</strong>
+                <span>{{ userMobile }}</span>
+              </div>
+              
+              <ng-container *ngIf="isOwner">
+                <div class="divider"></div>
+                <a routerLink="/my-listings" class="menu-item" (click)="isDropdownOpen = false">
+                  <mat-icon>edit_note</mat-icon> Manage Listings
+                </a>
+              </ng-container>
+
+              <div class="divider"></div>
+              <button class="menu-item logout" (click)="logout()">
+                <mat-icon>logout</mat-icon> Logout
+              </button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-bottom-nav">
+  <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+    <mat-icon>home</mat-icon>
+    <span>Home</span>
+  </a>
+  <a routerLink="/explore-listing" routerLinkActive="active-link" class="nav-item">
+    <mat-icon>search</mat-icon>
+    <span>Rent</span>
+  </a>
+  <div class="nav-item center-action">
+    <a routerLink="/list-property" class="fab-button">
+      <mat-icon>add</mat-icon>
+    </a>
+    <span>List</span>
+  </div>
+  <a [routerLink]="['/']" fragment="contactUs" class="nav-item">
+    <mat-icon>support_agent</mat-icon>
+    <span>Contact</span>
+  </a>
+  <a (click)="toggleMenu()" class="nav-item" [class.active-link]="isMenuOpen">
+    <mat-icon>person</mat-icon>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<div class="mobile-dropdown-overlay" *ngIf="isMenuOpen">
+  <div class="overlay-backdrop" (click)="closeMenu()"></div>
+  <div class="mobile-dropdown">
+    
+    <ng-container *ngIf="isLoggedIn">
+      <div class="user-info" style="padding: 16px;">
+          <strong>Account</strong>
+          <span style="font-size: 13px; color: #6b7280;">{{ userMobile || 'User' }}</span>
+      </div>
+      
+      <ng-container *ngIf="isOwner">
+        <div class="divider"></div>
+        <a routerLink="/my-listings" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+          <mat-icon>real_estate_agent</mat-icon> My Properties
+        </a>
+      </ng-container>
+
+      <a routerLink="/about" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>info</mat-icon> About RoomZo
+      </a>
+      <div class="divider"></div>
+      <button class="menu-item logout" (click)="logout()" style="padding: 16px; width: 100%;">
+        <mat-icon>logout</mat-icon> Logout
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="!isLoggedIn">
+      <div class="user-info" style="padding: 24px; text-align: center;">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px; color: #cbd5e1; margin-bottom: 12px;">account_circle</mat-icon>
+          <h3 style="margin: 0; font-size: 18px;">Welcome to RoomZo</h3>
+          <p style="font-size: 14px; color: #6b7280; margin-top: 8px;">Log in to manage your listings and profile.</p>
+          <button class="btn-primary" routerLink="/owner-auth" (click)="closeMenu()" style="width: 100%; margin-top: 20px;">
+            Login / Sign Up
+          </button>
+      </div>
+    </ng-container>
+
+  </div>
+</div>

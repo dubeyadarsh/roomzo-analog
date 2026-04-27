@@ -11,8 +11,23 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     mainFields: ['module'],
   },
+  // ADD THIS SSR BLOCK:
+  ssr: {
+    noExternal: ['@angular/cdk', '@angular/material'],
+  },
   plugins: [
-    analog(),
+    analog({
+      prerender: {
+        routes: [
+          '/',
+          '/about',
+          '/faq',
+          '/explore-listing',
+          '/login',
+          '/owner-auth'
+        ],
+      },
+    }),
   ],
   test: {
     globals: true,

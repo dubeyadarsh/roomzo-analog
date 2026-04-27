@@ -1,0 +1,47 @@
+<div class="login-page">
+  <div class="login-card">
+    
+    <div class="brand-section">
+      <div class="icon-circle">
+        <mat-icon>mail</mat-icon> </div>
+      <h2>User Login</h2>
+      <p>Verify your email to manage listings</p>
+    </div>
+
+    <div *ngIf="step === 'EMAIL'" class="form-step">
+      <label>Email Address</label>
+      
+      <input 
+        type="email" 
+        [(ngModel)]="email" 
+        placeholder="name@example.com" 
+        class="full-width-input"
+      >
+      
+      <button class="btn-primary" (click)="onSendOtp()" [disabled]="isLoading">
+        {{ isLoading ? 'Sending...' : 'Send OTP' }}
+      </button>
+    </div>
+
+    <div *ngIf="step === 'OTP'" class="form-step fade-in">
+      <label>Enter OTP sent to {{ email }}</label>
+      
+      <input 
+        type="text" 
+        [(ngModel)]="otp" 
+        class="otp-input" 
+        placeholder="• • • •" 
+        maxlength="4"
+      >
+      
+      <button class="btn-primary" (click)="onVerifyOtp()" [disabled]="isLoading">
+        {{ isLoading ? 'Verifying...' : 'Verify & Login' }}
+      </button>
+
+      <button class="btn-link" (click)="step = 'EMAIL'" [disabled]="isLoading">
+        Change Email Address
+      </button>
+    </div>
+
+  </div>
+</div>

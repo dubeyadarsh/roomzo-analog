@@ -1,0 +1,149 @@
+<div class="page-wrapper">
+
+  <section class="search-hero">
+    <div class="hero-container">
+      <h1>Find your perfect home</h1>
+      <p>Search verified properties across top locations.</p>
+      
+      <div class="search-pill">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" 
+               [formControl]="searchControl" 
+               [matAutocomplete]="auto" 
+               placeholder="Search city, locality, or address...">
+        
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCity" (optionSelected)="onCitySelected($event)" class="custom-autocomplete-panel">
+          <mat-option *ngFor="let city of filteredCities" [value]="city">
+             {{ city.name }}, {{ city.stateCode }}
+          </mat-option>
+        </mat-autocomplete>
+        
+        <button class="btn-primary search-btn" (click)="applyFilters()">Search</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="main-content">
+    <div class="container layout-grid">
+      
+      <aside class="filters-sidebar" [class.show-on-mobile]="isMobileFiltersOpen">
+        <div class="filters-header">
+          <h3>Filters</h3>
+          <div class="header-actions">
+            <button class="reset-btn" (click)="resetFilters()">Reset All</button>
+            <button class="close-filter-btn" (click)="toggleMobileFilters()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="filter-group">
+          <div class="filter-label-row">
+            <label>Max Budget</label>
+            <span class="slider-value">{{ filters.maxPrice | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <input type="range" class="custom-range-slider" min="500" max="50000" step="500" [(ngModel)]="filters.maxPrice" (change)="applyFilters()">
+        </div>
+
+        <div class="divider-line"></div>
+
+        <div class="filter-group">
+          <label>Property Type</label>
+          <div class="pill-group">
+            <label class="filter-pill" [class.active]="filters.propertyType === 'Any'">
+              <input type="radio" name="type" [(ngModel)]="filters.propertyType" value="Any" (change)="applyFilters()"> Any
+            </label>
+            <label class="filter-pill" [class.active]="filters.propertyType === 'Flat'">
+              <input type="radio" name="type" [(ngModel)]="filters.propertyType" value="Flat" (change)="applyFilters()"> Flat
+            </label>
+            <label class="filter-pill" [class.active]="filters.propertyType === 'PG'">
+              <input type="radio" name="type" [(ngModel)]="filters.propertyType" value="PG" (change)="applyFilters()"> PG
+            </label>
+            <label class="filter-pill" [class.active]="filters.propertyType === 'Room'">
+              <input type="radio" name="type" [(ngModel)]="filters.propertyType" value="Room" (change)="applyFilters()"> Room
+            </label>
+          </div>
+        </div>
+      </aside>
+
+      <section class="listings-area">
+        
+        <div class="results-header">
+          <span class="results-count">Showing <strong>{{ totalItems }}</strong> properties</span>
+          
+          <button class="mobile-filter-toggle" (click)="toggleMobileFilters()">
+            <mat-icon>tune</mat-icon> Filters
+          </button>
+        </div>
+
+        <div class="loader-container" *ngIf="isLoading">
+          <div class="modern-spinner"></div>
+          <p>Searching for properties...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading && listings.length === 0">
+          <mat-icon>search_off</mat-icon>
+           <h3>No properties found</h3>
+           <p>Try increasing your budget or changing the property type.</p>
+           <button class="btn-outline mt-3" (click)="resetFilters()">Clear Filters</button>
+        </div>
+
+        <div class="property-grid" *ngIf="!isLoading && listings.length > 0">
+          
+          <div class="listing-card" *ngFor="let prop of listings">
+            
+            <div class="card-image" (click)="viewDetails(prop.id)" style="cursor: pointer;">
+              <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
+              
+              <div class="badges-container">
+                 <span class="verified-badge" *ngIf="prop.isRented === false"><mat-icon>check</mat-icon> Available</span>
+                 <span class="verified-badge rented" *ngIf="prop.isRented === true">Rented</span>
+              </div>
+
+              <div class="price-overlay">
+                <span class="price-amount">{{ formatPrice(prop.rentAmount) }}</span>
+                <span class="price-month">/ mo</span>
+              </div>
+            </div>
+
+            <div class="card-content">
+              <h3>{{ prop.propertyType }} in {{ prop.city }}</h3>
+              
+              <div class="location-text">
+                <mat-icon>location_on</mat-icon> {{ prop.street }}, {{ prop.city }}
+              </div>
+
+              <div class="specs-row">
+                <span><mat-icon>bed</mat-icon> {{ prop.bedrooms }} Bed</span>
+                <span><mat-icon>bathtub</mat-icon> {{ prop.bathrooms }} Bath</span>
+                <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize | number }} sqft</span>
+              </div>
+
+              <button class="btn full-width view-btn" (click)="viewDetails(prop.id)">
+                View Details
+              </button>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+          <button class="page-btn nav-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <button class="page-btn" *ngFor="let p of pagesArray" [class.active]="p === currentPage" (click)="changePage(p)">
+            {{ p + 1 }}
+          </button>
+          
+          <button class="page-btn nav-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </main>
+</div>

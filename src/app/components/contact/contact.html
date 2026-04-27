@@ -1,0 +1,96 @@
+<div class="page-wrapper">
+  <div class="container">
+    
+    <header class="page-header">
+      <h1>Contact Our Experts</h1>
+      <p>Have questions about a listing or want to list your property? Fill out the form below or reach out directly.</p>
+    </header>
+
+    <div class="contact-grid">
+      
+      <div class="form-card">
+        <h2>Send us a message</h2>
+        
+        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" formControlName="fullName" placeholder="Jane Doe">
+              <div class="error" *ngIf="contactForm.get('fullName')?.touched && contactForm.get('fullName')?.invalid">Name is required</div>
+            </div>
+
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" formControlName="email" placeholder="jane@example.com">
+              <div class="error" *ngIf="contactForm.get('email')?.touched && contactForm.get('email')?.invalid">Valid email required</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Subject</label>
+            <mat-select formControlName="subject" placeholder="Select an inquiry type" class="custom-contact-select" panelClass="custom-select-panel">
+              <mat-option value="rent">Renting</mat-option>
+              <mat-option value="list">Listing a Property</mat-option>
+              <mat-option value="general">General Question</mat-option>
+            </mat-select>
+            <div class="error" *ngIf="contactForm.get('subject')?.touched && contactForm.get('subject')?.invalid">Please select a subject</div>
+          </div>
+
+          <div class="form-group">
+            <label>Message</label>
+            <textarea formControlName="message" rows="5" placeholder="Tell us how we can help you..."></textarea>
+            <div class="error" *ngIf="contactForm.get('message')?.touched && contactForm.get('message')?.invalid">Message is required</div>
+          </div>
+
+          <button type="submit" class="submit-btn" [disabled]="isSubmitting">
+            {{ isSubmitting ? 'Sending...' : 'Send Message' }}
+          </button>
+
+          <p id="contactUs" class="form-footer">
+            By submitting this form, you agree to our privacy policy. We typically reply within 24 hours.
+          </p>
+        </form>
+      </div>
+
+      <div class="info-column">
+        
+        <div class="info-card">
+          <h3>Contact Information</h3>
+          
+          <div class="info-item" *ngFor="let item of contactInfo">
+            <div class="icon-circle">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </div>
+            <div class="info-content">
+              <span class="label">{{ item.title }}</span>
+              <div class="value">{{ item.content }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-card">
+          <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80" alt="Map Location">
+          
+          <div class="map-overlay">
+            <mat-icon class="map-pin">location_on</mat-icon>
+          </div>
+
+          <a href="#" class="directions-btn">
+            <mat-icon>directions</mat-icon> Get Directions
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="faq-banner">
+      <div class="faq-content">
+        <h3>Looking for quick answers?</h3>
+        <p>Check out our Frequently Asked Questions to find what you need faster.</p>
+      </div>
+      <button class="btn-white" (click)="goToFaq()">View FAQ</button>
+    </div>
+
+  </div>
+</div>

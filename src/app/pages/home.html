@@ -1,0 +1,82 @@
+<app-hero></app-hero>
+
+<section class="featured-section">
+  <div class="container">
+    
+    <div class="section-header">
+      <h2>Featured Properties</h2>
+    </div>
+<div class="loader-container" *ngIf="isLoading">
+      <div class="modern-spinner"></div>
+      <p class="loader-text">Finding the best properties for you...</p>
+    </div>
+    <div class="listings-grid">
+      <div class="listing-card" *ngFor="let item of listings">
+        
+        <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
+          <img [src]="item.image" [alt]="item.title">
+          
+          <div class="verified-badge">
+            <mat-icon>check</mat-icon> Owner Verified
+          </div>
+          
+          <div class="price-overlay">
+            <span class="price-amount">{{ formatPrice(item.price) }}</span>
+            <span class="price-month" *ngIf="item.priceUnit">/ {{ item.priceUnit }}</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <h3>{{ item.title }}</h3>
+          
+          <div class="location-text">
+            <mat-icon>fiber_manual_record</mat-icon> {{ item.location }}
+          </div>
+
+          <div class="specs-row">
+            <span><mat-icon>bed</mat-icon> {{ item.specs.beds }} Bed</span>
+            <span><mat-icon>bathtub</mat-icon> {{ item.specs.baths }} Bath</span>
+            <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
+          </div>
+
+          <div class="action-pill-container">
+            <!-- <button class="action-btn left">
+              <mat-icon>call</mat-icon> WhatsApp Owner
+            </button> -->
+            <div class="btn-divider"></div>
+            <button class="action-btn right" (click)="viewDetails(item.id)">
+              <mat-icon>info</mat-icon> View Details
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-features-row">
+      <div class="feature-box">
+        <mat-icon class="feature-icon">verified_user</mat-icon>
+        <div>
+          <h4>Verified Listings</h4>
+          <p>All properties are verified by our team</p>
+        </div>
+      </div>
+
+      <button routerLink="/explore-listing" class="btn-primary browse-btn">
+        Browse More Properties <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <div class="feature-box text-right">
+        <mat-icon class="feature-icon">support_agent</mat-icon>
+        <div>
+          <h4>Easy to Contact</h4>
+          <p>Call or WhatsApp owners directly</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+  <app-contact></app-contact>
+  
+</section>

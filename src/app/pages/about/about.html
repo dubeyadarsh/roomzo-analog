@@ -1,0 +1,97 @@
+<div class="page-wrapper">
+
+  <section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Finding Your Way Home</h1>
+      <p>We bridge the gap between dream homes and reality with integrity and personalized care.</p>
+      <div class="hero-actions">
+        <button class="btn-white">Our Values</button>
+        <button class="btn-outline-light">Meet The Team</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mission-section">
+    <div class="container">
+      <div class="section-header center">
+        <span class="eyebrow">OUR MISSION</span>
+        <h2>To make renting rooms, PGs, and flats simple, transparent, and broker-free across India.</h2>
+        <p class="subtext">We aim to connect tenants directly with verified property owners, eliminating middlemen, hidden charges, and fake listings—so finding a place to stay is fast, affordable, and trustworthy.</p>
+      </div>
+
+      <div class="values-grid">
+        <div class="value-card" *ngFor="let v of values">
+          <div class="icon-box">
+            <mat-icon>{{ v.icon }}</mat-icon>
+          </div>
+          <h3>{{ v.title }}</h3>
+          <p>{{ v.desc }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- <section class="stats-section">
+    <div class="container stats-grid">
+      <div class="stat-item" *ngFor="let stat of stats">
+        <div class="stat-val">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </section> -->
+
+  <!-- <section class="journey-section">
+    <div class="container split-layout">
+      <div class="journey-content">
+        <span class="eyebrow">OUR JOURNEY</span>
+        <h2>From a small office to a city-wide leader.</h2>
+        <p>
+          EstateView began in 2012 with a simple idea: that finding a home should be an exciting adventure, not a stressful chore. Founded by two friends in a small downtown office, we started with just a handful of local listings.
+        </p>
+        <p>
+          Over the years, our commitment to integrity and personalized service fueled our growth. We embraced technology early, becoming one of the first agencies to offer virtual tours. Today, we are proud to be a trusted partner for thousands of families.
+        </p>
+        <button class="link-btn">Read full story <mat-icon>arrow_forward</mat-icon></button>
+      </div>
+      <div class="journey-image">
+        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80" alt="Our Office HQ">
+        <div class="image-caption">Headquarters, Downtown</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="team-section">
+    <div class="container">
+      <div class="section-header center">
+        <h2>Meet the Leadership</h2>
+        <p class="subtext">The experts guiding our vision and ensuring your success.</p>
+      </div>
+
+      <div class="team-grid">
+        <div class="team-card" *ngFor="let member of team">
+          <div class="member-img">
+            <img [src]="member.image" [alt]="member.name">
+          </div>
+          <div class="member-info">
+            <h3>{{ member.name }}</h3>
+            <span class="role">{{ member.role }}</span>
+            <button class="email-btn"><mat-icon>mail_outline</mat-icon></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section> -->
+
+  <section class="cta-section">
+    <div class="container center">
+      <h2>Ready to find your dream home?</h2>
+      <p>Browse our exclusive listings or get in touch with one of our expert agents today.</p>
+      <div class="cta-actions">
+        <button class="btn-white" routerLink="/explore-listing">Browse Listings</button>
+        <button (click)="goToContact()" class="btn-dark-outline">Contact Us</button>
+      </div>
+    </div>
+  </section>
+
+</div>

@@ -1,0 +1,189 @@
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  font-family: 'Inter', sans-serif;
+}
+
+.login-card {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.brand-section {
+  margin-bottom: 30px;
+}
+
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  background: #eff6ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.icon-circle mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--rz-primary); /* Primary Blue */
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+p {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Form Styles */
+.form-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+label {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: -8px;
+}
+
+.input-group {
+  display: flex;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: 0.2s;
+}
+
+.input-group:focus-within, .otp-input:focus {
+  border-color: var(--rz-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.prefix {
+  background: #f9fafb;
+  padding: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  border-right: 1px solid #d1d5db;
+}
+
+input {
+  border: none;
+  padding: 12px;
+  width: 100%;
+  font-size: 16px;
+  outline: none;
+}
+
+.otp-input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 24px;
+  letter-spacing: 8px;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: var(--rz-primary);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 8px;
+}
+
+.btn-primary:disabled {
+  background: var(--rz-primary-hover);
+  cursor: not-allowed;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--rz-primary-hover);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.input-group {
+  display: flex;            /* 1. Aligns children (span + input) in a row */
+  align-items: center;      /* 2. Vertically centers them */
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  overflow: hidden;         /* Ensures corners stay rounded */
+  background: white;
+}
+
+.prefix {
+  background: #f9fafb;
+  padding: 12px 16px;
+  color: #6b7280;
+  font-weight: 600;
+  border-right: 1px solid #d1d5db; /* Divider line */
+  white-space: nowrap;      /* Prevents text from wrapping */
+}
+
+.input-group input {
+  border: none;             /* 3. Remove default border */
+  outline: none;            /* Remove focus glow (handled by group) */
+  padding: 12px;
+  width: 100%;
+  flex: 1;                  /* 4. Takes up all remaining space */
+  font-size: 16px;
+  color: #111827;
+}
+
+/* Optional: Focus effect for the whole group */
+.input-group:focus-within {
+  border-color: var(--rz-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards; /* Added 'forwards' to keep final state */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

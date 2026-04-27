@@ -1,0 +1,214 @@
+:host {
+  display: block;
+  background-color: var(--rz-text-main, #111827); /* Very dark slate/black */
+  color: #9ca3af; /* Muted gray text for readability */
+  font-family: var(--font-sans);
+}
+
+.rz-footer {
+  padding: 80px 0 32px;
+}
+
+.container {
+  max-width: var(--rz-max-width, 1200px);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* --- Top Grid --- */
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+/* 1. Brand Column */
+.brand-col .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  margin-bottom: 16px;
+  transition: color 0.2s;
+}
+.brand-col .logo mat-icon { color: var(--rz-primary); font-size: 32px; width: 32px; height: 32px; }
+.brand-col .logo:hover { color: var(--rz-primary); }
+
+.brand-col p { 
+  line-height: 1.6; 
+  max-width: 320px; 
+  font-size: 1.05rem; 
+  margin: 0; 
+}
+
+/* 2. Links Column */
+.links-col h4, .subscribe-col h4 { 
+  color: #ffffff; 
+  font-size: 1.2rem; 
+  font-weight: 600; 
+  margin: 0 0 24px 0; 
+}
+
+/* Update this specific block in your footer.css */
+.links-col a {
+  display: block; /* Forces each link onto a new line */
+  width: fit-content; /* Ensures the hover effect only triggers on the text */
+  color: #9ca3af;
+  text-decoration: none;
+  margin-bottom: 16px;
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
+}
+
+.links-col a:hover { 
+  color: var(--rz-primary); 
+  transform: translateX(6px); /* Smooth slide effect on hover */
+}
+
+/* 3. Subscribe Column */
+.subscribe-desc {
+  margin: 0 0 16px 0;
+  font-size: 0.95rem;
+}
+
+.subscribe-form { 
+  display: flex; 
+  gap: 8px; 
+  background: #1f2937; /* Slightly lighter box */
+  padding: 6px;
+  border-radius: var(--rz-radius-pill, 50px);
+  border: 1px solid #374151;
+  transition: border-color 0.2s;
+}
+.subscribe-form:focus-within {
+  border-color: var(--rz-primary);
+}
+
+.subscribe-form input {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+}
+.subscribe-form input::placeholder { color: #6b7280; }
+
+.subscribe-btn {
+  background: var(--rz-primary);
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--rz-radius-pill, 50px);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.subscribe-btn:hover { background: var(--rz-primary-hover); }
+
+/* --- Bottom Bar --- */
+.bottom-bar {
+  border-top: 1px solid #374151; /* Subtle divider line */
+  padding-top: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.social-links { display: flex; gap: 16px; }
+
+.social-link {
+  color: #9ca3af;
+  background: #1f2937;
+  width: 44px; 
+  height: 44px;
+  border-radius: 50%;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.social-link:hover { 
+  background: var(--rz-primary); 
+  color: #ffffff; 
+  transform: translateY(-4px); /* Floating effect */
+  box-shadow: 0 8px 16px rgba(25, 97, 83, 0.4); /* Teal glow */
+}
+.social-link svg { width: 20px; height: 20px; fill: currentColor; }
+.social-link[aria-label="Instagram"] svg { fill: none; } /* Specific fix for Instagram SVG stroke */
+/* ========================================================
+   RESPONSIVE ADJUSTMENTS (FOOTER FIX)
+======================================================== */
+@media (max-width: 900px) {
+  .rz-footer { 
+    padding: 60px 0 24px; 
+    overflow: hidden; /* Contains any accidental bleed */
+  }
+  
+  .container {
+    width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    box-sizing: border-box;
+  }
+
+  .footer-top { 
+    grid-template-columns: 1fr; 
+    gap: 40px; 
+    text-align: center;
+    width: 100%;
+  }
+
+  .brand-col .logo { justify-content: center; }
+  .brand-col p { max-width: 100%; margin: 0 auto; }
+  
+  /* --- Newsletter Mobile Fix --- */
+  .subscribe-col { width: 100%; }
+  
+  .subscribe-form {
+    display: flex;
+    flex-direction: column; /* Stack input and button on small phones */
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .subscribe-form input {
+    width: 100%;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px; /* Rounded box instead of pill */
+    padding: 14px 16px;
+    text-align: center;
+  }
+  
+  .subscribe-btn {
+    width: 100%;
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+
+  /* --- Bottom Bar --- */
+  .bottom-bar { 
+    flex-direction: column-reverse; 
+    gap: 24px; 
+    text-align: center; 
+    width: 100%;
+  }
+  
+  .social-links { 
+    justify-content: center; 
+    flex-wrap: wrap; 
+  }
+}
