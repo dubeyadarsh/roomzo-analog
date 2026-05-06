@@ -152,7 +152,7 @@
         </section>
       </div>
 
-      <div class="sidebar-column desktop-only">
+      <div class="sidebar-column">
         <div class="booking-card">
           <div class="price-header">
             <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
@@ -163,7 +163,7 @@
             {{ property.isRented ? 'Currently Rented' : 'Available Now' }}
           </div>
           
-          <button class="btn-primary full-width mt-16" (click)="contactAgent()">Contact Owner</button>
+          <button class="btn-primary full-width mt-16 " (click)="contactAgent()">Contact Owner</button>
           <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
         </div>
 
