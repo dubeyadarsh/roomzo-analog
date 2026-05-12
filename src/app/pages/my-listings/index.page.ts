@@ -98,22 +98,26 @@ export default class MyListingsComponent implements OnInit {
     default: return 'badge-active';
   }
 }
+// Update the method in my-listings.ts
 changeStatus(property: any, event: any) {
-  const newStatus = event.target.value;
-  const originalStatus = property.currentStatus; // Backup in case of error
+  // FIX: Material select uses event.value, not event.target.value
+  const newStatus = event.value; 
+  
+  // Backup original value in case the API call fails
+  const originalStatus = property.isRented; 
 
-  // Optimistic UI Update (Change it immediately on screen)
-  property.currentStatus = newStatus; 
+  // Optimistic UI Update
+  property.isRented = newStatus; 
 
   this.propertyService.updateListingStatus(property.id, newStatus).subscribe({
     next: (res) => {
-      this.toastr.success(`Status updated to ${newStatus}`);
+      this.toastr.success(`Status updated successfully`);
       this.cd.detectChanges();
     },
     error: (err: HttpErrorResponse) => {
-      // Revert if failed
-      property.currentStatus = originalStatus; 
-      this.toastr.error('Failed to update status');
+      // Revert if API call failed
+      property.isRented = originalStatus; 
+      this.toastr.error('Failed to update status on server');
       console.error(err);
       this.cd.detectChanges();
     }

@@ -57,15 +57,15 @@
                <div class="action-row">
                     
                     <mat-select 
-                        [value]="prop.isRented" 
-                        (selectionChange)="changeStatus(prop, $event)"
-                        class="custom-status-select"
-                        [ngClass]="'select-' + getStatusLabel(prop.isRented).toLowerCase()"
-                        panelClass="custom-select-panel">
-                        <mat-option [value]="0">Active</mat-option>
-                        <mat-option [value]="1">Rented</mat-option>
-                        <mat-option [value]="2">Hidden</mat-option>
-                    </mat-select>
+    [value]="prop.isRented" 
+    (selectionChange)="changeStatus(prop, $event)"
+    class="custom-status-select"
+    [ngClass]="'select-' + getStatusLabel(prop.isRented).toLowerCase()"
+    panelClass="custom-select-panel">
+    <mat-option [value]="0">Active</mat-option>
+    <mat-option [value]="1">Rented</mat-option>
+    <mat-option [value]="2">Hidden</mat-option>
+</mat-select>
 
                     <div class="btn-group">
                         <a [routerLink]="['/property-details', prop.id]" class="btn-icon" title="View Property">
