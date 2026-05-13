@@ -10,7 +10,7 @@
       style="--swiper-navigation-color: #fff; --swiper-pagination-color: #fff; --swiper-pagination-bullet-inactive-color: rgba(255,255,255,0.6);" 
       navigation="true" pagination="true" loop="true">
       <swiper-slide *ngFor="let photo of property.photos">
-        <img [src]="photo.photoUrl || 'assets/placeholder.jpg'" alt="Property Image" loading="lazy">
+        <img [src]="photo.photoUrl || 'assets/placeholder.jpg'" alt="Property Image" loading="lazy" (click)="openImage(photo.photoUrl)">
       </swiper-slide>
       <swiper-slide *ngIf="!property.photos || property.photos.length === 0">
          <img src="assets/placeholder.jpg" alt="Placeholder">
@@ -24,18 +24,18 @@
   <section class="gallery-section desktop-only mt-24">
     <div class="gallery-grid">
       <div class="main-img">
-        <img [src]="(property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Main">
+        <img [src]="(property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Main" (click)="openImage(property.photos[0]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 1">
-        <img [src]="property.photos[1].photoUrl" alt="Side 1">
+        <img [src]="property.photos[1].photoUrl" alt="Side 1" (click)="openImage(property.photos[1]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 2">
-        <img [src]="property.photos[2].photoUrl" alt="Side 2">
+        <img [src]="property.photos[2].photoUrl" alt="Side 2" (click)="openImage(property.photos[2]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 3">
-        <img [src]="property.photos[3].photoUrl" alt="Side 3">
+        <img [src]="property.photos[3].photoUrl" alt="Side 3" (click)="openImage(property.photos[3]?.photoUrl)">
       </div>
-      <div class="side-img relative" *ngIf="property.photos?.length > 4">
+      <div class="side-img relative" *ngIf="property.photos?.length > 4" (click)="openImage(property.photos[4]?.photoUrl)">
         <img [src]="property.photos[4].photoUrl" alt="More" style="filter: brightness(0.6);">
         <div class="more-photos-overlay">+{{ property.photos.length - 4 }} Photos</div>
       </div>
@@ -213,7 +213,7 @@
 <div class="modal-overlay" *ngIf="showContactModal" (click)="closeContactModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Owner Details</h3>
+      <h3>Contact Details</h3>
       <button class="close-btn" (click)="closeContactModal()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="modal-body">
@@ -222,22 +222,37 @@
         <h4>{{ ownerDetails.name }}</h4>
         <p class="verified-badge"><mat-icon>verified</mat-icon> Verified Owner</p>
       </div>
+      
       <div class="contact-info-box">
-        <div class="info-row">
+        
+        <div class="info-row" *ngIf="ownerDetails.propertyPhone">
           <mat-icon>phone</mat-icon>
           <div>
-            <label>Mobile Number</label>
-            <a [href]="'tel:' + ownerDetails.phone" class="contact-link">{{ ownerDetails.phone }}</a>
+            <label>Property Contact</label>
+            <a [href]="'tel:' + ownerDetails.propertyPhone" class="contact-link">{{ ownerDetails.propertyPhone }}</a>
           </div>
         </div>
-        <div class="divider-thin"></div>
-        <div class="info-row">
+
+        <div class="divider-thin" *ngIf="ownerDetails.propertyPhone && ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)"></div>
+
+        <div class="info-row" *ngIf="ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)">
+          <mat-icon>person</mat-icon>
+          <div>
+            <label>Owner's Account Number</label>
+            <a [href]="'tel:' + ownerDetails.ownerPhone" class="contact-link">{{ ownerDetails.ownerPhone }}</a>
+          </div>
+        </div>
+
+        <div class="divider-thin" *ngIf="(ownerDetails.propertyPhone || ownerDetails.ownerPhone) && ownerDetails.email"></div>
+        
+        <div class="info-row" *ngIf="ownerDetails.email">
           <mat-icon>email</mat-icon>
           <div>
             <label>Email Address</label>
             <a [href]="'mailto:' + ownerDetails.email" class="contact-link">{{ ownerDetails.email }}</a>
           </div>
         </div>
+
       </div>
     </div>
   </div>

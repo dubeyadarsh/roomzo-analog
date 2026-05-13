@@ -10,11 +10,12 @@
         <input type="text" 
                [formControl]="searchControl" 
                [matAutocomplete]="auto" 
-               placeholder="Search city, locality, or address...">
+               placeholder="Search locality, village, or area...">
         
         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCity" (optionSelected)="onCitySelected($event)" class="custom-autocomplete-panel">
-          <mat-option *ngFor="let city of filteredCities" [value]="city">
-             {{ city.name }}, {{ city.stateCode }}
+          <mat-option *ngFor="let loc of filteredCities" [value]="loc" style="display: flex; align-items: center; font-size: 0.95rem;">
+             <mat-icon style="color: #94a3b8; font-size: 20px; width: 20px; height: 20px; margin-right: 8px;">place</mat-icon>
+             <span>{{ displayCity(loc) }}</span>
           </mat-option>
         </mat-autocomplete>
         

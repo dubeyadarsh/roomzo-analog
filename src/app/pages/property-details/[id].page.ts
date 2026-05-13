@@ -12,8 +12,6 @@ import { getAmenitiesMap } from '../../services/Utility';
 import { register } from 'swiper/element/bundle';
 import { AuthService } from '../../services/auth.service';
 
-// 1. REMOVE GLOBAL REGISTER: Do not call register() here, it crashes the server build.
-
 @Component({
   selector: 'app-property-details',
   standalone: true,
@@ -36,9 +34,12 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   isCopied = false;
 
   showContactModal = false;
+  
+  // UPDATED: Hold both phone numbers
   ownerDetails = {
     name: 'Property Owner', 
-    phone: '+91 98XXX XXXXX',
+    ownerPhone: '',
+    propertyPhone: '',
     email: 'hidden@roomzo.com'
   };
 
@@ -52,9 +53,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private toastr: ToastrService,
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object // INJECT PLATFORM_ID
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // 2. SAFE SWIPER REGISTRATION: Only register Custom Elements in the browser
     if (isPlatformBrowser(this.platformId)) {
       register();
     }
@@ -69,7 +69,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         this.mapUrl = null; 
         this.showContactModal = false; 
         
-        // 3. SAFE SCROLL
         if (isPlatformBrowser(this.platformId)) {
           window.scrollTo(0, 0);
         }
@@ -125,7 +124,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
 
   isUserLoggedIn(): boolean {
-    // 4. SAFE LOCAL STORAGE: Return false immediately on the server
     if (!isPlatformBrowser(this.platformId)) return false;
 
     const isVerified = localStorage.getItem('userVerifiedwWIthOtp');
@@ -140,7 +138,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
   
   isOwnerLoggedIn(): boolean {
-    // 4. SAFE LOCAL STORAGE: Return false immediately on the server
     if (!isPlatformBrowser(this.platformId)) return false;
 
     const isVerified = localStorage.getItem('ownerVerifiedwWIthOtp');
@@ -167,6 +164,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     }
   }
 
+  // UPDATED: Capture both contact numbers for the modal
   openContactModal() {
     if (!this.property || !this.property.ownerId) {
        this.toastr.error('Owner information not available');
@@ -179,9 +177,11 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.isLoading = false;
         if (res.status === 1 && res.data) {
+          
           this.ownerDetails = {
             name: res.data.name,
-            phone: res.data.phone == null ? this.property.tempContactNo : res.data.phone,
+            ownerPhone: res.data.phone, // The account's registered number
+            propertyPhone: this.property.contactNo || this.property.tempContactNo, // The number listed specifically for this property
             email: res.data.email
           };
           this.showContactModal = true;
@@ -199,6 +199,13 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
 
   closeContactModal() {
     this.showContactModal = false;
+  }
+
+  // NEW: Method to open image in a new tab safely
+  openImage(url: string | undefined): void {
+    if (url && isPlatformBrowser(this.platformId)) {
+      window.open(url, '_blank');
+    }
   }
 
   loadMapCoordinates(property: any) {
@@ -235,7 +242,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
 
   shareProperty() {
-    // 5. SAFE CLIPBOARD & LOCATION API
     if (isPlatformBrowser(this.platformId) && navigator.clipboard) {
       const currentUrl = window.location.href;
       navigator.clipboard.writeText(currentUrl).then(() => {
@@ -321,7 +327,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     }
 
     if (destination) {
-      // 6. SAFE WINDOW OPEN + fixed string interpolation bug
       if (isPlatformBrowser(this.platformId)) {
         const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
         window.open(googleMapsUrl, '_blank');

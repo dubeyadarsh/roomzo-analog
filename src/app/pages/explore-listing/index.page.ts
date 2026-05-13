@@ -6,12 +6,13 @@ import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router'; 
+import { HttpClient } from '@angular/common/http'; // NEW: Required for API
 
-import { Subscription } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { Subscription, of } from 'rxjs';
+import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators'; // NEW: RxJS operators
 
-import { City, State } from 'country-state-city';
 import { PropertyService, ListingFilter } from '../../services/property.service';
+// REMOVED: country-state-city imports since we are using live API now
 
 @Component({
   selector: 'app-explore-listings',
@@ -33,8 +34,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   // Search State
   searchControl = new FormControl('');
-  filteredCities: any[] = [];
-  allCities: any[] = [];
+  filteredCities: any[] = []; // Now holds Nominatim search results
   selectedLocation: { city: string, state: string } | null = null;
 
   // Filter State
@@ -52,39 +52,41 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   pageSize = 6;
   totalPages = 0;
   pagesArray: number[] = [];
-
-  guidebook = {
-    customRules: '',
-    rules: [] as string[],           
-    nearby: [] as any[]              
-  };
-  placeTypes = ['transport', 'restaurant', 'shopping', 'attraction', 'hospital', 'other'];
   
   private searchSubscription: Subscription | null = null;
   isMobileFiltersOpen = false; 
 
-  // 1. Inject PLATFORM_ID
   constructor(
     private propertyService: PropertyService,
     private cd: ChangeDetectorRef,
     private router: Router,
     private route: ActivatedRoute,
+    private http: HttpClient, // INJECTED HTTP CLIENT
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {}
 
   ngOnInit(): void {
-    this.allCities = City.getCitiesOfCountry('IN') || [];
-    
-    this.searchControl.valueChanges.subscribe(val => {
-      if (typeof val === 'string') {
-        this.filterCities(val);
-        if (!val) this.selectedLocation = null;
-      }
+    // NEW: Real-time OpenStreetMap Locality Search
+    this.searchControl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter(val => typeof val === 'string'), // Only trigger on text, not on object selection
+      switchMap(val => {
+        if (!val || val.length < 2) {
+          this.selectedLocation = null;
+          return of([]); // Clear suggestions if empty
+        }
+        // Search API restricted to India (countrycodes=in) for better local relevance
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val as string)}&addressdetails=1&countrycodes=in&limit=5`;
+        return this.http.get<any[]>(url).pipe(catchError(() => of([])));
+      })
+    ).subscribe(results => {
+      this.filteredCities = results || [];
+      this.cd.detectChanges();
     });
 
     this.route.queryParams.subscribe(params => {
       if (Object.keys(params).length > 0) {
-        
         if (params['city'] && params['state']) {
           const city = params['city'];
           const state = params['state'];
@@ -119,33 +121,37 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- Search Logic ---
-  filterCities(value: string) {
-    const filterValue = value.toLowerCase();
-    this.filteredCities = this.allCities
-      .filter(city => city.name.toLowerCase().includes(filterValue))
-      .slice(0, 10);
-  }
+  // Helper to format the long Nominatim API response into a clean "Locality, City, State" string
+  displayCity = (result: any): string => {
+    if (!result) return '';
+    if (typeof result === 'string') return result;
+    
+    const addr = result.address || {};
+    const locality = addr.neighbourhood || addr.suburb || addr.village || addr.town || result.name || '';
+    const city = addr.city || addr.state_district || addr.county || '';
+    const state = addr.state || '';
 
-  displayCity = (city: any): string => {
-    if (city && city.name) {
-       const stateName = this.getStateName(city.stateCode);
-       return `${city.name}, ${stateName}`;
-    }
-    return city || '';
+    // Remove duplicates (e.g., if locality and city are the same) and join with commas
+    const parts = [locality, city, state].filter((val, index, arr) => val && arr.indexOf(val) === index);
+    return parts.join(', ');
   }
 
   onCitySelected(event: any) {
-    const cityData = event.option.value;
-    const stateName = this.getStateName(cityData.stateCode);
+    const result = event.option.value;
+    const addr = result.address || {};
 
-    this.filters.lat = cityData.latitude ? Number(cityData.latitude) : undefined;
-    this.filters.lng = cityData.longitude ? Number(cityData.longitude) : undefined;
+    // Get exact coordinates of the locality selected
+    this.filters.lat = parseFloat(result.lat);
+    this.filters.lng = parseFloat(result.lon); // Nominatim uses 'lon' instead of 'lng'
     
-    this.filters.city = cityData.name;
-    this.filters.state = stateName;
+    // Extract highest-level city/state for fallback filtering
+    const city = addr.city || addr.town || addr.village || addr.county || '';
+    const state = addr.state || '';
 
-    this.selectedLocation = { city: cityData.name, state: stateName };
+    this.filters.city = city;
+    this.filters.state = state;
+
+    this.selectedLocation = { city, state };
     this.applyFilters();
   }
 
@@ -160,7 +166,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     let isRentedParam = this.availabilityFilter === 'available' ? false : undefined;
 
     if (!this.filters.city && !this.filters.lat) {
-      // 2. Protect localStorage access with SSR Check
       if (isPlatformBrowser(this.platformId)) {
         const storedLocation = localStorage.getItem('user_geo_location');
         if (storedLocation) {
@@ -231,11 +236,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   
   viewDetails(id: string) {
       this.router.navigate(['/property-details', id]);
-  }
-  
-  getStateName(stateCode: string): string {
-    const state = State.getStateByCodeAndCountry(stateCode, 'IN');
-    return state ? state.name : stateCode;
   }
   
   toggleMobileFilters(): void {
