@@ -1,17 +1,21 @@
 import { Component, OnInit, ChangeDetectorRef, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder, Validators, FormArray, FormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { PropertyService } from '../../services/property.service';
 import { Country, State, City } from 'country-state-city';
 import { ToastrService } from 'ngx-toastr';
 import { HttpClient } from '@angular/common/http';
-import { authGuard } from '../../auth.guard'; // Adjust path based on where your guard is
+import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators';
+import { of } from 'rxjs';
+
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
 };
+
 // TYPE-ONLY IMPORT: Prevents Leaflet from crashing the Node.js server build
 import type * as L from 'leaflet'; 
 
@@ -40,6 +44,9 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   selectedStateIso: string | null = null;
   readonly WATERMARK_TEXT = 'Roomzo.in';
   isSubmitting = false;
+
+  searchControl = new FormControl('');
+  searchResults: any[] = [];
 
   commonRules = [
     { label: 'No Smoking', value: 'no_smoking', icon: 'smoke_free' },
@@ -83,7 +90,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     private cd: ChangeDetectorRef,
     private toastr: ToastrService,
     private http: HttpClient,
-    @Inject(PLATFORM_ID) private platformId: Object // Inject Platform ID
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -132,6 +139,19 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       if (!this.detailsGroup.get('address.city')?.value) {
         this.detailsGroup.get('address.city')?.reset();
       }
+    });
+
+    this.searchControl.valueChanges.pipe(
+      debounceTime(500), 
+      distinctUntilChanged(),
+      filter(val => (val || '').length > 2), 
+      switchMap(val => {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val!)}&addressdetails=1&limit=5`;
+        return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
+      })
+    ).subscribe(results => {
+      this.searchResults = results || [];
+      this.cd.detectChanges();
     });
 
     if (isPlatformBrowser(this.platformId)) {
@@ -198,6 +218,47 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       const newValue = (control.value || 0) + change;
       if (newValue >= 0) control.setValue(newValue);
     }
+  }
+
+  selectLocation(result: any): void {
+    const lat = parseFloat(result.lat);
+    const lon = parseFloat(result.lon);
+
+    if (this.map) {
+      this.map.setView([lat, lon], 16);
+    }
+
+    if (this.marker) {
+      this.marker.setLatLng([lat, lon]);
+    } else if (this.map) {
+      import('leaflet').then(leaflet => {
+        this.marker = leaflet.marker([lat, lon]).addTo(this.map!);
+      });
+    }
+
+    const addr = result.address || {};
+    const city = addr.city || addr.town || addr.village || addr.county || '';
+    const state = addr.state || '';
+    const zip = addr.postcode || '';
+    
+    // Expanded landmark fallback
+    const landmark = addr.neighbourhood || addr.suburb || addr.quarter || addr.borough || addr.city_district || addr.county || '';
+    
+    // Fallback for street using display name if no exact road is found
+    const street = addr.road || addr.suburb || result.name || result.display_name.split(',')[0] || '';
+
+    this.detailsGroup.get('address.state')?.patchValue(state);
+    this.detailsGroup.get('address')?.patchValue({
+      latitude: lat,
+      longitude: lon,
+      city: city,
+      zip: zip,
+      street: street, 
+      landmark: landmark
+    });
+
+    this.searchResults = [];
+    this.searchControl.setValue(result.display_name, { emitEvent: false });
   }
 
   private readFileAsDataURL(file: File): Promise<string> {
@@ -375,14 +436,10 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
 
   private async fixLeafletIcons() {
     const leaflet = await import('leaflet');
-    const iconRetinaUrl = 'assets/marker-icon-2x.png';
-    const iconUrl = 'assets/marker-icon.png';
-    const shadowUrl = 'assets/marker-shadow.png';
-    
     const iconDefault = leaflet.icon({
-      iconRetinaUrl,
-      iconUrl,
-      shadowUrl,
+      iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+      iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],

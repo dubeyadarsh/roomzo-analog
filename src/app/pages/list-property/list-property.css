@@ -27,7 +27,7 @@ h1, h2, h3, h4, p { margin: 0; }
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
-  padding: 100px 20px 60px; /* Safe padding for header */
+  padding: 100px 20px 60px;
   flex: 1;
 }
 
@@ -54,10 +54,11 @@ h1, h2, h3, h4, p { margin: 0; }
 .btn-outline:hover { background: #f8fafc; border-color: var(--rz-text-muted); }
 .btn-small { padding: 8px 16px; font-size: 0.9rem; }
 
+/* --- 3. Stepper --- */
 .modern-stepper {
   display: flex !important;
-  flex-direction: row !important; /* Forces elements to sit side-by-side */
-  flex-wrap: nowrap !important;   /* Prevents them from collapsing into a column */
+  flex-direction: row !important; 
+  flex-wrap: nowrap !important;   
   align-items: flex-start !important;
   justify-content: space-between !important;
   width: 100%;
@@ -83,7 +84,7 @@ h1, h2, h3, h4, p { margin: 0; }
   justify-content: center;
   font-weight: 700;
   color: #64748b;
-  margin-bottom: 12px; /* Forces space between the circle and the text */
+  margin-bottom: 12px; 
   transition: all 0.3s;
 }
 
@@ -95,7 +96,7 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 
 .step.completed .step-icon {
-  background: #10b981; /* Success Green */
+  background: #10b981; 
   border-color: #10b981;
   color: white;
 }
@@ -106,23 +107,22 @@ h1, h2, h3, h4, p { margin: 0; }
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  white-space: nowrap; /* Prevents text from wrapping awkwardly */
+  white-space: nowrap; 
 }
 
 .step.active .step-label { color: var(--rz-primary); font-weight: 800; }
 .step.completed .step-label { color: var(--text-main); }
 
 .step-divider {
-  flex: 1 1 auto; /* Allows the line to stretch dynamically between circles */
+  flex: 1 1 auto; 
   height: 3px;
   background: #e2e8f0;
-  /* 20px pushes the line perfectly into the middle of the 44px circle */
   margin: 20px 8px 0 8px; 
   transition: all 0.3s;
 }
 
 .step-divider.completed { background: #10b981; }
-/* Mobile simple tracker */
+
 .mobile-progress { margin-bottom: 32px; }
 .mobile-progress .step-indicator { text-align: center; margin-bottom: 8px; }
 .mobile-progress .current-step-label { font-size: 1rem; font-weight: 700; color: var(--rz-text-main); text-transform: uppercase; letter-spacing: 1px;}
@@ -167,8 +167,7 @@ input:focus, textarea:focus {
 .divider-line { height: 1px; background: var(--rz-border); width: 100%; }
 .divider-thin { height: 1px; background: #f1f5f9; width: 100%; }
 
-/* --- 6. Square Hover Cards (Property Type) --- */
-/* --- 6. Property Type Cards (Fixed: No more giant squares) --- */
+/* --- 6. Property Type Cards --- */
 .property-type-grid { 
   display: grid; 
   grid-template-columns: repeat(3, 1fr); 
@@ -176,12 +175,11 @@ input:focus, textarea:focus {
 }
 
 .type-card {
-  /* REMOVED: aspect-ratio: 1; */
   display: flex; 
   flex-direction: column; 
   align-items: center; 
   justify-content: center;
-  padding: 32px 24px; /* Sleek rectangular padding */
+  padding: 32px 24px; 
   border: 2px solid #e2e8f0; 
   border-radius: 16px;
   cursor: pointer; 
@@ -203,7 +201,7 @@ input:focus, textarea:focus {
 }
 
 .type-icon { 
-  font-size: 38px; /* Slightly smaller, more elegant icon */
+  font-size: 38px; 
   height: 38px; 
   width: 38px; 
   color: #94a3b8; 
@@ -255,10 +253,8 @@ input:focus, textarea:focus {
   opacity: 1; 
 }
 
-/* Hide default native radio dots inside the property cards */
-.type-card input[type="radio"] {
-  display: none !important;
-}
+.type-card input[type="radio"] { display: none !important; }
+
 /* --- 7. Counter Controls --- */
 .counter-card { background: #f8fafc; border-radius: 16px; padding: 12px 32px; }
 .counter-row { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; }
@@ -292,12 +288,97 @@ input:focus, textarea:focus {
 .unselected-icon { color: #94a3b8; }
 .amenity-pill.selected .unselected-icon { color: white; opacity: 0.9; }
 
-/* --- 9. Map & Nearby Places (FIXED: Added Fallback background to prevent blank space) --- */
+/* --- 9. Map & Integrated Actions --- */
 .map-picker-container { border: 1px solid var(--rz-border); border-radius: 16px; padding: 16px; background: white; }
-.map-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+
+.map-header { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+  margin-bottom: 8px; 
+}
+
+@media (min-width: 768px) {
+  .map-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.map-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .map-actions { width: auto; }
+}
+
+.search-location-inline {
+  position: relative;
+  flex: 1; 
+  min-width: 260px; 
+}
+
+.search-location-inline input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 2px solid var(--rz-border);
+  border-radius: 8px; 
+  font-size: 0.95rem;
+  background: white;
+  transition: 0.2s;
+}
+
+.search-location-inline input:focus {
+  border-color: var(--rz-primary);
+  outline: none;
+}
+
+.map-actions .btn-outline {
+  padding: 10px 16px; 
+  height: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--rz-border);
+  border-radius: 12px;
+  margin-top: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  z-index: 1000;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+  color: var(--rz-text-main);
+  transition: background 0.2s;
+}
+
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: #f8fafc; color: var(--rz-primary); }
+.suggestion-item mat-icon { color: #94a3b8; font-size: 20px; width: 20px; height: 20px; margin-top: 2px;}
+.suggestion-item:hover mat-icon { color: var(--rz-primary); }
+
 .property-map { height: 350px; width: 100%; border-radius: 12px; z-index: 1; border: 1px solid var(--rz-border); background: #e2e8f0; }
 .property-map img.leaflet-tile { max-width: none !important; max-height: none !important; width: 256px !important; height: 256px !important; padding: 0 !important; margin: 0 !important; }
 
+/* Nearby Places */
 .nearby-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 .nearby-icon-box { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: #f1f5f9; border-radius: 12px; color: var(--rz-primary); flex-shrink: 0; }
 .input-col-main { flex: 2; }
@@ -346,7 +427,7 @@ input:focus, textarea:focus {
 .preview-loc { color: var(--rz-text-muted); display: flex; align-items: center; gap: 4px; font-size: 1rem; }
 .preview-loc mat-icon { font-size: 20px; width: 20px; height: 20px; color: var(--rz-primary); }
 
-/* --- 12. Form Action Buttons (Moved inside the card) --- */
+/* --- 12. Form Action Buttons --- */
 .form-actions {
   display: flex;
   justify-content: space-between;
@@ -370,12 +451,9 @@ input:focus, textarea:focus {
   .mobile-only { display: block; }
   
   .container { padding: 100px 16px 40px; }
-  
   .main-card { padding: 32px 20px; border-radius: 20px; margin-bottom: 20px; }
-  
   .section-title { font-size: 1.75rem; }
   
-  /* Stack Grids */
   .property-type-grid { grid-template-columns: 1fr; }
   .type-card { aspect-ratio: auto; padding: 20px; flex-direction: row; justify-content: flex-start; gap: 16px; text-align: left; }
   .type-icon { margin-bottom: 0; }
@@ -401,38 +479,16 @@ input:focus, textarea:focus {
   .btn-icon-danger { position: absolute; right: 12px; bottom: 12px; }
   
   .two-column-layout { flex-direction: column; }
-  
-  /* Stack Action Buttons on Mobile */
   .form-actions { flex-direction: column-reverse; gap: 16px; align-items: stretch; }
   .form-actions button { width: 100%; }
-}
-
-.type-card input[type="radio"] {
-  display: none !important;
 }
 
 /* ========================================================
    STRICT FORM VALIDATION UI
 ======================================================== */
+.req-star { color: #ef4444; font-weight: 800; margin-left: 2px; }
+.error-text { display: block; color: #ef4444; font-size: 0.85rem; font-weight: 500; margin-top: 6px; animation: fadeIn 0.2s ease-out; }
 
-/* Red Asterisk for required fields */
-.req-star {
-  color: #ef4444; /* Bright Red */
-  font-weight: 800;
-  margin-left: 2px;
-}
-
-/* Small Red Helper Text */
-.error-text {
-  display: block;
-  color: #ef4444;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 6px;
-  animation: fadeIn 0.2s ease-out;
-}
-
-/* Highlight input boxes red when empty and touched */
 input.ng-invalid.ng-touched, 
 textarea.ng-invalid.ng-touched {
   border-color: #ef4444 !important;
@@ -440,7 +496,6 @@ textarea.ng-invalid.ng-touched {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
 }
 
-/* Special red border for the Map Container if skipped */
 .map-error {
   border-color: #ef4444 !important;
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;

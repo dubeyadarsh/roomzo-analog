@@ -54,14 +54,33 @@
           </span>
 
           <h2 class="subsection-title move-down mt-32">Property Location <span class="req-star">*</span></h2>
+          
           <div class="map-picker-container" [class.map-error]="detailsGroup.get('address.latitude')?.invalid && detailsGroup.get('address.latitude')?.touched">
+            
             <div class="map-header">
-              <p class="input-helper">Pinpoint your exact location on the map. (Required)</p>
-              <button type="button" class="btn-outline btn-small" (click)="detectLocation()">
-                <mat-icon>my_location</mat-icon> Auto-Detect
-              </button>
+              <div>
+                <p class="input-helper mb-0">Pinpoint your exact location on the map.</p>
+              </div>
+              
+              <div class="map-actions">
+                <div class="search-location-inline">
+                  <input type="text" [formControl]="searchControl" placeholder="🔍 Search area, city, or village...">
+                  
+                  <div class="autocomplete-dropdown" *ngIf="searchResults.length > 0">
+                    <div class="suggestion-item" *ngFor="let result of searchResults" (click)="selectLocation(result)">
+                      <mat-icon>place</mat-icon>
+                      <span>{{ result.display_name }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="button" class="btn-outline btn-small" (click)="detectLocation()">
+                  <mat-icon>my_location</mat-icon> <span class="desktop-only">Auto-Detect</span>
+                </button>
+              </div>
             </div>
-            <div id="propertyMap" class="property-map"></div>
+
+            <div id="propertyMap" class="property-map mt-16"></div>
           </div>
           <span class="error-text" *ngIf="detailsGroup.get('address.latitude')?.invalid && detailsGroup.get('address.latitude')?.touched">
             Please select your location on the map.
