@@ -55,6 +55,10 @@
             <mat-icon>location_on</mat-icon>
             {{ property.street }}, {{ property.city }}, {{ property.state }}
           </p>
+          <div class="posted-info" *ngIf="property.createdOn">
+            <mat-icon>schedule</mat-icon>
+            <span>Posted {{ property.createdOn | date: 'MMM d, y' }}</span>
+          </div>
         </div>
         <div class="action-buttons desktop-only">
           <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
@@ -233,7 +237,7 @@
           </div>
         </div>
 
-        <div class="divider-thin" *ngIf="ownerDetails.propertyPhone && ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)"></div>
+        <!-- <div class="divider-thin" *ngIf="ownerDetails.propertyPhone && ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)"></div>
 
         <div class="info-row" *ngIf="ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)">
           <mat-icon>person</mat-icon>
@@ -241,7 +245,7 @@
             <label>Owner's Account Number</label>
             <a [href]="'tel:' + ownerDetails.ownerPhone" class="contact-link">{{ ownerDetails.ownerPhone }}</a>
           </div>
-        </div>
+        </div> -->
 
         <div class="divider-thin" *ngIf="(ownerDetails.propertyPhone || ownerDetails.ownerPhone) && ownerDetails.email"></div>
         

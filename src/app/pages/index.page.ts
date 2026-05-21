@@ -1,8 +1,8 @@
-import { afterNextRender, Component, Inject, PLATFORM_ID } from '@angular/core';
+import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core'; 
 import { RouterModule } from '@angular/router';
@@ -31,13 +31,14 @@ interface Listing {
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export default class HomeComponent {
+export default class HomeComponent implements OnInit {
   listings: Listing[] = [];
   isLoading: boolean = true; 
 
   // 1. Inject PLATFORM_ID
   constructor(
-    private router: Router, 
+    private router: Router,
+    private route: ActivatedRoute,
     private http: HttpClient, 
     private propertyService: PropertyService, 
     private cd: ChangeDetectorRef,
@@ -49,7 +50,19 @@ export default class HomeComponent {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Handle fragment navigation to scroll to contact section
+    this.route.fragment.subscribe(fragment => {
+      if (fragment === 'contact' && isPlatformBrowser(this.platformId)) {
+        setTimeout(() => {
+          const contactElement = document.querySelector('app-contact');
+          if (contactElement) {
+            contactElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 300);
+      }
+    });
+  }
 
   checkAndGetLocation() {
     // 2. Protect localStorage access
@@ -171,5 +184,14 @@ export default class HomeComponent {
 
   viewDetails(id: any): void {
     this.router.navigate(['/property-details', id]);
+  }
+
+  scrollToContact(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const contactElement = document.querySelector('app-contact');
+      if (contactElement) {
+        contactElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   }
 }

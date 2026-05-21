@@ -68,6 +68,23 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
 .address { color: var(--rz-text-muted); display: flex; align-items: center; gap: 4px; font-size: 1rem; }
 .address mat-icon { font-size: 18px; width: 18px; height: 18px; color: var(--rz-primary); }
 
+.posted-info { 
+  color: var(--rz-text-muted); 
+  display: flex; 
+  align-items: center; 
+  gap: 6px; 
+  font-size: 0.95rem;
+  margin-top: 12px;
+  font-weight: 500;
+}
+.posted-info mat-icon { 
+  font-size: 16px; 
+  width: 16px; 
+  height: 16px; 
+  color: var(--rz-primary);
+  opacity: 0.8;
+}
+
 .action-buttons { display: flex; gap: 12px; }
 
 /* Specs Bar */
@@ -203,6 +220,7 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   /* 3. Typography Adjustments */
   h1 { font-size: 1.75rem; }
   .property-header { margin-bottom: 24px; }
+  .posted-info { font-size: 0.9rem; margin-top: 10px; }
   .content-layout { grid-template-columns: 1fr; gap: 32px; }
   
   /* 4. Mobile Specs Grid */

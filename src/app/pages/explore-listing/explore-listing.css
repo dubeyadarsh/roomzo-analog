@@ -163,12 +163,64 @@ h1, h2, h3, h4, p { margin: 0; }
 .specs-row span { display: flex; align-items: center; gap: 4px; }
 .specs-row mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
-.view-btn {
-  margin-top: auto; background: transparent; border: 1px solid var(--rz-border);
-  color: var(--rz-primary); padding: 10px; border-radius: var(--rz-radius-sm, 8px);
-  font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; font-family: inherit;
+.action-buttons-container {
+  display: flex;
+  gap: 12px;
+  margin-top: auto;
 }
-.view-btn:hover { border-color: var(--rz-primary); background: var(--rz-primary); color: white; }
+
+.contact-btn {
+  flex: 1;
+  background: white;
+  color: var(--rz-primary);
+  border: 2px solid var(--rz-primary);
+  padding: 10px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.contact-btn:hover {
+  background: var(--rz-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+.contact-btn:active {
+  transform: scale(0.98);
+}
+.contact-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+.view-btn {
+  flex: 1;
+  background: var(--rz-primary);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.view-btn:hover {
+  background: var(--rz-primary-hover);
+  transform: translateY(-2px);
+}
+.view-btn:active {
+  transform: scale(0.98);
+}
+.view-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
 /* Pagination & Loaders */
 .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; width: 100%; }
@@ -274,5 +326,14 @@ h1, h2, h3, h4, p { margin: 0; }
   /* Cards Stacked Vertically */
   .property-grid { grid-template-columns: 1fr; gap: 16px; width: 100%; } 
   .card-image { height: 220px; } 
-  .view-btn { padding: 14px; } 
+  
+  /* Mobile Action Buttons */
+  .action-buttons-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .contact-btn, .view-btn {
+    padding: 14px;
+    width: 100%;
+  }
 }

@@ -122,9 +122,14 @@
                 <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize | number }} sqft</span>
               </div>
 
-              <button class="btn full-width view-btn" (click)="viewDetails(prop.id)">
-                View Details
-              </button>
+              <div class="action-buttons-container">
+                <button class="contact-btn" (click)="scrollToContact()">
+                  <mat-icon>message</mat-icon> Contact
+                </button>
+                <button class="view-btn" (click)="viewDetails(prop.id)">
+                  <mat-icon>info</mat-icon> View Details
+                </button>
+              </div>
             </div>
             
           </div>

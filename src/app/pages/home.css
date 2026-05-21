@@ -77,16 +77,11 @@
 /* Action Pill Buttons */
 .action-pill-container {
   display: flex;
-  background: var(--rz-primary);
-  border-radius: var(--rz-radius-sm);
-  overflow: hidden;
+  gap: 12px;
   margin-top: auto;
 }
 .action-btn {
   flex: 1;
-  background: transparent;
-  color: white;
-  border: none;
   padding: 12px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -95,11 +90,34 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: background 0.2s;
+  border-radius: var(--rz-radius-sm);
+  transition: all 0.2s ease;
+  border: none;
+  font-family: inherit;
 }
-.action-btn:hover { background: var(--rz-primary-hover); }
+.action-btn.left {
+  background: white;
+  color: var(--rz-primary);
+  border: 2px solid var(--rz-primary);
+}
+.action-btn.left:hover {
+  background: var(--rz-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+.action-btn.right {
+  background: var(--rz-primary);
+  color: white;
+}
+.action-btn.right:hover {
+  background: var(--rz-primary-hover);
+  transform: translateY(-2px);
+}
+.action-btn:active {
+  transform: scale(0.98);
+}
 .action-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
-.btn-divider { width: 1px; background: rgba(255,255,255,0.2); margin: 8px 0; }
+.btn-divider { display: none; }
 
 /* Bottom Features Row */
 .bottom-features-row {
@@ -137,15 +155,22 @@
   /* Make the action buttons stack nicely on tiny phones */
   .action-pill-container {
     flex-direction: column;
-    border-radius: var(--rz-radius-sm);
+    gap: 8px;
   }
   .action-btn {
     width: 100%;
     padding: 14px; /* Taller touch target */
-    border-bottom: 1px solid rgba(255,255,255,0.15);
   }
-  .action-btn:last-child { border-bottom: none; }
-  .btn-divider { display: none; } /* Hide the vertical line */
+  .action-btn.left {
+    background: white;
+    color: var(--rz-primary);
+    border: 2px solid var(--rz-primary);
+  }
+  .action-btn.right {
+    background: var(--rz-primary);
+    color: white;
+    border: none;
+  }
 }
 
 /* ========================================================
