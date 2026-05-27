@@ -1,0 +1,80 @@
+<div class="flatmates-wrapper">
+  
+  <div class="container desktop-header-container">
+    <header class="page-header desktop-only">
+      <div class="header-content">
+        <h1>Find Your Perfect Flatmate</h1>
+        <p>Discover verified profiles looking to share a space in your preferred locations.</p>
+      </div>
+      
+      <div class="filter-bar">
+        <div class="search-wrapper">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--rz-text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" placeholder="Search locations (e.g., Powai, Bandra)..." class="search-input" />
+        </div>
+        <select class="filter-select">
+          <option value="">Any Budget</option>
+          <option value="low">Under ₹15k</option>
+          <option value="mid">₹15k - ₹25k</option>
+          <option value="high">Above ₹25k</option>
+        </select>
+        <button class="btn-primary">Search</button> 
+      </div>
+    </header>
+  </div>
+
+  <main class="feed-container">
+    @for (mate of flatmates; track mate.id) {
+      <article class="profile-card fade-in">
+        
+        <div class="card-image-layer">
+          <div class="image-carousel">
+            @for (img of mate.images; track img) {
+              <img [src]="img" [alt]="mate.name" class="carousel-image" loading="lazy" />
+            }
+          </div>
+          <div class="image-overlay"></div>
+        </div>
+
+        <div class="card-content-layer">
+          
+          <div class="insta-header">
+            <div class="name-block">
+              <span class="status-badge" 
+                    [ngClass]="{'need-flatmate': mate.listingStatus === 'Needs Flatmate', 'needs-room': mate.listingStatus === 'Needs a Room'}">
+                {{ mate.listingStatus === 'Needs Flatmate' ? '🏠 Need Flatmate' : '🔍 Needs a Room' }}
+              </span>
+              
+              <h2 class="card-title" [title]="mate.name">{{ mate.name }} <span class="age-gender">{{ mate.age }}</span></h2>
+              <p class="profession">{{ mate.profession }} • {{ mate.budget }}</p>
+            </div>
+            
+            <button class="btn-insta-connect">Connect</button>
+          </div>
+
+          <div class="details-box">
+            <p class="bio line-clamp">"{{ mate.bio }}"</p>
+            
+            <div class="preferences-container">
+              @for (pref of mate.preferences; track pref) {
+                <span class="tag">{{ pref }}</span>
+              }
+              <span class="tag location-tag">📍 {{ mate.targetLocations[0] }}</span>
+            </div>
+          </div>
+          
+        </div>
+      </article>
+    }
+
+    <div class="end-of-feed">
+      <div class="end-message fade-in">
+        <span class="end-icon">🎉</span>
+        <h3>You're all caught up!</h3>
+        <p>You've seen all the flatmates in this area.</p>
+        <button class="btn-secondary back-to-top" (click)="scrollToTop()">👆 Back to Top</button>
+      </div>
+    </div>
+
+  </main>
+</div>

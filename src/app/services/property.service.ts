@@ -137,7 +137,7 @@ export class PropertyService {
       .set('size', size);
 
     if (isRented !== undefined && isRented !== null) {
-      params = params.set('isRented', isRented);
+      params = params.set('isRented', isRented ? 1:0);
     }
 
     return this.http.get<PaginatedResponse>(`${this.baseUrl}/listings/search`, { params });
@@ -188,13 +188,13 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
     return this.http.get(`${this.baseUrl}/listings/searchWithFilters`, { params });
   }
 
-  private buildParams(page: number, size: number, filters?: ListingFilter, isRented?: boolean): HttpParams {
+  private buildParams(page: number, size: number, filters?: ListingFilter, isRented?: any): HttpParams {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size);
 
-    if (isRented !== undefined) {
-      params = params.set('isRented', isRented);
+    if (isRented !== undefined && isRented !== null) {
+      params = params.set('isRented', isRented?1:0);
     }
 
     if (filters) {
@@ -207,16 +207,18 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
          params = params.set('bedrooms', bedVal);
       }
 
-      // Geo-spatial sorting parameters
+      // Geo-spatial sorting parameters ONLY
       if (filters.lat) params = params.set('lat', filters.lat);
       if (filters.lng) params = params.set('lng', filters.lng);
       
-      // Fallback location parameters if Lat/Lng fail
-      if (filters.city) params = params.set('city', filters.city);
-      if (filters.state) params = params.set('state', filters.state);
+      // DELETED the fallback logic for city/state here. 
+      // The backend /searchWithFilters endpoint does not accept them.
     }
     
     return params;
+  }
+  reportProperty(payload: any) {
+    return this.http.post(`${this.baseUrl}/api/reports/submit`, payload);
   }
 }
 

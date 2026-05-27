@@ -8,14 +8,13 @@ import { Subscription, switchMap, tap } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { getAmenitiesMap } from '../../services/Utility';
-
-import { register } from 'swiper/element/bundle';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-property-details',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink],
+  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './property-details.html',
   styleUrls: ['./property-details.css']
@@ -34,8 +33,18 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   isCopied = false;
 
   showContactModal = false;
+  showReportModal = false;
+  reportReason = '';
+  reportDescription = '';
   
-  // UPDATED: Hold both phone numbers
+  reportReasonsList = [
+    'Scam or Fraud',
+    'Incorrect Information',
+    'Property No Longer Available',
+    'Offensive Content',
+    'Other'
+  ];
+
   ownerDetails = {
     name: 'Property Owner', 
     ownerPhone: '',
@@ -43,6 +52,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     email: 'hidden@roomzo.com'
   };
 
+  isBrowser = isPlatformBrowser(this.platformId);
+  activePhotoIndex = 0; // State for the native mobile gallery
   private routeSub: Subscription | null = null;
 
   constructor(
@@ -54,11 +65,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {
-    if (isPlatformBrowser(this.platformId)) {
-      register();
-    }
-  }
+  ) {}
 
   ngOnInit(): void {
     this.routeSub = this.route.paramMap.pipe(
@@ -68,8 +75,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         this.similarProperties = [];
         this.mapUrl = null; 
         this.showContactModal = false; 
+        this.activePhotoIndex = 0; // Reset gallery index on new property load
         
-        if (isPlatformBrowser(this.platformId)) {
+        if (this.isBrowser) {
           window.scrollTo(0, 0);
         }
         
@@ -95,9 +103,12 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
             );
           }
           this.mapAmenities(this.property);
-          this.loadMapCoordinates(this.property);
           this.checkReturnFromLogin();
-          this.loadSuggestions(this.property);
+          this.checkFocusContact();
+          if (this.isBrowser) {
+            this.loadMapCoordinates(this.property);
+            this.loadSuggestions(this.property);
+          }
 
         } else {
             this.toastr.warning('Property data not found', 'Not Found');
@@ -114,6 +125,25 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Mobile Native Gallery Methods
+  nextPhoto(event: Event) {
+    event.stopPropagation();
+    if (this.property?.photos) {
+      this.activePhotoIndex = (this.activePhotoIndex + 1) % this.property.photos.length;
+    }
+  }
+
+  prevPhoto(event: Event) {
+    event.stopPropagation();
+    if (this.property?.photos) {
+      this.activePhotoIndex = (this.activePhotoIndex - 1 + this.property.photos.length) % this.property.photos.length;
+    }
+  }
+
+  setActivePhoto(index: number) {
+    this.activePhotoIndex = index;
+  }
+
   contactAgent() {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
       this.openContactModal();
@@ -124,12 +154,10 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
 
   isUserLoggedIn(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
-
+    if (!this.isBrowser) return false;
     const isVerified = localStorage.getItem('userVerifiedwWIthOtp');
     const loginTime = localStorage.getItem('userloginTimestamp');
     const ONE_DAY = 1 * 24 * 60 * 60 * 1000;
-
     if (isVerified === 'true' && loginTime) {
       const timeElapsed = Date.now() - parseInt(loginTime, 10);
       return timeElapsed < ONE_DAY;
@@ -138,12 +166,10 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
   
   isOwnerLoggedIn(): boolean {
-    if (!isPlatformBrowser(this.platformId)) return false;
-
+    if (!this.isBrowser) return false;
     const isVerified = localStorage.getItem('ownerVerifiedwWIthOtp');
     const loginTime = localStorage.getItem('loginTimestamp');
     const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
-
     if (isVerified === 'true' && loginTime) {
       const timeElapsed = Date.now() - parseInt(loginTime, 10);
       return timeElapsed < TEN_DAYS;
@@ -153,7 +179,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   
   checkReturnFromLogin() {
     const params = this.route.snapshot.queryParams;
-    if (params['showContact'] === 'true' && this.isUserLoggedIn()) {
+    if (params['showContact'] === 'true' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
       this.openContactModal();
       this.router.navigate([], {
         relativeTo: this.route,
@@ -161,27 +187,36 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         queryParamsHandling: 'merge',
         replaceUrl: true
       });
+      this.clearQueryParams();
+    } else if (params['action'] === 'report' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
+      this.openReportModal(); 
+      this.clearQueryParams();
     }
   }
 
-  // UPDATED: Capture both contact numbers for the modal
+  private clearQueryParams() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { showContact: null, action: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  }
+
   openContactModal() {
     if (!this.property || !this.property.ownerId) {
        this.toastr.error('Owner information not available');
        return;
     }
-
     this.isLoading = true;
-
     this.authService.getOwnerDetails(this.property.ownerId).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         if (res.status === 1 && res.data) {
-          
           this.ownerDetails = {
             name: res.data.name,
-            ownerPhone: res.data.phone, // The account's registered number
-            propertyPhone: this.property.contactNo || this.property.tempContactNo, // The number listed specifically for this property
+            ownerPhone: res.data.phone, 
+            propertyPhone: this.property.contactNo || this.property.tempContactNo, 
             email: res.data.email
           };
           this.showContactModal = true;
@@ -201,9 +236,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     this.showContactModal = false;
   }
 
-  // NEW: Method to open image in a new tab safely
   openImage(url: string | undefined): void {
-    if (url && isPlatformBrowser(this.platformId)) {
+    if (url && this.isBrowser) {
       window.open(url, '_blank');
     }
   }
@@ -242,24 +276,34 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
 
   shareProperty() {
-    if (isPlatformBrowser(this.platformId) && navigator.clipboard) {
+    if (this.isBrowser && navigator.clipboard) {
       const currentUrl = window.location.href;
-      navigator.clipboard.writeText(currentUrl).then(() => {
-        this.isCopied = true;
-        this.toastr.success('Link copied to clipboard!', 'Shared');
-        setTimeout(() => {
-          this.isCopied = false;
+      if (navigator.share) {
+        navigator.share({
+          title: this.property ? `${this.property.propertyType} in ${this.property.city}` : 'Check out this property',
+          text: this.property ? `${this.property.propertyType} in ${this.property.city} — ${this.formatPrice(this.property.rentAmount)}/mo` : 'Check out this rental listing',
+          url: currentUrl,
+        }).catch((err) => {
+          if (err?.name !== 'AbortError') {
+            this.toastr.error('Sharing failed', 'Error');
+          }
+        });
+      } else {
+        navigator.clipboard.writeText(currentUrl).then(() => {
+          this.isCopied = true;
+          this.toastr.success('Link copied to clipboard!', 'Shared');
+          setTimeout(() => {
+            this.isCopied = false;
+            this.cd.detectChanges();
+          }, 2000);
           this.cd.detectChanges();
-        }, 2000);
-        this.cd.detectChanges();
-      }).catch(() => {
-        this.toastr.error('Failed to copy link', 'Error');
-      });
+        }).catch(() => {
+          this.toastr.error('Failed to copy link', 'Error');
+        });
+      }
     }
   }
 
-  saveProperty() { this.toastr.success('Property saved to your favorites', 'Saved'); }
-  requestBooking() { this.contactAgent(); } 
   scheduleTour() { this.toastr.info('Tour scheduling feature coming soon!', 'Coming Soon'); }
 
   ngOnDestroy(): void {
@@ -267,31 +311,34 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   }
   
   loadSuggestions(property: any) {
-    const filters: any = {};
-    
-    if (property.latitude && property.longitude) {
-      filters.lat = property.latitude;
-      filters.lng = property.longitude;
-    } else if (property.city && property.state) {
-      filters.city = property.city;
-      filters.state = property.state;
-    }
+    if (!property) return;
+    const isRentedVal = false; 
 
-    this.propertyService.searchListingsWithFilters(0, 4, filters, false).subscribe({
-      next: (res: any) => {
-        if (res.listings) {
-          let filtered = res.listings.filter((p: any) => String(p.id) !== String(property.id));
-          
-          if (filtered.length > 3) {
-            filtered = filtered.slice(0, 3);
-          }
-          
-          this.similarProperties = filtered;
-          this.cd.detectChanges();
-        }
-      },
-      error: () => console.warn('Failed to load similar properties')
-    });
+    if (property.latitude && property.longitude) {
+      const filters: any = {
+        lat: property.latitude,
+        lng: property.longitude,
+        propertyType: property.propertyType 
+      };
+
+      this.propertyService.searchListingsWithFilters(0, 4, filters, isRentedVal).subscribe({
+        next: (res: any) => this.processSuggestions(res, property.id),
+        error: (err) => console.error('Failed to load spatial suggestions:', err)
+      });
+    } else if (property.city && property.state) {
+      this.propertyService.searchListings(property.state, property.city, 0, 4, isRentedVal).subscribe({
+        next: (res: any) => this.processSuggestions(res, property.id),
+        error: (err) => console.error('Failed to load location suggestions:', err)
+      });
+    }
+  }
+
+  private processSuggestions(res: any, currentPropertyId: string) {
+    if (res && res.listings) {
+      let filtered = res.listings.filter((p: any) => String(p.id) !== String(currentPropertyId));
+      this.similarProperties = filtered.slice(0, 3);
+      this.cd.detectChanges();
+    }
   }
 
   mapAmenities(propData: any) {
@@ -306,7 +353,6 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
 
   openGoogleMaps(): void {
     if (!this.property) return;
-
     let destination = '';
 
     if (this.property.latitude && this.property.longitude) {
@@ -320,14 +366,13 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         this.property.state,
         this.property.zipCode
       ];
-
       destination = encodeURIComponent(
         addressParts.filter(part => part && String(part).trim() !== '').join(', ')
       );
     }
 
     if (destination) {
-      if (isPlatformBrowser(this.platformId)) {
+      if (this.isBrowser) {
         const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${destination}`;
         window.open(googleMapsUrl, '_blank');
       }
@@ -335,4 +380,97 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
       this.toastr.warning('Location details are not available for this property.', 'Location Unavailable');
     }
   }
+
+  reportProperty() {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      this.openReportModal(); 
+    } else {
+      const returnUrl = `/property-details/${this.currentId}?action=report`;
+      this.router.navigate(['/login'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  submitReport() {
+    if (!this.reportReason) {
+      this.toastr.warning('Please select a reason for reporting.', 'Missing Info');
+      return;
+    }
+
+    const finalReason = this.reportReason + (this.reportDescription ? ` - Details: ${this.reportDescription}` : '');
+
+    const payload = {
+      propertyId: this.currentId,
+      propertyName: `${this.property?.propertyType} in ${this.property?.city}`,
+      ownerId: this.property?.ownerId,
+      reason: finalReason,
+      reporterEmail: localStorage.getItem('userEmail') || 'Unknown User' 
+    };
+
+    this.propertyService.reportProperty(payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 1) {
+          this.toastr.success('Property reported successfully. Our team will look into it.', 'Reported');
+          this.closeReportModal(); 
+        } else {
+          this.toastr.error('Could not submit report.', 'Error');
+        }
+      },
+      error: (err) => {
+        console.error('Report error:', err);
+        this.toastr.error('Failed to report property.', 'Server Error');
+      }
+    });
+  }
+
+  openReportModal() {
+    this.reportReason = '';
+    this.reportDescription = '';
+    this.showReportModal = true;
+  }
+
+  closeReportModal() {
+    this.showReportModal = false;
+  }
+  // NEW: Helper method to format description into bullet points
+  get formattedDescription(): string[] {
+    if (!this.property || !this.property.description) return [];
+    
+    // Split by '|', remove extra whitespace, and filter out any empty strings
+    return this.property.description
+      .split('|')
+      .map((item: string) => item.trim())
+      .filter((item: string) => item.length > 0);
+  }
+  
+highlightContact = false;
+checkFocusContact() {
+  const params = this.route.snapshot.queryParams;
+  if (params['focusContact'] === 'true') {
+    this.highlightContact = true;
+    this.cd.detectChanges();
+    
+    if (this.isBrowser) {
+      setTimeout(() => {
+        // Target the button inside the booking card (works for both desktop and mobile flow)
+        const targetBtn = document.querySelector('.booking-card .btn-primary');
+        if (targetBtn) {
+          targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Remove highlight animation after 3 seconds and clean the URL
+        setTimeout(() => {
+          this.highlightContact = false;
+          this.cd.detectChanges();
+          
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { focusContact: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+        }, 3000);
+      }, 300); // Brief delay to ensure DOM is fully rendered
+    }
+  }
+}
 }

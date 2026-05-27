@@ -72,7 +72,7 @@
       <section class="listings-area">
         
         <div class="results-header">
-          <span class="results-count">Showing <strong>{{ totalItems }}</strong> properties</span>
+          <span class="results-count">Showing <strong>All</strong> properties</span>
           
           <button class="mobile-filter-toggle" (click)="toggleMobileFilters()">
             <mat-icon>tune</mat-icon> Filters
@@ -123,7 +123,7 @@
               </div>
 
               <div class="action-buttons-container">
-                <button class="contact-btn" (click)="scrollToContact()">
+                <button class="contact-btn" (click)="scrollToContact(prop.id)">
                   <mat-icon>message</mat-icon> Contact
                 </button>
                 <button class="view-btn" (click)="viewDetails(prop.id)">

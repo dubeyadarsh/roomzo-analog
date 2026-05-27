@@ -229,6 +229,11 @@
               <div class="input-group">
                 <label class="input-label">Description <span class="req-star">*</span></label>
                 <textarea formControlName="description" rows="4" placeholder="Describe what makes your place special..."></textarea>
+                
+                <span class="input-helper" style="margin-bottom: 0; margin-top: 4px;">
+                  💡 Tip: Press 'Enter' for a new line to automatically create bullet points.
+                </span>
+
                 <span class="error-text" *ngIf="finalGroup.get('description')?.invalid && finalGroup.get('description')?.touched">Description is required.</span>
               </div>
 

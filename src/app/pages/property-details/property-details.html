@@ -5,20 +5,38 @@
 
 <div class="page-container" *ngIf="!isLoading && property">
 
-  <section class="gallery-section mobile-only">
-    <swiper-container 
-      style="--swiper-navigation-color: #fff; --swiper-pagination-color: #fff; --swiper-pagination-bullet-inactive-color: rgba(255,255,255,0.6);" 
-      navigation="true" pagination="true" loop="true">
-      <swiper-slide *ngFor="let photo of property.photos">
-        <img [src]="photo.photoUrl || 'assets/placeholder.jpg'" alt="Property Image" loading="lazy" (click)="openImage(photo.photoUrl)">
-      </swiper-slide>
-      <swiper-slide *ngIf="!property.photos || property.photos.length === 0">
-         <img src="assets/placeholder.jpg" alt="Placeholder">
-      </swiper-slide>
-    </swiper-container>
+  <section class="gallery-container mobile-only" *ngIf="isBrowser">
     
-    <button class="mobile-floating-btn back-btn" routerLink="/explore-listing"><mat-icon>arrow_back</mat-icon></button>
-    <button class="mobile-floating-btn share-btn" (click)="shareProperty()"><mat-icon>ios_share</mat-icon></button>
+    <button class="mobile-floating-btn back-btn" routerLink="/explore-listing">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <button class="mobile-floating-btn share-btn" (click)="shareProperty()">
+      <mat-icon>ios_share</mat-icon>
+    </button>
+
+    <div class="main-image-wrapper">
+      <button class="nav-arrow prev-arrow" (click)="prevPhoto($event)" *ngIf="property.photos?.length > 1">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <img [src]="property.photos && property.photos.length > 0 ? property.photos[activePhotoIndex].photoUrl : 'assets/placeholder.jpg'" 
+           alt="Property View" 
+           class="main-image fade-in" 
+           (click)="openImage(property.photos[activePhotoIndex]?.photoUrl)" />
+
+      <button class="nav-arrow next-arrow" (click)="nextPhoto($event)" *ngIf="property.photos?.length > 1">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <div class="thumbnail-strip" *ngIf="property.photos?.length > 1">
+      <button class="thumbnail-btn" 
+              *ngFor="let photo of property.photos; let i = index" 
+              [class.active]="i === activePhotoIndex" 
+              (click)="setActivePhoto(i)">
+        <img [src]="photo.photoUrl" alt="Thumbnail" loading="lazy" />
+      </button>
+    </div>
   </section>
 
   <section class="gallery-section desktop-only mt-24">
@@ -50,7 +68,7 @@
           <div class="breadcrumbs desktop-only">
             <a routerLink="/explore-listing">Explore</a> &gt; {{ property.city }}
           </div>
-          <h1>{{ property.propertyType }} in {{ property.city }}</h1>
+          <h1>{{ property.propertyType }} in {{ property.street }}</h1>
           <p class="address">
             <mat-icon>location_on</mat-icon>
             {{ property.street }}, {{ property.city }}, {{ property.state }}
@@ -64,6 +82,10 @@
           <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
             <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
             {{ isCopied ? 'Copied!' : 'Share' }}
+          </button>
+          <button class="btn-outline report-btn" (click)="reportProperty()">
+            <mat-icon>flag</mat-icon>
+            Report
           </button>
         </div>
       </div>
@@ -79,9 +101,21 @@
     <div class="content-layout">
       
       <div class="details-column">
-        <section class="info-block">
+       <section class="info-block">
           <h2>About this home</h2>
-          <p [class.truncated]="!showFullDescription">{{ property.description }}</p>
+          
+          <div [class.truncated]="!showFullDescription">
+            
+            <ul *ngIf="formattedDescription.length > 1; else singleDesc" class="custom-bullet-list">
+              <li *ngFor="let line of formattedDescription">{{ line }}</li>
+            </ul>
+            
+            <ng-template #singleDesc>
+              <p>{{ property.description }}</p>
+            </ng-template>
+            
+          </div>
+
           <button class="link-btn" (click)="showFullDescription = !showFullDescription" *ngIf="property.description?.length > 150">
             {{ showFullDescription ? 'Show less' : 'Show more' }} <mat-icon>expand_more</mat-icon>
           </button>
@@ -167,8 +201,11 @@
             {{ property.isRented ? 'Currently Rented' : 'Available Now' }}
           </div>
           
-          <button class="btn-primary full-width mt-16 " (click)="contactAgent()">Contact Owner</button>
-          <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
+<button class="btn-primary full-width mt-16" 
+        [ngClass]="{'pulse-highlight': highlightContact}" 
+        (click)="contactAgent()">
+  Contact Owner
+</button>          <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
         </div>
 
         <div class="agent-card">
@@ -184,6 +221,12 @@
 
     </div>
 
+    <div class="mobile-report-section mobile-only mt-24">
+      <button class="mobile-report-btn" (click)="reportProperty()">
+        <mat-icon>flag</mat-icon> Report this listing
+      </button>
+    </div>
+
     <section class="similar-section" *ngIf="similarProperties.length > 0">
       <h2>Similar homes you might like</h2>
       <div class="similar-grid">
@@ -191,22 +234,26 @@
           <img [src]="(home.photos && home.photos.length > 0) ? home.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Home">
           <div class="sim-details">
             <div class="sim-price">{{ formatPrice(home.rentAmount) }}<span>/mo</span></div>
-            <h4>{{ home.propertyType }} in {{ home.city }}</h4>
+            <h4>{{ home.propertyType }} in {{ home.street  }}</h4>
             <p>{{ home.bedrooms }} Beds • {{ home.bathrooms }} Baths</p>
           </div>
         </a>
       </div>
     </section>
 
-  </div> </div>
+  </div> 
+</div>
 
 <div class="mobile-bottom-bar mobile-only" *ngIf="!isLoading && property">
   <div class="bottom-price-info">
     <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
     <div class="status" [class.available]="!property.isRented">{{ property.isRented ? 'Rented' : 'Available' }}</div>
   </div>
-  <button class="btn-primary" (click)="contactAgent()">Contact Owner</button>
-</div>
+<button class="btn-primary" 
+        [ngClass]="{'pulse-highlight': highlightContact}" 
+        (click)="contactAgent()">
+  Contact Owner
+</button></div>
 
 <div class="not-found-state" *ngIf="!isLoading && !property">
   <mat-icon>search_off</mat-icon>
@@ -228,7 +275,6 @@
       </div>
       
       <div class="contact-info-box">
-        
         <div class="info-row" *ngIf="ownerDetails.propertyPhone">
           <mat-icon>phone</mat-icon>
           <div>
@@ -236,16 +282,6 @@
             <a [href]="'tel:' + ownerDetails.propertyPhone" class="contact-link">{{ ownerDetails.propertyPhone }}</a>
           </div>
         </div>
-
-        <!-- <div class="divider-thin" *ngIf="ownerDetails.propertyPhone && ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)"></div>
-
-        <div class="info-row" *ngIf="ownerDetails.ownerPhone && (ownerDetails.propertyPhone !== ownerDetails.ownerPhone)">
-          <mat-icon>person</mat-icon>
-          <div>
-            <label>Owner's Account Number</label>
-            <a [href]="'tel:' + ownerDetails.ownerPhone" class="contact-link">{{ ownerDetails.ownerPhone }}</a>
-          </div>
-        </div> -->
 
         <div class="divider-thin" *ngIf="(ownerDetails.propertyPhone || ownerDetails.ownerPhone) && ownerDetails.email"></div>
         
@@ -256,8 +292,37 @@
             <a [href]="'mailto:' + ownerDetails.email" class="contact-link">{{ ownerDetails.email }}</a>
           </div>
         </div>
-
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showReportModal" (click)="closeReportModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Report Property</h3>
+      <button class="close-btn" (click)="closeReportModal()"><mat-icon>close</mat-icon></button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="reasonSelect">Why are you reporting this property?</label>
+        <select id="reasonSelect" [(ngModel)]="reportReason" class="form-control">
+          <option value="" disabled selected>Select a reason</option>
+          <option *ngFor="let reason of reportReasonsList" [value]="reason">{{ reason }}</option>
+        </select>
+      </div>
+
+      <div class="form-group mt-16">
+        <label for="descriptionText">Additional Details (Optional)</label>
+        <textarea id="descriptionText" [(ngModel)]="reportDescription" class="form-control" rows="4" placeholder="Please provide more context..."></textarea>
+      </div>
+
+      <button class="btn-primary full-width mt-24 report-submit-btn" 
+              (click)="submitReport()" 
+              [disabled]="!reportReason">
+        Submit Report
+      </button>
     </div>
   </div>
 </div>

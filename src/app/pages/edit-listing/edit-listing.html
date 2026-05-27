@@ -64,8 +64,11 @@
       <div class="form-group">
         <label>Property Description</label>
         <textarea [(ngModel)]="listing.description" name="description" rows="5" placeholder="Highlight the best features of your property..." required></textarea>
+        
+        <span class="helper-text" style="margin-bottom: 0; margin-top: 4px; display: block;">
+          💡 Tip: Press 'Enter' for a new line to automatically create bullet points.
+        </span>
       </div>
-
       <div class="amenities-group">
         <label>Amenities</label>
         <p class="helper-text">Select all that apply to your property.</p>

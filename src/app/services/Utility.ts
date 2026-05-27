@@ -1,4 +1,4 @@
- interface Listing {
+export interface Listing {
   id: number;
   title: string;
   location: string;
@@ -10,49 +10,54 @@
   rating?: number;
   isFavorite: boolean;
 }
- export function mapBackendListingsToUi(list: any[]): Listing[] {
-    return list.map(item => ({
-      id: item.id,
 
-      title: item.propertyName
-        ? item.propertyName
-        : item.propertyType?.toUpperCase() || 'Property',
+export function mapBackendListingsToUi(list: any[]): Listing[] {
+  return list.map(item => ({
+    id: item.id,
 
-      location: `${item.city}, ${item.state}`,
+    title: item.propertyName
+      ? item.propertyName
+      : item.propertyType?.toUpperCase() || 'Property',
 
-      price: item.rentAmount,
-      priceUnit: '/month',
+    location: `${item.city}, ${item.state}`,
 
-      image: item.photos?.length
-        ? item.photos[0].photoUrl
-        : 'assets/no-image.jpg',
+    price: item.rentAmount,
+    priceUnit: '/month',
 
-      badge: {
-        text: item.isRented ? 'RENTED' : 'FOR RENT',
-        color: item.isRented ?  'blue' : 'green'
-      },
+    image: item.photos?.length
+      ? item.photos[0].photoUrl
+      : 'assets/no-image.jpg',
 
-      specs: {
-        beds: item.bedrooms,
-        baths: item.bathrooms,
-        area: item.propertySize
-      },
+    badge: {
+      text: item.isRented ? 'RENTED' : 'FOR RENT',
+      color: item.isRented ?  'blue' : 'green'
+    },
+
+    specs: {
+      beds: item.bedrooms,
+      baths: item.bathrooms,
+      area: item.propertySize
+    },
     rating: +(4 + Math.random()).toFixed(1), 
 
     // Random boolean for favorite
     isFavorite: Math.random() >= 0.5
-    }));
-  }
-  export function getAmenitiesMap() {
-    return [
-      { key: 'wifi', label: 'Fast Wifi', icon: 'wifi' ,dbKey:'hasWifi'},
-      { key: 'ac', label: 'Air Conditioning', icon: 'ac_unit', dbKey:'hasAc' },
-      { key: 'heating', label: 'Heating', icon: 'thermostat', dbKey:'hasHeating' },
-      { key: 'parking', label: 'Free Parking', icon: 'local_parking', dbKey:'hasParking' },
-      { key: 'gym', label: 'Gym Access', icon: 'fitness_center', dbKey:'hasGym' },
-      { key: 'balcony', label: 'Private Balcony', icon: 'balcony', dbKey:'hasBalcony' },
-      { key: 'washerDryer', label: 'Washer & Dryer', icon: 'local_laundry_service', dbKey:'hasWasherDryer' },
-      { key: 'pets', label: 'Pet Friendly', icon: 'pets', dbKey:'hasPets' },
-      { key: 'smokeAlarm', label: 'Smoke Alarm', icon: 'detector_smoke', dbKey:'hasSmokeAlarm' }
-    ];
-  }
+  }));
+}
+
+export function getAmenitiesMap() {
+  return [
+    { key: 'bed', label: 'Bed & Mattress', icon: 'bed', dbKey: 'hasBed' },
+    { key: 'almirah', label: 'Almirah / Cupboard', icon: 'door_sliding', dbKey: 'hasAlmirah' },
+    { key: 'studyTable', label: 'Study Table & Chair', icon: 'desk', dbKey: 'hasStudyTable' },
+    { key: 'fanLight', label: 'Fan & Tube Light', icon: 'mode_fan', dbKey: 'hasFanLight' },
+    { key: 'roWater', label: 'RO Water Purifier', icon: 'water_drop', dbKey: 'hasRoWater' },
+    { key: 'inverter', label: 'Power Backup', icon: 'battery_charging_full', dbKey: 'hasInverter' },
+    { key: 'cooling', label: 'AC / Air Cooler', icon: 'ac_unit', dbKey: 'hasCooling' },
+    { key: 'geyser', label: 'Geyser (Hot Water)', icon: 'hot_tub', dbKey: 'hasGeyser' },
+    { key: 'wifi', label: 'Wi-Fi Internet', icon: 'wifi', dbKey: 'hasWifi' },
+    { key: 'parking', label: 'Parking Space', icon: 'local_parking', dbKey: 'hasParking' },
+    { key: 'cctv', label: 'CCTV Security', icon: 'videocam', dbKey: 'hasCctv' },
+    { key: 'washingMachine', label: 'Washing Machine', icon: 'local_laundry_service', dbKey: 'hasWashingMachine' }
+  ];
+}

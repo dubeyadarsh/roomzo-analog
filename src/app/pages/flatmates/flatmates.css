@@ -1,0 +1,130 @@
+/* =========================================
+   GLOBAL & DESKTOP VIEW
+========================================= */
+.flatmates-wrapper { padding-top: 80px; padding-bottom: 60px; background-color: var(--rz-bg); }
+.desktop-only { display: block; }
+.page-header { margin-bottom: 3.5rem; text-align: center; }
+.header-content h1 { color: var(--rz-text-main); font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+.header-content p { color: var(--rz-text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2.5rem auto; }
+.filter-bar { display: flex; gap: 1rem; justify-content: center; align-items: center; flex-wrap: wrap; background: var(--rz-bg-card, #ffffff); padding: 1rem; border-radius: 100px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); border: 1px solid var(--rz-border, #eaeaea); max-width: 800px; margin: 0 auto; }
+.search-wrapper { flex: 1; min-width: 250px; position: relative; }
+.search-input, .filter-select { padding: 14px 20px; border: 1px solid var(--rz-border); border-radius: 50px; font-family: var(--font-sans); font-size: 1rem; outline: none; background-color: transparent; }
+.filter-bar .btn-primary { padding: 14px 32px; border-radius: 50px; font-weight: 600; background: var(--rz-primary, #2563eb); color: #fff; border: none; cursor: pointer; }
+.name-block { display: flex; flex-direction: column; align-items: flex-start; flex: 1; min-width: 0; }
+/* Desktop Grid & Cards */
+.feed-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.profile-card { background: var(--rz-bg-card, #ffffff); border-radius: 20px; border: 1px solid var(--rz-border, #eaeaea); overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.04); display: flex; flex-direction: column; position: relative; }
+.card-image-layer { height: 260px; position: relative; overflow: hidden; }
+.image-carousel { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.image-carousel::-webkit-scrollbar { display: none; }
+.carousel-image { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; }
+
+/* Desktop Content */
+.card-content-layer { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
+.insta-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 16px; }
+.card-title { font-size: 1.4rem; color: var(--rz-text-main); margin: 0; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+.age-gender { font-weight: 400; color: var(--rz-text-muted); font-size: 1.1rem; margin-left: 4px; }
+.profession { font-size: 0.9rem; color: var(--rz-text-muted); font-weight: 500; margin: 4px 0 0 0; }
+/* Ensure connect button doesn't shrink if the name is too long */
+.btn-insta-connect { background: var(--rz-primary, #2563eb); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; white-space: nowrap; flex-shrink: 0; }
+.btn-insta-connect:hover { opacity: 0.9; }
+.bio { font-size: 0.95rem; color: var(--rz-text-muted); margin: 0.5rem 0 1rem 0; line-height: 1.4; }
+.line-clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.preferences-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.tag { background: rgba(0,0,0,0.04); color: var(--rz-text-main); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+.location-tag { background: rgba(16, 185, 129, 0.1); color: var(--rz-primary, #10b981); }
+
+/* Status Badge Styling (Desktop) */
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; width: fit-content; }
+.need-flatmate { background: rgba(16, 185, 129, 0.15); color: var(--rz-primary, #10b981); border: 1px solid rgba(16, 185, 129, 0.3); }
+.needs-room { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+/* End of Feed (Desktop) */
+.end-of-feed { display: flex; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; grid-column: 1 / -1; background: transparent; }
+.end-message { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.end-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+.end-message h3 { color: var(--rz-text-main, #fff); font-size: 1.5rem; margin: 0; }
+.end-message p { color: var(--rz-text-muted, #94a3b8); margin: 0 0 1.5rem 0; }
+.back-to-top { padding: 10px 24px; border-radius: 50px; background: var(--rz-primary, #2563eb); color: white; border: none; cursor: pointer; }
+
+/* Animations */
+.fade-in { animation: fadeIn 0.5s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+   MOBILE VIEW (Reel Scrolling + Carousel)
+========================================= */
+@media (max-width: 768px) {
+  .desktop-only { display: none; }
+  
+  .flatmates-wrapper { padding: 0; height: 100vh; height: 100dvh; background: #000; overflow: hidden; }
+  .feed-container { display: block; height: 100%; width: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; padding: 0; margin: 0; scrollbar-width: none; }
+  .feed-container::-webkit-scrollbar { display: none; }
+
+  /* ⚠️ THE FIX: hardware acceleration traps the blur bug */
+  .profile-card { 
+    height: 100vh; height: 100dvh; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; 
+    border-radius: 0; border: none; background: #000; position: relative; 
+    transform: translateZ(0); 
+    -webkit-transform: translateZ(0);
+  }
+
+  .card-image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+  .image-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 70%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0.3) 70%, transparent 100%); pointer-events: none; }
+.card-content-layer { 
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    right: 0; 
+    z-index: 2; 
+    /* Increased from 90px to 120px to clear the big '+' button */
+    padding: 1rem 1rem calc(120px + env(safe-area-inset-bottom)) 1rem; 
+    box-sizing: border-box; /* CRITICAL: Ensures padding pushes content UP */
+    background: transparent; 
+    color: #fff; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+  }
+  .insta-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 0; }
+ .name-block { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; /* Forces the badge and name to align perfectly left */
+    flex: 1; 
+    min-width: 0; 
+  }
+  
+  .card-title { 
+    color: #fff; 
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5); 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    margin-left: 0; /* Reset any rogue margins */
+    padding-left: 0; 
+  }
+   .age-gender { font-weight: 400; opacity: 0.9; font-size: 1.4rem; }
+  .profession { color: rgba(255,255,255,0.9); font-size: 0.9rem; margin-top: 2px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+  .btn-insta-connect { flex-shrink: 0; }
+
+  .details-box { margin: 0; }
+  .bio { color: rgba(255,255,255,0.95); font-size: 0.9rem; line-height: 1.3; margin: 0 0 12px 0; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+  .line-clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .preferences-container { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 8px; padding-bottom: 4px; mask-image: linear-gradient(to right, black 85%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); }
+  .preferences-container::-webkit-scrollbar { display: none; }
+  
+  .tag { background: rgba(255, 255, 255, 0.2); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(4px); white-space: nowrap; flex-shrink: 0; padding: 4px 12px; font-size: 0.8rem; border-radius: 100px; }
+  .location-tag { background: rgba(16, 185, 129, 0.4); border-color: rgba(16, 185, 129, 0.6); }
+  
+  /* Status Badges (Mobile overrides) */
+  .need-flatmate { background: rgba(52, 211, 153, 0.25); color: #6ee7b7; border-color: rgba(52, 211, 153, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .needs-room { background: rgba(251, 191, 36, 0.25); color: #fcd34d; border-color: rgba(251, 191, 36, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+  /* End of Feed (Mobile) */
+  .end-of-feed { height: 100vh; height: 100dvh; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; padding: 2rem; background: #000; }
+}

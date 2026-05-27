@@ -242,8 +242,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     this.isMobileFiltersOpen = !this.isMobileFiltersOpen;
   }
 
-  scrollToContact(): void {
-    // Navigate to home page with contact fragment
-    this.router.navigate(['/'], { fragment: 'contact' });
-  }
+  scrollToContact(id: string): void {
+  this.router.navigate(['/property-details', id], { 
+    queryParams: { focusContact: 'true' } 
+  });
+}
 }

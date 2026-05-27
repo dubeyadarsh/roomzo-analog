@@ -62,25 +62,27 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     { label: 'Rooms', icon: 'hotel', value: 'Room' }
   ];
 
+ // NEW: Tier-2 specific amenities
   amenityGroups = [
-    { title: 'Essentials', items: [
-      { label: 'Wi-Fi', formControlName: 'wifi', icon: 'wifi' },
-      { label: 'Heating', formControlName: 'heating', icon: 'hvac' },
-      { label: 'Air Conditioning', formControlName: 'ac', icon: 'ac_unit' },
-      { label: 'Washer / Dryer', formControlName: 'washerDryer', icon: 'local_laundry_service' }
+    { title: 'Room Essentials', items: [
+      { label: 'Bed & Mattress', formControlName: 'bed', icon: 'bed' },
+      { label: 'Almirah / Cupboard', formControlName: 'almirah', icon: 'door_sliding' },
+      { label: 'Study Table & Chair', formControlName: 'studyTable', icon: 'desk' },
+      { label: 'Fan & Tube Light', formControlName: 'fanLight', icon: 'mode_fan' }
     ]},
-    { title: 'Features', items: [
-      { label: 'Parking Spot', formControlName: 'parking', icon: 'local_parking' },
-      { label: 'Gym / Fitness', formControlName: 'gym', icon: 'fitness_center' },
-      { label: 'Balcony / Patio', formControlName: 'balcony', icon: 'deck' },
-      { label: 'Pet Friendly', formControlName: 'pets', icon: 'pets' }
+    { title: 'Appliances & Utilities', items: [
+      { label: 'RO Water Purifier', formControlName: 'roWater', icon: 'water_drop' },
+      { label: 'Inverter (Power Backup)', formControlName: 'inverter', icon: 'battery_charging_full' },
+      { label: 'AC / Air Cooler', formControlName: 'cooling', icon: 'ac_unit' },
+      { label: 'Geyser (Hot Water)', formControlName: 'geyser', icon: 'hot_tub' }
     ]},
-    { title: 'Safety', items: [
-      { label: 'Smoke Alarm', formControlName: 'smokeAlarm', icon: 'detector_smoke' },
-      { label: 'Carbon Monoxide Alarm', formControlName: 'coAlarm', icon: 'warning_amber' }
+    { title: 'Shared Facilities & Safety', items: [
+      { label: 'Wi-Fi Internet', formControlName: 'wifi', icon: 'wifi' },
+      { label: 'Parking Space', formControlName: 'parking', icon: 'local_parking' },
+      { label: 'CCTV Security', formControlName: 'cctv', icon: 'videocam' },
+      { label: 'Washing Machine', formControlName: 'washingMachine', icon: 'local_laundry_service' }
     ]}
   ];
-
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
 
@@ -110,10 +112,11 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
           longitude: [null, Validators.required]
         })
       }),
+      // NEW: Form controls matching the Tier-2 amenities
       amenities: this.fb.group({
-        wifi: [false], heating: [false], ac: [false], washerDryer: [false],
-        parking: [false], gym: [false], balcony: [false], pets: [false],
-        smokeAlarm: [false], coAlarm: [false]
+        bed: [false], almirah: [false], studyTable: [false], fanLight: [false],
+        roWater: [false], inverter: [false], cooling: [false], geyser: [false],
+        wifi: [false], parking: [false], cctv: [false], washingMachine: [false]
       }),
       guidebook: this.fb.group({
         rules: this.fb.array([]),
@@ -342,12 +345,29 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onSubmit(): void {
+ onSubmit(): void {
     if (this.listingForm.valid) {
       if (this.isSubmitting) return;
 
       const rawData = this.listingForm.value;
-      const files: File[] = rawData.final.images || [];
+
+      // NEW: Intercept and format the description before sending
+      const payload = {
+        ...rawData,
+        final: {
+          ...rawData.final,
+          description: rawData.final.description
+            ? rawData.final.description
+                .split(/\r?\n/) // Split the text by any newline character
+                .map((line: string) => line.trim()) // Remove extra spaces from each line
+                .filter((line: string) => line.length > 0) // Remove empty lines
+                .join(' | ') // Join them together with the pipe separator
+            : ''
+        }
+      };
+
+      // Ensure we check the payload for files, not rawData
+      const files: File[] = payload.final.images || [];
 
       if (files.length < 2) {
         this.toastr.error('Please upload at least two images.', 'Error');
@@ -356,7 +376,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
 
       this.isSubmitting = true;
 
-      this.propertyService.saveListing(rawData).subscribe({
+      // Send the formatted payload instead of rawData
+      this.propertyService.saveListing(payload).subscribe({
         next: (response) => {
           this.toastr.success('Listing uploaded successfully!', 'Success');
           this.listingForm.reset();

@@ -481,6 +481,28 @@ input:focus, textarea:focus {
   .two-column-layout { flex-direction: column; }
   .form-actions { flex-direction: column-reverse; gap: 16px; align-items: stretch; }
   .form-actions button { width: 100%; }
+  /* --- MAP SEARCH ALIGNMENT FIX --- */
+  .map-actions {
+    display: flex;
+    flex-direction: row; 
+    width: 100%;
+    gap: 10px; 
+  }
+
+  .search-location-inline {
+    flex: 1; /* Takes up all available space */
+    min-width: 0; /* CRITICAL: Removes the desktop restriction to prevent overflow */
+  }
+
+  .map-actions .btn-outline {
+    flex-shrink: 0; /* Prevents the button from being crushed */
+    width: 44px;
+    height: 44px;
+    padding: 0; /* Reset desktop padding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 /* ========================================================

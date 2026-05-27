@@ -184,46 +184,137 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* ========================================================
-   PREMIUM MOBILE APP EXPERIENCE (The Magic Happens Here) 
+   PREMIUM MOBILE APP EXPERIENCE 
 ======================================================== */
 @media (max-width: 900px) {
   
-  :host { padding-bottom: 90px; } /* Room for sticky bottom bar */
+  :host { padding-bottom: 90px; } 
   .page-container { padding: 0; }
   
-  /* 1. Edge-to-Edge Swiper Header */
-  .gallery-section.mobile-only { position: relative; height: 35vh; min-height: 300px; max-height: 400px; }
-  swiper-container { width: 100%; height: 100%; background-color: #f1f5f9; }
-  swiper-slide img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  
-  /* Floating Top Nav Buttons over Image */
-  .mobile-floating-btn {
-    position: absolute; top: 16px; z-index: 10;
-    width: 40px; height: 40px; border-radius: 50%; border: none;
-    background: rgba(255,255,255,0.9); backdrop-filter: blur(4px);
-    display: flex; align-items: center; justify-content: center; cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: var(--rz-text-main);
+  /* --- UPGRADED MOBILE GALLERY STYLES --- */
+  .gallery-container.mobile-only {
+    position: relative;
+    background: var(--rz-bg);
+    width: 100%;
   }
+
+  .main-image-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    overflow: hidden;
+    background: #e2e8f0;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+  }
+
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(30, 30, 30, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .nav-arrow:active { background: rgba(30, 30, 30, 0.9); }
+  .prev-arrow { left: 12px; }
+  .next-arrow { right: 12px; }
+  .nav-arrow mat-icon { font-size: 24px; width: 24px; height: 24px; display: block; }
+
+  .thumbnail-strip {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 16px 20px;
+    background: var(--rz-bg);
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    border-bottom: 1px solid var(--rz-border);
+  }
+  .thumbnail-strip::-webkit-scrollbar { display: none; }
+
+  .thumbnail-btn {
+    flex: 0 0 70px;
+    height: 52px;
+    border-radius: 8px;
+    padding: 0;
+    border: 2px solid transparent;
+    overflow: hidden;
+    cursor: pointer;
+    scroll-snap-align: start;
+    transition: all 0.2s ease;
+    background: #e2e8f0;
+  }
+  
+  .thumbnail-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.2s;
+  }
+  
+  .thumbnail-btn.active {
+    border-color: var(--rz-primary, #2563eb);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .thumbnail-btn:not(.active) img {
+    opacity: 0.6;
+  }
+  /* -------------------------------------- */
+
+  .mobile-floating-btn {
+    position: absolute; 
+    top: calc(16px + env(safe-area-inset-top, 0px)); 
+    z-index: 999 !important; 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 50%; 
+    border: none;
+    background: rgba(255, 255, 255, 0.95); 
+    backdrop-filter: blur(8px);
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15); 
+    color: var(--rz-text-main);
+    transition: transform 0.2s ease;
+  }
+  .mobile-floating-btn:active { transform: scale(0.95); }
   .mobile-floating-btn.back-btn { left: 16px; }
   .mobile-floating-btn.share-btn { right: 16px; }
+  .mobile-floating-btn mat-icon { display: block; font-size: 22px; width: 22px; height: 22px; }
 
-  /* 2. Overlapping Content Card */
+  /* OVERLAPPING CARD FIX (Removed negative margin) */
   .content-wrapper {
     position: relative; z-index: 20;
     background: var(--rz-bg); 
-    border-top-left-radius: 24px; border-top-right-radius: 24px;
-    margin-top: -30px; /* Pulls it up over the image */
-    padding: 24px 20px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    margin-top: 0; 
+    padding: 16px 20px 24px 20px;
+    box-shadow: none; 
   }
 
-  /* 3. Typography Adjustments */
   h1 { font-size: 1.75rem; }
   .property-header { margin-bottom: 24px; }
   .posted-info { font-size: 0.9rem; margin-top: 10px; }
   .content-layout { grid-template-columns: 1fr; gap: 32px; }
   
-  /* 4. Mobile Specs Grid */
   .specs-bar {
     display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
     border: none; padding: 0; margin-bottom: 32px;
@@ -234,12 +325,10 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
     box-shadow: var(--rz-shadow-sm);
   }
   
-  /* 5. Mobile Amenities & Nearby Grid */
   .amenities-grid, .nearby-grid { grid-template-columns: 1fr; }
   .info-block { margin-bottom: 32px; }
   .divider { margin: 32px 0; }
 
-  /* 6. Sticky Bottom Action Bar */
   .mobile-bottom-bar {
     position: fixed; bottom: 0; left: 0; width: 100%;
     background: white; border-top: 1px solid var(--rz-border);
@@ -253,9 +342,15 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   .bottom-price-info .status.available { color: #10b981; }
   .mobile-bottom-bar .btn-primary { padding: 12px 24px; }
   
-  /* 7. Similar Homes Stack */
   .similar-grid { grid-template-columns: 1fr; gap: 16px; }
   .similar-section { padding-bottom: 20px; }
+
+  .mobile-report-section {
+    display: flex; justify-content: center; padding: 32px 0 24px 0; border-top: 1px solid var(--rz-border);
+  }
+  .mobile-report-btn {
+    color: #ef4444; opacity: 0.8; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 6px; background: none; border: none; font-family: inherit;
+  }
 }
 
 /* ========================================================
@@ -272,10 +367,14 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
 }
 
-/* On mobile, make it a true Bottom Sheet */
 @media (max-width: 600px) {
-  .modal-overlay { align-items: flex-end; }
-  .modal-content { width: 100%; max-width: 100%; border-bottom-left-radius: 0; border-bottom-right-radius: 0; animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-content { 
+    width: 100%; max-width: 100%; border-radius: 24px 24px 0 0; 
+    padding-bottom: env(safe-area-inset-bottom, 20px); 
+    animation: slideUpMobile 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .modal-body { max-height: 80vh; overflow-y: auto; }
 }
 
 .modal-header { padding: 20px; border-bottom: 1px solid var(--rz-border); display: flex; justify-content: space-between; align-items: center; }
@@ -299,3 +398,73 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes slideUpMobile { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.report-btn { color: #ef4444; border-color: #fca5a5; }
+.report-btn mat-icon { color: #ef4444; }
+.report-btn:hover { background-color: #fef2f2; border-color: #ef4444; }
+
+/* --- Forms for Modals --- */
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 0.9rem; font-weight: 600; color: var(--rz-text-main); }
+.form-control { padding: 12px; border: 1px solid var(--rz-border); border-radius: var(--rz-radius-sm); font-family: inherit; font-size: 1rem; color: var(--rz-text-main); background: #f8fafc; width: 100%; }
+.form-control:focus { outline: none; border-color: var(--rz-primary); }
+textarea.form-control { resize: vertical; }
+
+.report-submit-btn { background: #ef4444; }
+.report-submit-btn:hover { background: #dc2626; }
+.report-submit-btn:disabled { background: #fca5a5; cursor: not-allowed; }
+
+/* --- Description Bullet Points --- */
+.custom-bullet-list {
+  padding-left: 20px;
+  margin: 0;
+  color: var(--rz-text-muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.custom-bullet-list li {
+  margin-bottom: 8px; /* Adds breathing room between bullet points */
+}
+
+.custom-bullet-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Ensure the wrapper handles the "Show More" truncation properly */
+div.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ========================================================
+   DYNAMIC HIGHLIGHT ANIMATIONS
+======================================================== */
+/* ========================================================
+   DYNAMIC HIGHLIGHT ANIMATIONS
+======================================================== */
+.pulse-highlight {
+  animation: intense-pulse 1.2s infinite ease-in-out !important;
+  position: relative;
+  z-index: 10;
+}
+
+@keyframes intense-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.9); /* Emerald Green glow */
+    background-color: var(--rz-primary);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+    background-color: #059669; /* Slightly brighter shade to create a flash effect */
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    background-color: var(--rz-primary);
+  }
+}
