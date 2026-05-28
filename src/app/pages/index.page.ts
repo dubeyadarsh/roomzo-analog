@@ -185,13 +185,9 @@ export default class HomeComponent implements OnInit {
   viewDetails(id: any): void {
     this.router.navigate(['/property-details', id]);
   }
-
-  scrollToContact(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      const contactElement = document.querySelector('app-contact');
-      if (contactElement) {
-        contactElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  }
+  scrollToContact(id: number): void {
+  this.router.navigate(['/property-details', id], { 
+    queryParams: { focusContact: 'true' } 
+  });
+}
 }

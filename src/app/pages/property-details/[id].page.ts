@@ -144,21 +144,29 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     this.activePhotoIndex = index;
   }
 
-  contactAgent() {
+ contactAgent() {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
       this.openContactModal();
     } else {
       const returnUrl = `/property-details/${this.currentId}?showContact=true`;
-      this.router.navigate(['/login'], { queryParams: { returnUrl: returnUrl } });
+      // CHANGE: Route to owner-auth instead of login
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
 
-  isUserLoggedIn(): boolean {
+isUserLoggedIn(): boolean {
     if (!this.isBrowser) return false;
-    const isVerified = localStorage.getItem('userVerifiedwWIthOtp');
-    const loginTime = localStorage.getItem('userloginTimestamp');
-    const ONE_DAY = 1 * 24 * 60 * 60 * 1000;
+    
+    // 1. Updated to check for 'user' instead of 'currentUser'
+    const hasToken = !!localStorage.getItem('token') || !!localStorage.getItem('user');
+    if (hasToken) return true;
+
+    const isVerified = localStorage.getItem('userVerifiedWithOtp'); 
+    // 2. Updated to 'loginTimestamp' to match your auth service
+    const loginTime = localStorage.getItem('loginTimestamp'); 
+    
     if (isVerified === 'true' && loginTime) {
+      const ONE_DAY = 1 * 24 * 60 * 60 * 1000;
       const timeElapsed = Date.now() - parseInt(loginTime, 10);
       return timeElapsed < ONE_DAY;
     }
@@ -167,10 +175,16 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   
   isOwnerLoggedIn(): boolean {
     if (!this.isBrowser) return false;
-    const isVerified = localStorage.getItem('ownerVerifiedwWIthOtp');
+    
+    // 1. Updated to check for 'user' instead of 'currentUser'
+    const hasToken = !!localStorage.getItem('token') || !!localStorage.getItem('user');
+    if (hasToken) return true;
+
+    const isVerified = localStorage.getItem('userVerifiedWithOtp'); 
     const loginTime = localStorage.getItem('loginTimestamp');
-    const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
+    
     if (isVerified === 'true' && loginTime) {
+      const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
       const timeElapsed = Date.now() - parseInt(loginTime, 10);
       return timeElapsed < TEN_DAYS;
     }
@@ -386,7 +400,8 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
       this.openReportModal(); 
     } else {
       const returnUrl = `/property-details/${this.currentId}?action=report`;
-      this.router.navigate(['/login'], { queryParams: { returnUrl: returnUrl } });
+      // CHANGE: Route to owner-auth instead of login
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
 

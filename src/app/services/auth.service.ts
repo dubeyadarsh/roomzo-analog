@@ -13,13 +13,12 @@ export class AuthService {
 
   constructor(private http: HttpClient,@Inject(PLATFORM_ID) private platformId: Object) {}
 
-  private checkInitialStatus(): boolean {
-    // 2. Use Angular's SSR Check
+ private checkInitialStatus(): boolean {
     if (isPlatformBrowser(this.platformId)) {
-      // 3. Drop the 'window.' prefix completely. It's safe to just call localStorage.
-      return localStorage.getItem('ownerVerifiedwWIthOtp') === 'true';
+      // Fixed typo in key name
+      return localStorage.getItem('userVerifiedWithOtp') === 'true';
     }
-    return false; // Server fallback
+    return false; 
   }
 
   sendOtp(email: string): Observable<any> {
@@ -30,36 +29,26 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/api/auth/verify-otp`, { phone: email, otp: otp });
   }
 saveSession(user: any) {
-    // 2. Use Angular's native SSR check
     if (isPlatformBrowser(this.platformId)) {
-      // 3. Safely call localStorage directly (no 'window.' prefix)
-      localStorage.setItem('ownerVerifiedwWIthOtp', 'true');
-      localStorage.setItem('ownerEmail', user.email); 
-      localStorage.setItem('ownerUser', JSON.stringify(user));
+      // Fixed typo in key name
+      localStorage.setItem('userVerifiedWithOtp', 'true');
+      localStorage.setItem('userEmail', user.email); 
+      localStorage.setItem('user', JSON.stringify(user));
+      // This correctly matches what your component is looking for
       localStorage.setItem('loginTimestamp', Date.now().toString());
     }
     this.isLoggedInSubject.next(true);
   }
 
-  saveSessionForSeeingOwnerDetails(email: string) {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('userVerifiedwWIthOtp', 'true');
-      localStorage.setItem('userEmail', email); 
-      localStorage.setItem('userloginTimestamp', Date.now().toString());
-    }
-  }
 
-  logout() {
+
+ logout() {
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('ownerVerifiedwWIthOtp');
-      localStorage.removeItem('ownerEmail');
-      localStorage.removeItem('loginTimestamp');
-      localStorage.removeItem('ownerUser');
-      
-      // Also a good idea to clear the user session data on full logout
-      localStorage.removeItem('userVerifiedwWIthOtp');
+      // Fixed typo in key name
+      localStorage.removeItem('userVerifiedWithOtp');
       localStorage.removeItem('userEmail');
-      localStorage.removeItem('userloginTimestamp');
+      localStorage.removeItem('loginTimestamp');
+      localStorage.removeItem('user');
     }
     this.isLoggedInSubject.next(false);
   }
@@ -76,12 +65,12 @@ saveSession(user: any) {
     return this.http.post(`${this.baseUrl}/api/contact/send`, data);
   }
 
-  loginOwner(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/auth/login-password`, payload);
+  login(payload: any): Observable<any> {
+    // Make sure your payload has 'identifier' and 'password'
+    return this.http.post(`${this.baseUrl}/api/auth/login`, payload); 
   }
-
   completeRegistration(payload: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/api/auth/register-complete`, payload);
+    return this.http.post(`${this.baseUrl}/api/auth/register`, payload);
   }
 
   forgotPasswordInit(identifier: string) {

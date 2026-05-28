@@ -90,7 +90,7 @@ export class PropertyService {
         const photoUrls = responses
           .filter(res => res && res.status === 1)
           .map(res => environment.hostingerUploadUrl +  res.url);
-      const user=  JSON.parse(localStorage.getItem("ownerUser") || '{}');
+      const user=  JSON.parse(localStorage.getItem("user") || '{}');
       const { final, ...rest } = formData;
         const { images, ...finalWithoutImages } = final;
 

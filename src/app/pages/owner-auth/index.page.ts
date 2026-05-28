@@ -5,12 +5,12 @@ import { AuthService } from '../../services/auth.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
-
+import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-owner-auth',
   templateUrl: './owner-auth.html',
   styleUrls: ['./owner-auth.css'],
-  imports: [ReactiveFormsModule, CommonModule]
+  imports: [ReactiveFormsModule, CommonModule, MatIconModule]
 })
 export default class OwnerAuthComponent implements OnInit {
   // UI State Controls
@@ -62,8 +62,7 @@ export default class OwnerAuthComponent implements OnInit {
         Validators.pattern('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&#]).{8,}') 
       ]],
       confirmPassword: ['', Validators.required],
-      ownerType: ['Hostel', Validators.required],
-
+ownerType: ['Tenant', Validators.required],
       // Advanced Fields
       propertyName: [''],
       alternatePhone: ['', Validators.pattern('^[6-9]\\d{9}$')]
@@ -108,7 +107,7 @@ export default class OwnerAuthComponent implements OnInit {
     this.isForgotPasswordMode = false;
     this.showOtpStep = false;
     this.loginForm.reset();
-    this.registerForm.reset({ ownerType: 'Hostel' });
+this.registerForm.reset({ ownerType: 'Tenant' });
     this.cdr.detectChanges(); 
   }
 
@@ -136,22 +135,41 @@ export default class OwnerAuthComponent implements OnInit {
     
     this.isSubmitting = true; 
     
-    this.authService.loginOwner(this.loginForm.value).subscribe({
+    this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
-        if (res.status === 1) {
-          this.isSubmitting = false; 
-          this.toastr.success('Welcome back!', 'Login Successful');
-          this.authService.saveSession(res.data.user); 
+        // DEBUG 1: Verify exactly what the API is returning
+        console.log('API Response:', res); 
 
-          // <-- 3. THE MAGIC REDIRECT LOGIC -->
-          // Grab the returnUrl from the browser address bar, default to '/' if none exists
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-          this.router.navigateByUrl(returnUrl);
+        // Update this condition if your API returns something other than status === 1
+        if (res.status === 1) { 
+          this.toastr.success('Welcome back!', 'Login Successful');
+          
+          // Prevent session saving from silently crashing the function
+          try {
+            this.authService.saveSession(res.data.user); 
+          } catch (error) {
+            console.error('Failed to save session data:', error);
+          }
+
+          // Check for both 'returnUrl' and 'redirect' just to be safe
+          const queryParams = this.route.snapshot.queryParams;
+          const returnUrl = queryParams['returnUrl'] || queryParams['redirect'] || '/';
+          
+          console.log('Attempting to navigate to:', returnUrl);
+
+          // USE navigateByUrl SO QUERY PARAMETERS ARE PARSED CORRECTLY
+          this.router.navigateByUrl(returnUrl).then(success => {
+            if (!success) {
+              console.warn('Navigation to returnUrl failed. Falling back to root /');
+              this.router.navigateByUrl('/'); 
+            }
+          });
 
         } else {
-          this.toastr.error(res.message, 'Login Failed');
-          this.isSubmitting = false; 
+          this.toastr.error(res.message || 'Invalid credentials', 'Login Failed');
         }
+        
+        this.isSubmitting = false; 
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -168,18 +186,21 @@ export default class OwnerAuthComponent implements OnInit {
       this.registerForm.markAllAsTouched();
       return;
     }
-
+this.isSubmitting = true;
     this.authService.sendOtp(this.registerForm.value.email).subscribe({
       next: (res) => {
+        this.isSubmitting = false;
         if (res.status === 1) {
           this.toastr.info(`OTP sent to ${this.registerForm.value.email}`, 'Check your inbox');
           this.showOtpStep = true;
-          this.cdr.detectChanges();
         } else {
           this.toastr.error(res.message, 'Failed to send OTP');
         }
+                  this.cdr.detectChanges();
+
       },
       error: (err) => {
+        this.isSubmitting = false;
         console.error('OTP Send error', err);
         this.toastr.error('Failed to send OTP. Please try again.', 'Server Error');
       }
@@ -219,10 +240,11 @@ export default class OwnerAuthComponent implements OnInit {
       this.forgotInitForm.markAllAsTouched();
       return;
     }
-
+this.isSubmitting = true;
     const identifier = this.forgotInitForm.value.identifier;
     this.authService.forgotPasswordInit(identifier).subscribe({
       next: (res) => {
+        this.isSubmitting = false;
         if (res.status === 1) {
           this.recoveryEmail = res.data.email; 
           this.maskedRecoveryEmail = res.data.maskedEmail; 
@@ -232,7 +254,10 @@ export default class OwnerAuthComponent implements OnInit {
           this.cdr.detectChanges();
 
         } else {
+          this.isSubmitting = false;
           this.toastr.error(res.message, 'Account Not Found');
+                    this.cdr.detectChanges();
+
         }
       },
       error: () => this.toastr.error('Server error. Please try again later.')
@@ -252,7 +277,7 @@ export default class OwnerAuthComponent implements OnInit {
       this.forgotResetForm.markAllAsTouched();
       return;
     }
-
+this.isSubmitting = true;
     const payload = {
       email: this.recoveryEmail,
       otp: this.forgotOtpForm.value.otp,
@@ -261,6 +286,7 @@ export default class OwnerAuthComponent implements OnInit {
 
     this.authService.resetPassword(payload).subscribe({
       next: (res) => {
+        this.isSubmitting = false;
         if (res.status === 1) {
           this.toastr.success(res.message, 'Success!');
           this.cancelForgotPassword(); 
@@ -274,7 +300,16 @@ export default class OwnerAuthComponent implements OnInit {
           }
         }
       },
-      error: () => this.toastr.error('Server error. Please try again later.')
+      error: () =>{
+this.isSubmitting = false;
+       this.toastr.error('Server error. Please try again later.')
+      }
     });
   }
+  // --- ADD THESE NEW VARIABLES ---
+  showLoginPassword = false;
+  showRegisterPassword = false;
+  showConfirmPassword = false;
+  showForgotNewPassword = false;
+  showForgotConfirmPassword = false;
 }

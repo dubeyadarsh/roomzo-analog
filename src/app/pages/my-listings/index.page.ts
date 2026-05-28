@@ -34,7 +34,7 @@ export default class MyListingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const storedUser = JSON.parse(localStorage.getItem('ownerUser') || 'null'); 
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null'); 
     if (storedUser && storedUser.id) {
       this.ownerId = parseInt(storedUser.id, 10);
           this.loadMyListings();

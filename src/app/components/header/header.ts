@@ -51,14 +51,12 @@ export default class HeaderComponent implements OnInit {
       
       if (status && isPlatformBrowser(this.platformId)) {
         // 1. Determine WHO is logged in by checking local storage
-        this.isOwner = localStorage.getItem('ownerVerifiedwWIthOtp') === 'true';
+        this.isOwner = localStorage.getItem('userVerifiedWithOtp') === 'true';
         
         // 2. Set the appropriate email/name based on the role
-        if (this.isOwner) {
-          this.userMobile = localStorage.getItem('ownerEmail') || 'Owner';
-        } else {
+      
           this.userMobile = localStorage.getItem('userEmail') || 'User';
-        }
+        
       } else {
         // Logged out or SSR fallback
         this.isOwner = false;

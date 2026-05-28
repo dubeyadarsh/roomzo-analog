@@ -12,7 +12,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // 2. Browser Check: ONLY Check Owner Validity
-  const isOwnerVerified = localStorage.getItem('ownerVerifiedwWIthOtp') === 'true';
+  const isOwnerVerified = localStorage.getItem('userVerifiedWithOtp') === 'true';
   const ownerLoginTime = localStorage.getItem('loginTimestamp');
   const TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
 
