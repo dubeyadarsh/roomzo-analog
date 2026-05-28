@@ -1,98 +1,138 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-export interface Flatmate {
-  id: string;
-  name: string;
-  age: number;
-  gender: string;
-  profession: string;
-  budget: string;
-  targetLocations: string[];
-  bio: string;
-  images: string[];
-  preferences: string[];
-listingStatus: 'Needs Flatmate' | 'Needs a Room';}
-
+import { FlatmateService } from "../../services/flatmate.service";
+import {environment} from "../../environments/environment";
+import {MatIconModule} from "@angular/material/icon";
 @Component({
   selector: 'app-flatmates',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,MatIconModule],
   templateUrl: './flatmates.html',
   styleUrls: ['./flatmates.css']
 })
-export default class FlatmatesComponent {
-  flatmates: Flatmate[] = [
-    {
-      id: '1',
-      name: 'Aarav',
-      age: 26,
-      gender: 'Male',
-      profession: 'Software Engineer',
-      budget: '₹15k - ₹20k',
-      targetLocations: ['Andheri West', 'Bandra'],
-      bio: 'Clean, organized, and usually working late. I enjoy a quiet environment during the weekdays and exploring cafes on weekends.',
-      images: [
-        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80'
-      ],
-      preferences: ['Non-Smoker', 'Pet Friendly', 'Vegetarian'],
-      listingStatus: 'Needs Flatmate'
-      
-    },
-    {
-      id: '2',
-      name: 'Priya',
-      age: 24,
-      gender: 'Female',
-      profession: 'UX Designer',
-      budget: '₹18k - ₹25k',
-      targetLocations: ['Powai', 'Vikhroli'],
-      bio: 'Looking for a chill flatmate to share a 2BHK. I love plants, keeping the common areas aesthetic, and occasional movie nights.',
-      images: [
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80'
-      ],
-      preferences: ['Early Riser', 'Clean Freak', 'No Pets'],
-      listingStatus: 'Needs a Room'
-    },
-    {
-      id: '3',
-      name: 'Rohan',
-      age: 28,
-      gender: 'Male',
-      profession: 'Marketing',
-      budget: '₹20k - ₹30k',
-      targetLocations: ['South Mumbai', 'Lower Parel'],
-      bio: 'Easy-going and social. I travel for work quite a bit, so I am out of town a few days a month.',
-      images: [
-        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80'
-      ],
-      preferences: ['Gym Bro', 'Occasional Drinker', 'Foodie'],
-      listingStatus: 'Needs Flatmate'
-    },
-    {
-      id: '4',
-      name: 'Neha',
-      age: 25,
-      gender: 'Female',
-      profession: 'Finance',
-      budget: '₹12k - ₹16k',
-      targetLocations: ['Malad', 'Goregaon'],
-      bio: 'Strictly looking for a female flatmate. I respect privacy and boundaries, pay bills on time, and expect the same.',
-      images: [
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80',
-        'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=80'
-      ],
-      preferences: ['Non-Smoker', 'Quiet', 'Vegetarian'],
-      listingStatus: 'Needs a Room'
+export default class FlatmatesComponent implements OnInit {
+  flatmates: any[] = [];
+  loading = false;
+  loadingMore = false;
+  page = 0;
+  size = 10;
+  hasMore = true;
+  latitude?: number;
+  longitude?: number;
+
+  private readonly CACHE_KEY = 'flatmate_feed_cache_v1';
+  
+  // 🔴 UPDATE THIS WITH YOUR HOSTINGER UPLOAD DOMAIN
+  private readonly HOSTINGER_URL = 'https://YOUR-HOSTINGER-DOMAIN.com'; 
+
+  constructor(private flatmateService: FlatmateService) { }
+
+  ngOnInit(): void {
+    this.loadCache();
+    this.loadMemoryFeed();
+    this.initializeLocation();
+  }
+
+ 
+
+  // --- Cache ---
+  loadCache() {
+    const cached = localStorage.getItem(this.CACHE_KEY);
+    if (cached) {
+      this.flatmates = JSON.parse(cached);
     }
-  ];
+  }
+
+  saveCache() {
+    localStorage.setItem(this.CACHE_KEY, JSON.stringify(this.flatmates));
+  }
+
+  // --- Feeds ---
+  loadMemoryFeed() {
+    this.loading = true;
+    this.flatmateService.getMemoryFeed().subscribe({
+      next: (res: any) => {
+        const posts = res?.data || [];
+        if (posts.length) {
+          this.flatmates = posts;
+          this.saveCache();
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  initializeLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.longitude;
+        this.loadMorePosts();
+      },
+      () => { console.log('Location permission denied'); }
+    );
+  }
+
+  loadMorePosts() {
+    if (this.loadingMore || !this.hasMore) return;
+    this.loadingMore = true;
+
+    this.flatmateService.getNearbyFeed(this.page, this.size, this.latitude, this.longitude).subscribe({
+      next: (res: any) => {
+        const posts = res?.data?.content || [];
+        if (posts.length < this.size) this.hasMore = false;
+
+        const existingIds = new Set(this.flatmates.map(x => x.id));
+        const uniquePosts = posts.filter((x: any) => !existingIds.has(x.id));
+
+        this.flatmates = [...this.flatmates, ...uniquePosts];
+        this.saveCache();
+        this.page++;
+        this.loadingMore = false;
+      },
+      error: () => { this.loadingMore = false; }
+    });
+  }
+
+  // --- Interaction ---
+  onScroll(event: any) {
+    const element = event.target;
+    const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
+    if (remaining < 1200) this.loadMorePosts();
+  }
+
   scrollToTop() {
     const feed = document.querySelector('.feed-container');
-    if (feed) {
-      feed.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (feed) feed.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  get allCaughtUp() {
+    return !this.hasMore && this.flatmates.length > 0;
+  }
+
+  trackByPostId(index: number, item: any) {
+    return item.id;
+  }
+  getImageUrl(dbPath: string): string {
+    if (!dbPath) return 'assets/images/flatmate-placeholder.jpg';
+    if (dbPath.startsWith('http')) return dbPath; // Already a full URL
+
+    // Use environment URL, fallback to roomzo.in if missing
+    const baseUrl = environment.hostingerUploadUrl || 'https://roomzo.in';
+    
+    // Strip trailing slashes from base, and leading slashes from path to prevent '//'
+    const cleanBase = baseUrl.replace(/\/+$/, '');
+    const cleanPath = dbPath.replace(/^\/+/, '');
+
+    return `${cleanBase}/${cleanPath}`;
+  }
+
+  imageError(event: Event): void {
+    const element = event.target as HTMLImageElement;
+    element.src = 'assets/images/flatmate-placeholder.jpg';
   }
 }

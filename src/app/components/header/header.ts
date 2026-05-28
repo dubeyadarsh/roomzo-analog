@@ -3,7 +3,9 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, RouterModule, NavigationEnd } from '@angular/router'; 
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
+import { FlatmateService } from '../../services/flatmate.service';
 import { filter } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-header',
@@ -24,7 +26,9 @@ export default class HeaderComponent implements OnInit {
   constructor(
     private router: Router, 
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object 
+    @Inject(PLATFORM_ID) private platformId: Object ,
+    private flatmateService: FlatmateService,
+    private toastr: ToastrService 
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -90,5 +94,30 @@ export default class HeaderComponent implements OnInit {
     this.isMenuOpen = false;   
     this.isDropdownOpen = false; 
     this.router.navigate(['/']);
+  }
+  isPostMenuOpen = false;
+
+  togglePostMenu() {
+    this.isPostMenuOpen = !this.isPostMenuOpen;
+  }
+
+  handleListProperty() {
+    this.isPostMenuOpen = false;
+    this.router.navigate(['/list-property']);
+  }
+
+  handleListFlatmate() {
+    this.isPostMenuOpen = false;
+    
+    if (!this.isLoggedIn) {
+      this.toastr.warning('Please log in to post a flatmate requirement.', 'Authentication Required');
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' }});
+      return;
+    }
+
+          this.router.navigate(['/post-flatmate']); // Route to the new form we will build
+        
+      
+  
   }
 }

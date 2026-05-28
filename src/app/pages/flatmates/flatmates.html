@@ -1,80 +1,233 @@
 <div class="flatmates-wrapper">
-  
-  <div class="container desktop-header-container">
-    <header class="page-header desktop-only">
+
+  <!-- DESKTOP HEADER -->
+  <div class="container desktop-header-container desktop-only">
+
+    <header class="page-header">
+
       <div class="header-content">
         <h1>Find Your Perfect Flatmate</h1>
-        <p>Discover verified profiles looking to share a space in your preferred locations.</p>
+
+        <p>
+          Discover verified flatmates nearby based on your
+          location and lifestyle preferences.
+        </p>
       </div>
-      
-      <div class="filter-bar">
-        <div class="search-wrapper">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--rz-text-muted);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" placeholder="Search locations (e.g., Powai, Bandra)..." class="search-input" />
-        </div>
-        <select class="filter-select">
-          <option value="">Any Budget</option>
-          <option value="low">Under ₹15k</option>
-          <option value="mid">₹15k - ₹25k</option>
-          <option value="high">Above ₹25k</option>
-        </select>
-        <button class="btn-primary">Search</button> 
-      </div>
+
+     
+
     </header>
+
   </div>
 
-  <main class="feed-container">
+  <!-- FEED -->
+  <main
+    class="feed-container"
+    #scrollContainer
+    (scroll)="onScroll($event)">
+
+    <!-- INITIAL LOADER -->
+    @if (loading && flatmates.length === 0) {
+
+      <div class="feed-loader">
+
+        <div class="loader-spinner"></div>
+
+        <p>Finding flatmates near you...</p>
+
+      </div>
+    }
+
+    <!-- POSTS -->
     @for (mate of flatmates; track mate.id) {
+
       <article class="profile-card fade-in">
-        
+
+        <!-- IMAGE -->
         <div class="card-image-layer">
+
           <div class="image-carousel">
+
             @for (img of mate.images; track img) {
-              <img [src]="img" [alt]="mate.name" class="carousel-image" loading="lazy" />
+
+              <img
+                [src]="getImageUrl(img)"
+                [alt]="mate.name"
+                class="carousel-image"
+                loading="lazy"
+                (error)="imageError($event)" />
             }
+
           </div>
+
           <div class="image-overlay"></div>
+
         </div>
 
+        <!-- CONTENT -->
         <div class="card-content-layer">
-          
-          <div class="insta-header">
-            <div class="name-block">
-              <span class="status-badge" 
-                    [ngClass]="{'need-flatmate': mate.listingStatus === 'Needs Flatmate', 'needs-room': mate.listingStatus === 'Needs a Room'}">
-                {{ mate.listingStatus === 'Needs Flatmate' ? '🏠 Need Flatmate' : '🔍 Needs a Room' }}
-              </span>
-              
-              <h2 class="card-title" [title]="mate.name">{{ mate.name }} <span class="age-gender">{{ mate.age }}</span></h2>
-              <p class="profession">{{ mate.profession }} • {{ mate.budget }}</p>
+
+          <!-- LINE 1 -->
+          <div class="top-row">
+
+            <div class="name-age-wrap">
+
+              <h2
+                class="card-title"
+                [title]="mate.name">
+
+                {{ mate.name }}
+
+                <span class="age-gender">
+                  {{ mate.age }}
+                </span>
+
+              </h2>
+
             </div>
-            
-            <button class="btn-insta-connect">Connect</button>
+
+            <button class="btn-message">
+
+  <mat-icon>
+    message
+  </mat-icon>
+
+</button>
+
           </div>
 
-          <div class="details-box">
-            <p class="bio line-clamp">"{{ mate.bio }}"</p>
-            
-            <div class="preferences-container">
-              @for (pref of mate.preferences; track pref) {
-                <span class="tag">{{ pref }}</span>
-              }
-              <span class="tag location-tag">📍 {{ mate.targetLocations[0] }}</span>
-            </div>
+          <!-- LINE 2 -->
+          <div class="meta-row">
+
+            <span class="profession">
+              {{ mate.profession || 'Professional' }}
+            </span>
+
+            <span class="rent-pill">
+              ₹{{ mate.budget || mate.rent || '0' }}/month
+            </span>
+
           </div>
-          
+
+          <!-- LINE 3 -->
+          <div class="details-box">
+
+            <p class="bio line-clamp">
+              “{{ mate.bio || 'Looking for a clean and chill flatmate.' }}”
+            </p>
+
+          </div>
+
+          <!-- TAGS -->
+          <div class="preferences-container">
+
+            <!-- LOCATION FIRST -->
+            <div
+  class="tag location-tag"
+  [title]="mate.address || mate.location || mate.city">
+
+  <mat-icon>
+    location_on
+  </mat-icon>
+
+  <span class="location-text">
+
+    {{
+      (
+        mate.address ||
+        mate.location ||
+        mate.city ||
+        'Preferred Location'
+      ).length > 28
+
+      ?
+
+      (
+        (
+          mate.flatAddress ||
+          mate.location ||
+          mate.city
+        ) | slice:0:28
+      ) + '...'
+
+      :
+
+      (
+        mate.flatAddress ||
+        mate.location ||
+        mate.city ||
+        'Preferred Location'
+      )
+    }}
+
+  </span>
+
+</div>
+
+            <!-- OTHER TAGS -->
+            @for (
+              pref of mate.preferences;
+              track pref
+            ) {
+
+              <div class="tag">
+
+                {{ pref }}
+
+              </div>
+            }
+
+          </div>
+
         </div>
+
       </article>
     }
 
-    <div class="end-of-feed">
-      <div class="end-message fade-in">
-        <span class="end-icon">🎉</span>
-        <h3>You're all caught up!</h3>
-        <p>You've seen all the flatmates in this area.</p>
-        <button class="btn-secondary back-to-top" (click)="scrollToTop()">👆 Back to Top</button>
+    <!-- PAGINATION LOADER -->
+    @if (loadingMore) {
+
+      <div class="pagination-loader">
+
+        <div class="loader-spinner small"></div>
+
+        <p>Loading more flatmates...</p>
+
       </div>
-    </div>
+    }
+
+    <!-- ALL CAUGHT UP -->
+    @if (allCaughtUp && flatmates.length > 0) {
+
+      <div class="end-of-feed">
+
+        <div class="end-message fade-in">
+
+          <span class="end-icon">
+            🎉
+          </span>
+
+          <h3>
+            You're all caught up!
+          </h3>
+
+          <p>
+            No more flatmates nearby right now.
+          </p>
+
+          <button
+            class="back-to-top"
+            (click)="scrollToTop()">
+
+            Back to Top
+
+          </button>
+
+        </div>
+
+      </div>
+    }
 
   </main>
+
 </div>

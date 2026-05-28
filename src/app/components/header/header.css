@@ -304,3 +304,99 @@
 .dropdown-icon.rotated {
   transform: rotate(180deg);
 }
+/* --- New Premium Floating Menu Wrapper --- */
+/* --- Transparent Wrapper --- */
+.speed-dial-wrapper {
+  position: fixed;
+  bottom: calc(100px + env(safe-area-inset-bottom, 0px)); /* Floats cleanly above the navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 40px; /* Forces a wide, clear gap between the two icons */
+  z-index: 1001;
+  pointer-events: none; /* Lets clicks pass through the empty space */
+}
+
+/* --- Individual Floating Buttons --- */
+.mini-fab {
+  pointer-events: auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px; /* <-- CHANGED: Reduced from 8px to 2px for a tight, cohesive fit */
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+/* --- Labels Floating Below --- */
+.mini-fab-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1; /* <-- ADDED: Removes invisible padding above and below the text */
+  color: #ffffff; 
+  text-shadow: 0 2px 6px rgba(0,0,0,0.6); 
+  opacity: 0;
+  animation: popOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation-delay: 0.05s; 
+}
+
+/* The actual circular icons */
+.mini-fab-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* The "Pop" animation */
+  animation: popOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Specific Icon Accents */
+.flatmate-btn .mini-fab-icon { color: #059669; }
+.property-btn .mini-fab-icon { color: var(--rz-primary, #2563eb); }
+.mini-fab-icon mat-icon { font-size: 26px; width: 26px; height: 26px; }
+
+/* Shrink slightly when tapped */
+.mini-fab:active .mini-fab-icon {
+  transform: scale(0.9);
+}
+
+/* --- Labels Floating Below --- */
+
+
+/* --- Animations & Backdrop --- */
+@keyframes popOut {
+  0% { transform: translateY(20px) scale(0.5); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.fab-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4); /* Slightly darker to make the white icons stand out */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  animation: fadeInBackdrop 0.2s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* The red close button */
+.fab-button.fab-active {
+  z-index: 1001;
+  transform: translateX(-50%) rotate(135deg);
+  background: #ef4444 !important;
+  border-color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+}
