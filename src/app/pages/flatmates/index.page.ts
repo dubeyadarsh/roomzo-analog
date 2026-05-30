@@ -1,12 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 import { FlatmateService } from "../../services/flatmate.service";
-import {environment} from "../../environments/environment";
-import {MatIconModule} from "@angular/material/icon";
+import { AuthService } from "../../services/auth.service"; 
+import { ChatService } from "../../services/chat.service"; 
+import { environment } from "../../environments/environment";
+import { MatIconModule } from "@angular/material/icon";
+import { ToastrService } from 'ngx-toastr';
+
 @Component({
   selector: 'app-flatmates',
   standalone: true,
-  imports: [CommonModule,MatIconModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './flatmates.html',
   styleUrls: ['./flatmates.css']
 })
@@ -19,35 +24,60 @@ export default class FlatmatesComponent implements OnInit {
   hasMore = true;
   latitude?: number;
   longitude?: number;
+  isLoggedIn = false;
+  currentUserId: number | null = null; // Storing Current User
 
   private readonly CACHE_KEY = 'flatmate_feed_cache_v1';
-  
-  // 🔴 UPDATE THIS WITH YOUR HOSTINGER UPLOAD DOMAIN
-  private readonly HOSTINGER_URL = 'https://YOUR-HOSTINGER-DOMAIN.com'; 
 
-  constructor(private flatmateService: FlatmateService) { }
+  constructor(
+    private flatmateService: FlatmateService,
+    private authService: AuthService,
+    private router: Router,
+    private chatService: ChatService, 
+    private toastr : ToastrService,
+
+    @Inject(PLATFORM_ID) private platformId: Object,
+  ) { }
 
   ngOnInit(): void {
-    this.loadCache();
+    this.authService.isLoggedIn$.subscribe(status => this.isLoggedIn = status);
+
+    if (isPlatformBrowser(this.platformId)) {
+      let storedId = localStorage.getItem('userId');
+      if (!storedId) {
+        const userJson = localStorage.getItem('user');
+        if (userJson) {
+          try {
+            const userObj = JSON.parse(userJson);
+            storedId = userObj.id || userObj.userId;
+          } catch(e) {}
+        }
+      }
+      if (storedId) {
+        this.currentUserId = parseInt(storedId.toString(), 10);
+      }
+      this.loadCache();
+    }
+
     this.loadMemoryFeed();
     this.initializeLocation();
   }
 
- 
-
-  // --- Cache ---
   loadCache() {
-    const cached = localStorage.getItem(this.CACHE_KEY);
-    if (cached) {
-      this.flatmates = JSON.parse(cached);
+    if (isPlatformBrowser(this.platformId)) {
+      const cached = localStorage.getItem(this.CACHE_KEY);
+      if (cached) {
+        this.flatmates = JSON.parse(cached);
+      }
     }
   }
 
   saveCache() {
-    localStorage.setItem(this.CACHE_KEY, JSON.stringify(this.flatmates));
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(this.flatmates));
+    }
   }
 
-  // --- Feeds ---
   loadMemoryFeed() {
     this.loading = true;
     this.flatmateService.getMemoryFeed().subscribe({
@@ -98,7 +128,6 @@ export default class FlatmatesComponent implements OnInit {
     });
   }
 
-  // --- Interaction ---
   onScroll(event: any) {
     const element = event.target;
     const remaining = element.scrollHeight - element.scrollTop - element.clientHeight;
@@ -117,22 +146,59 @@ export default class FlatmatesComponent implements OnInit {
   trackByPostId(index: number, item: any) {
     return item.id;
   }
+
   getImageUrl(dbPath: string): string {
     if (!dbPath) return 'assets/images/flatmate-placeholder.jpg';
-    if (dbPath.startsWith('http')) return dbPath; // Already a full URL
+    if (dbPath.startsWith('http')) return dbPath;
 
-    // Use environment URL, fallback to roomzo.in if missing
     const baseUrl = environment.hostingerUploadUrl || 'https://roomzo.in';
-    
-    // Strip trailing slashes from base, and leading slashes from path to prevent '//'
     const cleanBase = baseUrl.replace(/\/+$/, '');
     const cleanPath = dbPath.replace(/^\/+/, '');
-
     return `${cleanBase}/${cleanPath}`;
   }
 
   imageError(event: Event): void {
     const element = event.target as HTMLImageElement;
     element.src = 'assets/images/flatmate-placeholder.jpg';
+  }
+
+  scrollCarousel(carouselElement: HTMLElement, direction: number): void {
+    if (!carouselElement) return;
+    const scrollAmount = carouselElement.clientWidth;
+    carouselElement.scrollBy({
+      left: direction * scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+
+  getFullLocation(mate: any): string {
+    return mate.flatAddress || mate.address || mate.location || mate.city || 'Location not specified';
+  }
+
+  truncateLocation(mate: any): string {
+    const full = this.getFullLocation(mate);
+    return full.length > 28 ? full.substring(0, 28) + '...' : full;
+  }
+
+  messageOwner(ownerId: number, ownerName: string) {
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/flatmates' }});
+      return;
+    }
+
+    if (this.currentUserId === ownerId) {
+      return; // Safety guard just in case
+    }
+
+    this.chatService.openChatWith(ownerId, ownerName);
+  }
+   handleListFlatmate() {
+    
+    if (!this.isLoggedIn) {
+      this.toastr.warning('Please log in to post a flatmate requirement.', 'Authentication Required');
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' }});
+      return;
+    }
+    this.router.navigate(['/post-flatmate']); 
   }
 }

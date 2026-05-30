@@ -1,4 +1,4 @@
-import { Component, NgZone, AfterViewInit } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,8 +12,8 @@ import { FlatmateService } from '../../services/flatmate.service';
   imports: [CommonModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './post-flatmate.html',
   styleUrls: ['./post-flatmate.css']
-})
-export default class PostFlatmateComponent {
+}) 
+export default class PostFlatmateComponent   {
   postForm: FormGroup;
   isSubmitting = false;
   isDetectingLocation = false;
@@ -23,7 +23,9 @@ export default class PostFlatmateComponent {
   previewUrls: string[] = [];
   preferences: string[] = [];
     locationDetected: boolean = false;
-
+ngOnInit() {
+    this.checkUserStatus();
+  }
   constructor(
     private fb: FormBuilder,
     private flatmateService: FlatmateService,
@@ -231,4 +233,14 @@ isInvalid(field: string): boolean {
   const control = this.postForm.get(field);
   return !!(control && control.invalid && (control.touched || control.dirty));
 }
+checkUserStatus() {
+    this.flatmateService.checkUserPostStatus().subscribe({
+      next: (res: any) => {
+        if (res.data === true) { // If user already has a post
+          this.toastr.warning('You already have an active flatmate listing.');
+          this.router.navigate(['/flatmates']);
+        }
+      }
+    });
+  }
 }

@@ -90,8 +90,7 @@
 
 .feed-container {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 26px;
   max-width: 1240px;
   margin: 0 auto;
@@ -99,7 +98,7 @@
 }
 
 /* =========================================
-   CARD
+   CARD & IMAGE CAROUSEL (HORIZONTAL SCROLL + ARROWS)
 ========================================= */
 
 .profile-card {
@@ -124,15 +123,31 @@
 
 .image-carousel {
   display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   height: 100%;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+  cursor: grab;
+  scrollbar-width: thin;
+}
+
+.image-carousel:active {
+  cursor: grabbing;
 }
 
 .image-carousel::-webkit-scrollbar {
-  display: none;
+  height: 5px;
+}
+.image-carousel::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+.image-carousel::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.4);
+  border-radius: 10px;
 }
 
 .carousel-image {
@@ -141,17 +156,64 @@
   height: 100%;
   object-fit: cover;
   scroll-snap-align: center;
+  pointer-events: none;
+}
+
+/* Carousel navigation arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+  z-index: 3;
+}
+.carousel-arrow:hover {
+  background: rgba(0,0,0,0.8);
+}
+.carousel-arrow-left {
+  left: 12px;
+}
+.carousel-arrow-right {
+  right: 12px;
+}
+.carousel-arrow mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+.image-counter {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  z-index: 2;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
 }
 
 .image-overlay {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(
-      to top,
-      rgba(0,0,0,0.35),
-      transparent
-    );
+  background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
+  pointer-events: none;
 }
 
 /* =========================================
@@ -207,55 +269,32 @@
   flex-shrink: 0;
 }
 
-/* LINE 2 */
 .meta-row {
-
   display: flex;
-
   align-items: center;
-
   gap: 6px;
-
   flex-wrap: nowrap;
 }
 
 .profession {
-
   font-size: 0.9rem;
-
   color: var(--rz-text-muted);
-
   overflow: hidden;
-
   text-overflow: ellipsis;
-
   white-space: nowrap;
-
   flex-shrink: 1;
 }
 
 .rent-pill {
-
   padding: 4px 10px;
-
   border-radius: 999px;
-
-  background:
-    rgba(37,99,235,0.12);
-
-  color:
-    var(--rz-primary);
-
+  background: rgba(37,99,235,0.12);
+  color: var(--rz-primary);
   font-size: 0.72rem;
-
   font-weight: 700;
-
   white-space: nowrap;
-
   margin-left: 0;
 }
-
-/* LINE 3 */
 
 .details-box {
   margin-top: 2px;
@@ -276,7 +315,6 @@
 }
 
 /* TAGS */
-
 .preferences-container {
   display: flex;
   overflow-x: auto;
@@ -313,6 +351,22 @@
 .location-tag {
   background: rgba(16,185,129,0.12);
   color: #059669;
+  cursor: pointer;
+  max-width: 220px;
+  overflow: hidden;
+  transition: 0.1s ease;
+}
+
+.location-tag:hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.location-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
 }
 
 /* =========================================
@@ -351,7 +405,7 @@
 }
 
 /* =========================================
-   END FEED
+   END OF FEED
 ========================================= */
 
 .end-of-feed {
@@ -397,7 +451,6 @@
 ========================================= */
 
 @media (max-width: 768px) {
-
   .desktop-only {
     display: none;
   }
@@ -430,14 +483,7 @@
   }
 
   .image-overlay {
-    background:
-      linear-gradient(
-        to top,
-        rgba(0,0,0,0.96) 0%,
-        rgba(0,0,0,0.72) 38%,
-        rgba(0,0,0,0.30) 68%,
-        transparent 100%
-      );
+    background: linear-gradient(to top, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 38%, rgba(0,0,0,0.30) 68%, transparent 100%);
   }
 
   .card-content-layer {
@@ -446,11 +492,7 @@
     right: 0;
     bottom: 0;
     z-index: 2;
-    padding:
-      18px
-      14px
-      calc(100px + env(safe-area-inset-bottom))
-      14px;
+    padding: 18px 14px calc(100px + env(safe-area-inset-bottom)) 14px;
     color: white;
     gap: 10px;
   }
@@ -498,130 +540,86 @@
   .end-of-feed {
     background: #000;
   }
+
   .btn-message {
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: none;
+  }
 
-  background:
-    rgba(255,255,255,0.14);
+  .image-counter {
+    bottom: 16px;
+    right: 16px;
+    font-size: 0.8rem;
+  }
 
-  backdrop-filter: blur(10px);
-
-  -webkit-backdrop-filter: blur(10px);
-
-  box-shadow: none;
-}
-}
-
-.meta-row {
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 6px;
-
-  flex-wrap: nowrap;
+  .carousel-arrow {
+    width: 32px;
+    height: 32px;
+    background: rgba(0,0,0,0.4);
+  }
 }
 
-.profession {
-
-  font-size: 0.9rem;
-
-  color: var(--rz-text-muted);
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-  flex-shrink: 1;
-}
-
-.rent-pill {
-
-  padding: 4px 10px;
-
-  border-radius: 999px;
-
-  background:
-    rgba(37,99,235,0.12);
-
-  color:
-    var(--rz-primary);
-
-  font-size: 0.72rem;
-
-  font-weight: 700;
-
-  white-space: nowrap;
-
-  margin-left: 0;
-}
+/* additional button styles (keep existing) */
 .btn-message {
-
   width: 38px;
-
   height: 38px;
-
   min-width: 38px;
-
   border: none;
-
   border-radius: 50%;
-
-  background:
-    var(--rz-primary, #2563eb);
-
+  background: var(--rz-primary, #2563eb);
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   cursor: pointer;
-
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
-
+  transition: transform 0.2s ease, opacity 0.2s ease;
   flex-shrink: 0;
-
-  box-shadow:
-    0 8px 24px rgba(37,99,235,0.28);
+  box-shadow: 0 8px 24px rgba(37,99,235,0.28);
 }
 
 .btn-message:hover {
-
   transform: scale(1.06);
-
   opacity: 0.92;
 }
 
 .btn-message mat-icon {
-
   font-size: 18px;
-
   width: 18px;
-
   height: 18px;
-
   color: white;
 }
 
-.location-tag {
-
-  max-width: 220px;
-
-  overflow: hidden;
+/* ✅ NEW: Desktop Post Button Styles */
+.header-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 
-.location-text {
+.btn-post-ad {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  background: var(--rz-primary, #2563eb);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-  overflow: hidden;
+.btn-post-ad:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
 
-  text-overflow: ellipsis;
-
-  white-space: nowrap;
-
-  display: block;
+.btn-post-ad mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
 }

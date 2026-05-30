@@ -400,3 +400,68 @@
   border-color: #ffffff !important;
   box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
 }
+/* ========================================================
+   NEW CHAT UI CLASSES 
+======================================================== */
+.nav-desktop .desktop-chat-link {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  font-weight: 600; 
+  color: var(--rz-primary, #2563eb); 
+  transition: opacity 0.2s ease;
+}
+
+.nav-desktop .desktop-chat-link:hover {
+  opacity: 0.8;
+}
+
+.unread-badge-desktop {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444; 
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 2px #ffffff; 
+  transform: translateY(-4px); 
+}
+
+.mobile-chat-btn {
+  background: rgba(0, 0, 0, 0.04); 
+  border: none;
+  color: var(--rz-text-main, #1f2937);
+  position: relative;
+  cursor: pointer;
+  width: 40px;  
+  height: 40px; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.mobile-chat-btn:active {
+  background: rgba(0, 0, 0, 0.08); 
+  transform: scale(0.95); 
+}
+
+.mobile-chat-btn mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.unread-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  border: 2px solid #ffffff; 
+  box-sizing: content-box;
+}

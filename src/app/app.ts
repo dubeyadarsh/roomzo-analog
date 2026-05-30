@@ -1,14 +1,18 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core'; // 1. Added ChangeDetectorRef
+import { Component, inject, ChangeDetectorRef } from '@angular/core'; 
 import { RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer/footer';
 import HeaderComponent from './components/header/header';
+import { ChatDrawerComponent } from './components/chat-drawer/chat-drawer';
+
+// ✅ 1. Import the ChatDrawerComponent
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, CommonModule],
+  // ✅ 2. Add ChatDrawerComponent to the imports array
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, CommonModule, ChatDrawerComponent],
   template: `
     <div *ngIf="isRouteLoading" class="global-loader"></div>
     <app-header></app-header>
@@ -16,6 +20,8 @@ import HeaderComponent from './components/header/header';
       <router-outlet></router-outlet>
     </main>
     <app-footer></app-footer>
+
+    <app-chat-drawer></app-chat-drawer>
   `,
   styles: [`
     .global-loader {
@@ -39,13 +45,13 @@ import HeaderComponent from './components/header/header';
 export class App {
   isRouteLoading = false;
   private router = inject(Router);
-  private cd = inject(ChangeDetectorRef); // 2. Inject ChangeDetectorRef
+  private cd = inject(ChangeDetectorRef);
 
   constructor() {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.isRouteLoading = true;
-        this.cd.detectChanges(); // 3. Force UI update on start
+        this.cd.detectChanges(); 
       } else if (
         event instanceof NavigationEnd || 
         event instanceof NavigationCancel || 
@@ -54,7 +60,7 @@ export class App {
         // Wrap the finish in a timeout and force detection
         setTimeout(() => {
           this.isRouteLoading = false;
-          this.cd.detectChanges(); // 4. Force UI update on finish
+          this.cd.detectChanges(); 
         }, 600);
       }
     });

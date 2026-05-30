@@ -4,7 +4,7 @@ export const environment = {
   production: false,
   // Your Spring Boot Local URL
   // apiUrl: 'https://traditional-jobi-roomzo-free-5e097403.koyeb.app' ,
-  apiUrl: 'http://localhost:8080' ,
+  apiUrl: 'http://localhost:8081' ,
   hostingerUploadUrl: 'https://roomzo.in/',
   uploadSecretKey: 'vK9#mP2$xL5@jR8&qW3' ,
   firebaseConfig: {

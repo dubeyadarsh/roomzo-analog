@@ -9,7 +9,42 @@
     <link rel="stylesheet" href="/src/styles.css" />
     <meta name="description" content="Find verified rental properties near you in Prayagraj. Roomzo offers 100% owner-verified listings for flats, rooms, and PGs with zero broker fees.">
 <meta property="og:site_name" content="Roomzo">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">  </head>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Round" rel="stylesheet">
+<script>
+    if (typeof global === 'undefined') {
+      window.global = window;
+    }
+  </script>
+
+  <script>
+    // 1. Define global
+    if (typeof global === 'undefined') {
+      window.global = window;
+    }
+    
+    // 2. Define util and util.inherits
+    window.global.util = window.global.util || {};
+    window.global.util.inherits = window.global.util.inherits || function(ctor, superCtor) {
+      if (ctor === undefined || ctor === null)
+        throw new TypeError('The constructor to "inherits" must not be null or undefined');
+      if (superCtor === undefined || superCtor === null)
+        throw new TypeError('The super constructor to "inherits" must not be null or undefined');
+      if (superCtor.prototype === undefined) {
+        ctor.super_ = superCtor;
+        return;
+      }
+      ctor.super_ = superCtor;
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+    };
+  </script>
+</head>
   <body>
     <app-root></app-root>
     <script type="module" src="/src/main.ts"></script>

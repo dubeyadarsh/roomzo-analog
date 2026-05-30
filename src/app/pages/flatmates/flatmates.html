@@ -1,233 +1,114 @@
 <div class="flatmates-wrapper">
 
-  <!-- DESKTOP HEADER -->
   <div class="container desktop-header-container desktop-only">
-
     <header class="page-header">
-
       <div class="header-content">
         <h1>Find Your Perfect Flatmate</h1>
-
-        <p>
-          Discover verified flatmates nearby based on your
-          location and lifestyle preferences.
-        </p>
+        <p>Discover verified flatmates nearby based on your location and lifestyle preferences.</p>
       </div>
-
-     
-
+      <div class="header-actions">
+          <button class="btn-post-ad" (click)="handleListFlatmate()">
+            <mat-icon>add_circle</mat-icon>
+            Post a Flatmate Ad
+          </button>
+        </div>
     </header>
-
   </div>
 
-  <!-- FEED -->
-  <main
-    class="feed-container"
-    #scrollContainer
-    (scroll)="onScroll($event)">
+  <main class="feed-container" #scrollContainer (scroll)="onScroll($event)">
 
-    <!-- INITIAL LOADER -->
     @if (loading && flatmates.length === 0) {
-
       <div class="feed-loader">
-
         <div class="loader-spinner"></div>
-
         <p>Finding flatmates near you...</p>
-
       </div>
     }
 
-    <!-- POSTS -->
     @for (mate of flatmates; track mate.id) {
-
       <article class="profile-card fade-in">
 
-        <!-- IMAGE -->
         <div class="card-image-layer">
-
-          <div class="image-carousel">
-
-            @for (img of mate.images; track img) {
-
-              <img
-                [src]="getImageUrl(img)"
-                [alt]="mate.name"
-                class="carousel-image"
-                loading="lazy"
-                (error)="imageError($event)" />
+          <div class="image-carousel" #carousel>
+            @for (img of mate.images; track img; let i = $index) {
+              <img [src]="getImageUrl(img)"
+                   [alt]="mate.name + ' image ' + (i+1)"
+                   class="carousel-image"
+                   loading="lazy"
+                   (error)="imageError($event)" />
             }
-
           </div>
 
+          @if (mate.images?.length > 1) {
+            <button class="carousel-arrow carousel-arrow-left" (click)="scrollCarousel(carousel, -1)">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <button class="carousel-arrow carousel-arrow-right" (click)="scrollCarousel(carousel, 1)">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <div class="image-counter">{{ mate.images.length }} photos</div>
+          }
           <div class="image-overlay"></div>
-
         </div>
 
-        <!-- CONTENT -->
         <div class="card-content-layer">
 
-          <!-- LINE 1 -->
           <div class="top-row">
-
             <div class="name-age-wrap">
-
-              <h2
-                class="card-title"
-                [title]="mate.name">
-
+              <h2 class="card-title" [title]="mate.name">
                 {{ mate.name }}
-
-                <span class="age-gender">
-                  {{ mate.age }}
-                </span>
-
+                <span class="age-gender">{{ mate.age }}</span>
               </h2>
+            </div>
+            
+            @if (mate.userId !== currentUserId) {
+              <button class="btn-message" (click)="messageOwner(mate.userId, mate.name)">
+                <mat-icon>message</mat-icon>
+              </button>
+            }
+          </div>
 
+          <div class="meta-row">
+            <span class="profession">{{ mate.profession || 'Professional' }}</span>
+            <span class="rent-pill">₹{{ mate.budget || mate.rent || '0' }}/month</span>
+          </div>
+
+          <div class="details-box">
+            <p class="bio line-clamp">“{{ mate.bio || 'Looking for a clean and chill flatmate.' }}”</p>
+          </div>
+
+          <div class="preferences-container">
+            <div class="tag location-tag"
+                 [title]="getFullLocation(mate)">
+              <mat-icon>location_on</mat-icon>
+              <span class="location-text">{{ truncateLocation(mate) }}</span>
             </div>
 
-            <button class="btn-message">
-
-  <mat-icon>
-    message
-  </mat-icon>
-
-</button>
-
-          </div>
-
-          <!-- LINE 2 -->
-          <div class="meta-row">
-
-            <span class="profession">
-              {{ mate.profession || 'Professional' }}
-            </span>
-
-            <span class="rent-pill">
-              ₹{{ mate.budget || mate.rent || '0' }}/month
-            </span>
-
-          </div>
-
-          <!-- LINE 3 -->
-          <div class="details-box">
-
-            <p class="bio line-clamp">
-              “{{ mate.bio || 'Looking for a clean and chill flatmate.' }}”
-            </p>
-
-          </div>
-
-          <!-- TAGS -->
-          <div class="preferences-container">
-
-            <!-- LOCATION FIRST -->
-            <div
-  class="tag location-tag"
-  [title]="mate.address || mate.location || mate.city">
-
-  <mat-icon>
-    location_on
-  </mat-icon>
-
-  <span class="location-text">
-
-    {{
-      (
-        mate.address ||
-        mate.location ||
-        mate.city ||
-        'Preferred Location'
-      ).length > 28
-
-      ?
-
-      (
-        (
-          mate.flatAddress ||
-          mate.location ||
-          mate.city
-        ) | slice:0:28
-      ) + '...'
-
-      :
-
-      (
-        mate.flatAddress ||
-        mate.location ||
-        mate.city ||
-        'Preferred Location'
-      )
-    }}
-
-  </span>
-
-</div>
-
-            <!-- OTHER TAGS -->
-            @for (
-              pref of mate.preferences;
-              track pref
-            ) {
-
-              <div class="tag">
-
-                {{ pref }}
-
-              </div>
+            @for (pref of mate.preferences; track pref) {
+              <div class="tag">{{ pref }}</div>
             }
-
           </div>
 
         </div>
-
       </article>
     }
 
-    <!-- PAGINATION LOADER -->
     @if (loadingMore) {
-
       <div class="pagination-loader">
-
         <div class="loader-spinner small"></div>
-
         <p>Loading more flatmates...</p>
-
       </div>
     }
 
-    <!-- ALL CAUGHT UP -->
     @if (allCaughtUp && flatmates.length > 0) {
-
       <div class="end-of-feed">
-
         <div class="end-message fade-in">
-
-          <span class="end-icon">
-            🎉
-          </span>
-
-          <h3>
-            You're all caught up!
-          </h3>
-
-          <p>
-            No more flatmates nearby right now.
-          </p>
-
-          <button
-            class="back-to-top"
-            (click)="scrollToTop()">
-
-            Back to Top
-
-          </button>
-
+          <span class="end-icon">🎉</span>
+          <h3>You're all caught up!</h3>
+          <p>No more flatmates nearby right now.</p>
+          <button class="back-to-top" (click)="scrollToTop()">Back to Top</button>
         </div>
-
       </div>
     }
 
   </main>
-
 </div>

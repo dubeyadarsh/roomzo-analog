@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, HostListener, Inject, PLATFORM_ID,OnDestroy } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, RouterModule, NavigationEnd } from '@angular/router'; 
 import { MatIconModule } from '@angular/material/icon';
@@ -6,7 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { FlatmateService } from '../../services/flatmate.service';
 import { filter } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
-
+import { ChatService } from '../../services/chat.service';
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -16,19 +17,22 @@ import { ToastrService } from 'ngx-toastr';
 })
 export default class HeaderComponent implements OnInit {
   isLoggedIn = false;
-  isOwner = false; // Strictly tracks if the logged-in user is a Landlord/Owner
+  isOwner = false; 
   isMenuOpen = false; 
   isDropdownOpen = false; 
   userMobile = '';
   isScrolled = false;
   isHomePage = true;
-
+  isPostMenuOpen = false;
+hasUnreadMessages = false; 
+  private subs = new Subscription();
   constructor(
     private router: Router, 
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object ,
     private flatmateService: FlatmateService,
-    private toastr: ToastrService 
+    private toastr: ToastrService ,
+    private chatService: ChatService // ✅ Inject the ChatService here
   ) {
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -54,23 +58,24 @@ export default class HeaderComponent implements OnInit {
       this.isLoggedIn = status;
       
       if (status && isPlatformBrowser(this.platformId)) {
-        // 1. Determine WHO is logged in by checking local storage
         this.isOwner = localStorage.getItem('userVerifiedWithOtp') === 'true';
-        
-        // 2. Set the appropriate email/name based on the role
-      
-          this.userMobile = localStorage.getItem('userEmail') || 'User';
-        
+        this.userMobile = localStorage.getItem('userEmail') || 'User';
       } else {
-        // Logged out or SSR fallback
         this.isOwner = false;
         this.userMobile = '';
         this.isMenuOpen = false;
         this.isDropdownOpen = false;
       }
     });
+    this.subs.add(
+      this.chatService.incomingMessage$.subscribe(() => {
+        this.hasUnreadMessages = true;
+      })
+    );
   }
-
+ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
     if (this.isMenuOpen) this.isDropdownOpen = false;
@@ -95,7 +100,6 @@ export default class HeaderComponent implements OnInit {
     this.isDropdownOpen = false; 
     this.router.navigate(['/']);
   }
-  isPostMenuOpen = false;
 
   togglePostMenu() {
     this.isPostMenuOpen = !this.isPostMenuOpen;
@@ -114,10 +118,13 @@ export default class HeaderComponent implements OnInit {
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' }});
       return;
     }
+    this.router.navigate(['/post-flatmate']); 
+  }
 
-          this.router.navigate(['/post-flatmate']); // Route to the new form we will build
-        
-      
-  
+ openChatDrawer() {
+    console.log("💬 Header Chat Button Clicked!");
+    this.hasUnreadMessages = false; // ✅ 5. Clear the red dot when they open chats
+    this.chatService.toggleChatDrawer(true);
+    this.closeMenu();
   }
 }
