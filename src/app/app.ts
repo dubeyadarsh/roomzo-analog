@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer/footer';
 import HeaderComponent from './components/header/header';
 import { ChatDrawerComponent } from './components/chat-drawer/chat-drawer';
+import { AnalyticsService } from './services/analytics.service';
 
 // ✅ 1. Import the ChatDrawerComponent
 
@@ -46,6 +47,8 @@ export class App {
   isRouteLoading = false;
   private router = inject(Router);
   private cd = inject(ChangeDetectorRef);
+ private analytics = inject(AnalyticsService);
+
 
   constructor() {
     this.router.events.subscribe((event) => {
@@ -64,5 +67,7 @@ export class App {
         }, 600);
       }
     });
+        this.analytics.init();
+
   }
 }

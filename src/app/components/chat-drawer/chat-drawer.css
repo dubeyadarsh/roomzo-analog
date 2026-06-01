@@ -150,3 +150,13 @@
     bottom: 0; /* Snap it perfectly to the bottom of the visible screen */
   }
 }
+/* Add this to your chat-drawer.css */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* Adjust this height based on your preference */
+  color: var(--rz-text-muted, #6b7280);
+  font-size: 0.95rem;
+  font-weight: 500;
+}

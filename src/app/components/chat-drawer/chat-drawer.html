@@ -27,7 +27,7 @@
   @if (!activeChatUserId) {
     <div class="conversation-list">
       @if (loading) {
-        <div class="loader">Loading chats...</div>
+        <div class="loader loading-container">Loading chats...</div>
       } @else {
         @for (conv of filteredConversations; track conv.conversationId) {
           <div class="conv-item" (click)="openChat(conv)">
