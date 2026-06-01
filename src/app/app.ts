@@ -1,5 +1,12 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core'; 
-import { RouterOutlet, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import { Component, inject, ChangeDetectorRef,PLATFORM_ID } from '@angular/core';
+import {
+  RouterOutlet,
+  Router,
+  NavigationStart,
+  NavigationEnd,
+  NavigationCancel,
+  NavigationError
+} from '@angular/router';
 
 import { CommonModule } from '@angular/common';
 import { FooterComponent } from './components/footer/footer';
@@ -7,19 +14,28 @@ import HeaderComponent from './components/header/header';
 import { ChatDrawerComponent } from './components/chat-drawer/chat-drawer';
 import { AnalyticsService } from './services/analytics.service';
 
-// ✅ 1. Import the ChatDrawerComponent
-
+import { MatDialog } from '@angular/material/dialog';
+import { ComingSoonModalComponent } from './components/coming-soon/coming-soon-modal';
+import { isPlatformBrowser } from '@angular/common';
 @Component({
   selector: 'app-root',
   standalone: true,
-  // ✅ 2. Add ChatDrawerComponent to the imports array
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, CommonModule, ChatDrawerComponent],
+  imports: [
+    RouterOutlet,
+    HeaderComponent,
+    FooterComponent,
+    CommonModule,
+    ChatDrawerComponent
+  ],
   template: `
     <div *ngIf="isRouteLoading" class="global-loader"></div>
+
     <app-header></app-header>
+
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
+
     <app-footer></app-footer>
 
     <app-chat-drawer></app-chat-drawer>
@@ -35,39 +51,96 @@ import { AnalyticsService } from './services/analytics.service';
       z-index: 9999;
       animation: loading 2s infinite ease-in-out;
     }
+
     @keyframes loading {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
     }
-    :host { display: flex; flex-direction: column; min-height: 100vh; }
-    .main-content { flex: 1; }
+
+    :host {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+    }
   `],
 })
 export class App {
   isRouteLoading = false;
+
   private router = inject(Router);
   private cd = inject(ChangeDetectorRef);
- private analytics = inject(AnalyticsService);
+  private analytics = inject(AnalyticsService);
+  private dialog = inject(MatDialog);
+private platformId = inject(PLATFORM_ID);
+constructor() {
+  
+  this.router.events.subscribe((event) => {
+    if (event instanceof NavigationStart) {
+      this.isRouteLoading = true;
+      this.cd.detectChanges();
+    } else if (
+      event instanceof NavigationEnd ||
+      event instanceof NavigationCancel ||
+      event instanceof NavigationError
+    ) {
+      setTimeout(() => {
+        this.isRouteLoading = false;
+        this.cd.detectChanges();
+      }, 600);
+    }
+  });
 
+  this.analytics.init();
 
-  constructor() {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        this.isRouteLoading = true;
-        this.cd.detectChanges(); 
-      } else if (
-        event instanceof NavigationEnd || 
-        event instanceof NavigationCancel || 
-        event instanceof NavigationError
-      ) {
-        // Wrap the finish in a timeout and force detection
-        setTimeout(() => {
-          this.isRouteLoading = false;
-          this.cd.detectChanges(); 
-        }, 600);
-      }
-    });
-        this.analytics.init();
-
+  // Only run in browser
+  if (isPlatformBrowser(this.platformId)) {
+    this.initComingSoonModal();
   }
+}
+
+ private initComingSoonModal(): void {
+  const STORAGE_KEY = 'pune-coming-soon-modal';
+  const COOLDOWN_DAYS = 1;
+
+  setTimeout(() => {
+    const lastShown = localStorage.getItem(STORAGE_KEY);
+
+    if (lastShown) {
+      const COOLDOWN_HOURS = 2;
+
+const hoursPassed =
+  (Date.now() - Number(lastShown)) /
+  (1000 * 60 * 60);
+
+if (hoursPassed < COOLDOWN_HOURS) {
+  return;
+}
+    }
+
+    const dialogRef = this.dialog.open(
+      ComingSoonModalComponent,
+      {
+        width: '500px',
+        maxWidth: '90vw',
+        autoFocus: false
+      }
+    );
+
+    dialogRef.afterClosed().subscribe(() => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        Date.now().toString()
+      );
+    });
+  }, 3000);
+}
 }

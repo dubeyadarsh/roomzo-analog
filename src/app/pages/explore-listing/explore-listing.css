@@ -260,6 +260,7 @@ h1, h2, h3, h4, p { margin: 0; }
 .page-btn:hover:not([disabled]) { border-color: var(--rz-primary); color: var(--rz-primary); }
 .page-btn.active { background: var(--rz-primary); color: white; border-color: var(--rz-primary); }
 .page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.pagination-ellipsis { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--rz-text-muted); font-weight: 600; font-size: 1.2rem; }
 
 .loader-container { display: flex; flex-direction: column; align-items: center; padding: 60px 0; color: var(--rz-text-muted); width: 100%; }
 .modern-spinner { width: 40px; height: 40px; border: 3px solid rgba(25, 97, 83, 0.1); border-left-color: var(--rz-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }

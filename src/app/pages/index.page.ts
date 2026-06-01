@@ -1,11 +1,9 @@
-import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit } from '@angular/core';
+import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core'; 
-import { RouterModule } from '@angular/router';
 import { HeroComponent } from '../components/hero/hero';
 import { ContactComponent } from '../components/contact/contact';
 import { PropertyService } from '../services/property.service';
@@ -22,6 +20,7 @@ interface Listing {
   specs: { beds: number; baths: number; area: number };
   rating?: number;
   isFavorite: boolean;
+  postedDate?: string; 
 }
 
 @Component({
@@ -32,26 +31,35 @@ interface Listing {
   styleUrls: ['./home.css']
 })
 export default class HomeComponent implements OnInit {
+  @ViewChild('carouselGrid') carouselGrid!: ElementRef;
+  
   listings: Listing[] = [];
-  isLoading: boolean = true; 
+  isLoading: boolean = true;
+  
+  currentCarouselIndex: number = 0;
+  carouselItemsToShow: number = 3; 
+  isAtStart: boolean = true;
+  isAtEnd: boolean = false;
+  
+  Math = Math; 
 
-  // 1. Inject PLATFORM_ID
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient, 
     private propertyService: PropertyService, 
     private cd: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {
-    // afterNextRender is great because it defers execution until the browser paints
     afterNextRender(() => {
-      this.checkAndGetLocation();
+      this.calculateItemsToShow();
+      this.fetchRecentListings();
+      if (isPlatformBrowser(this.platformId)) {
+        window.addEventListener('resize', () => this.calculateItemsToShow());
+      }
     });
   }
 
   ngOnInit(): void {
-    // Handle fragment navigation to scroll to contact section
     this.route.fragment.subscribe(fragment => {
       if (fragment === 'contact' && isPlatformBrowser(this.platformId)) {
         setTimeout(() => {
@@ -64,116 +72,99 @@ export default class HomeComponent implements OnInit {
     });
   }
 
-  checkAndGetLocation() {
-    // 2. Protect localStorage access
-    if (isPlatformBrowser(this.platformId)) {
-      const storedData = localStorage.getItem('user_geo_location');
-
-      if (storedData) {
-        const location = JSON.parse(storedData);
-        console.log('Using stored location:', location);
-        this.fetchDataUsingLocation(location);
-      } else {
-        this.requestBrowserLocation();
-      }
+  calculateItemsToShow(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    
+    const width = window.innerWidth;
+    if (width < 600) {
+      this.carouselItemsToShow = 1; // Mobile
+    } else if (width < 900) {
+      this.carouselItemsToShow = 2; // Tablet
     } else {
-      // If server somehow gets here, just fetch default listings
-      this.fetchDataWithoutLocation();
-    }
-  }
-
-  requestBrowserLocation() {
-    // 3. Protect navigator access
-    if (isPlatformBrowser(this.platformId) && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log('GPS Location obtained:', position.coords);
-          this.propertyService.getLocationFromCoords(position.coords.latitude, position.coords.longitude).subscribe(locationData => {
-            console.log('Location data from coordinates:', locationData);
-            const coords = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              city: locationData.address.city,
-              state: locationData.address.state,
-              source: 'gps' 
-            };
-
-            this.saveAndUseLocation(coords);
-          });
-        },
-        (error) => {
-          console.warn('GPS Denied or Error. Falling back to IP Location...');
-          this.getIpLocation();
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 6000, 
-          maximumAge: 0
-        }
-      );
-    } else {
-      this.getIpLocation();
-    }
-  }
-
-  getIpLocation() {
-    this.http.get('https://ipapi.co/json/').subscribe({
-      next: (data: any) => {
-        const coords = {
-          lat: data.latitude,
-          lng: data.longitude,
-          city: data.city, 
-          source: 'ip',
-          state: data.region
-        };
-        console.log('Location fetched via IP:', coords);
-        this.saveAndUseLocation(coords);
-      },
-      error: (err) => {
-        console.error('IP Location failed. Loading default Mumbai view.', err);
-        this.fetchDataWithoutLocation();
-      }
-    });
-  }
-
-  saveAndUseLocation(coords: any) {
-    // 4. Protect localStorage access
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('user_geo_location', JSON.stringify(coords));
+      this.carouselItemsToShow = 3; // Desktop
     }
     
-    this.fetchDataUsingLocation(coords);
+    // Check scroll state on resize
+    this.onScroll();
+    this.cd.detectChanges();
   }
 
-  fetchDataUsingLocation(coords: any) {
+  fetchRecentListings() {
     this.isLoading = true;
     
-    const locationFilter: any = {
-      lat: coords.lat,
-      lng: coords.lng
-    };
+    this.propertyService.getRecentListings(5).subscribe(
+      (response: any) => {
+        if (response.listings && response.listings.length > 0) {
+          this.listings = mapBackendListingsToUi(response.listings);
+          this.calculateItemsToShow();
+        }
+        this.isLoading = false;
 
-    this.propertyService.searchListingsWithFilters(0, 3, locationFilter).subscribe((response: any) => {
-      if (response.listings && response.listings.length > 0) {
-        this.listings = mapBackendListingsToUi(response.listings);
+        
+        this.cd.detectChanges();
+        
+        // Wait for DOM to render then check bounds
+        setTimeout(() => this.onScroll(), 100);
+      },
+      (error) => {
+        console.error('Error fetching recent listings:', error);
         this.isLoading = false;
         this.cd.detectChanges();
-      } else {
-        this.fetchDataWithoutLocation(); 
       }
-    });
+    );
   }
 
-  fetchDataWithoutLocation() {
-    this.isLoading = true;
+  // Native Scroll Event Handler
+  onScroll(): void {
+    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
+    
+    const el = this.carouselGrid.nativeElement;
+    
+    // Update button states
+    this.isAtStart = el.scrollLeft <= 0;
+    this.isAtEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
 
-    this.propertyService.searchListingsWithFilters(0, 3, {}).subscribe((response: any) => {
-      if (response.listings) {
-        this.listings = mapBackendListingsToUi(response.listings);
-      }
-      this.isLoading = false;
-      this.cd.detectChanges();
-    });
+    // Update index for active dots
+    const card = el.querySelector('.listing-card');
+    if (card) {
+      const cardWidth = card.offsetWidth;
+      const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+      this.currentCarouselIndex = Math.round(el.scrollLeft / (cardWidth + gap));
+    }
+    
+    this.cd.detectChanges();
+  }
+
+  scrollLeft(): void {
+    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.carouselGrid.nativeElement;
+    const cardWidth = el.querySelector('.listing-card').offsetWidth;
+    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+    el.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' });
+  }
+
+  scrollRight(): void {
+    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.carouselGrid.nativeElement;
+    const cardWidth = el.querySelector('.listing-card').offsetWidth;
+    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+    el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
+  }
+
+  scrollToIndex(index: number): void {
+    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.carouselGrid.nativeElement;
+    const cardWidth = el.querySelector('.listing-card').offsetWidth;
+    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+    el.scrollTo({ left: index * (cardWidth + gap), behavior: 'smooth' });
+  }
+
+  getVisibleIndices(): number[] {
+    const visible = [];
+    for (let i = 0; i < this.carouselItemsToShow && this.currentCarouselIndex + i < this.listings.length; i++) {
+      visible.push(this.currentCarouselIndex + i);
+    }
+    return visible;
   }
 
   formatPrice(price: number): string {
@@ -182,12 +173,46 @@ export default class HomeComponent implements OnInit {
       : '₹' + price.toLocaleString();
   }
 
+formatPostedDate(dateString?: string): string {
+  if (!dateString) return 'Recently posted';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  
+  // Guard against future dates caused by slight client/server clock desyncs
+  if (diffInMs < 0) return 'Just now';
+
+  // Calculate base units
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  if (diffInMinutes < 1) {
+    return 'Just now';
+  } else if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`;
+  } else if (diffInHours < 24) {
+    return `${diffInHours}h ago`;
+  } else if (diffInDays < 7) {
+    return `${diffInDays}d ago`;
+  } else {
+    // Fallback to absolute date
+    return date.toLocaleDateString('en-IN', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  }
+}
+
   viewDetails(id: any): void {
     this.router.navigate(['/property-details', id]);
   }
+
   scrollToContact(id: number): void {
-  this.router.navigate(['/property-details', id], { 
-    queryParams: { focusContact: 'true' } 
-  });
-}
+    this.router.navigate(['/property-details', id], { 
+      queryParams: { focusContact: 'true' } 
+    });
+  }
 }

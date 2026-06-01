@@ -14,7 +14,7 @@
       <a routerLink="/about">About</a>
       <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
       
-      
+     
     </nav>
 
     <div class="actions">
@@ -52,6 +52,7 @@
         </ng-container>
       </div>
 
+      <!-- Mobile Chat Button -->
       <button *ngIf="isLoggedIn" class="mobile-chat-btn mobile-only" (click)="openChatDrawer()">
         <mat-icon>chat_bubble_outline</mat-icon>
         <span class="unread-badge" *ngIf="hasUnreadMessages"></span>
@@ -60,6 +61,7 @@
   </div>
 </header>
 
+<!-- Mobile Bottom Navigation -->
 <nav class="mobile-bottom-nav">
   <a routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
     <mat-icon>home</mat-icon>
@@ -101,6 +103,7 @@
   </a>
 </nav>
 
+<!-- Mobile Dropdown Overlay (Profile Menu on Mobile) -->
 <div class="mobile-dropdown-overlay" *ngIf="isMenuOpen">
   <div class="overlay-backdrop" (click)="closeMenu()"></div>
   <div class="mobile-dropdown">

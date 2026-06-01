@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -23,28 +23,49 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } fro
   templateUrl: './search-bar.html',
   styleUrls: ['./search-bar.css']
 })
-export class SearchBarComponent implements OnInit {
-  // Using non-null assertion or default values to satisfy TS strict mode
+export class SearchBarComponent implements OnInit, OnDestroy {
   searchControl = new FormControl<string | any>('');
   propertyTypeControl = new FormControl<string>('Any');
   budgetControl = new FormControl<number>(50000);
 
   filteredCities: any[] = [];
 
+  // --- Dynamic Placeholder Properties ---
+  placeholders: string[] = [
+    'Search "Civil lines, Prayagraj"',
+    'Search "Mumfordganj, Prayagraj"',
+    'Search  "Teliyarganj, Prayagraj"',
+    'Search  "George Town, Prayagraj"',
+    'Search  "Katra, Prayagraj"',
+    'Search  "Allahpur, Prayagraj"',
+    'Search  "Kydganj, Prayagraj"',
+    'Search  "Naini, Prayagraj"',
+  
+  ];
+  currentPlaceholder: string = '';
+  private charIndex: number = 0;
+  private placeholderIndex: number = 0;
+  private typingTimeout: any;
+  private isDestroyed = false;
+
   constructor(
     private router: Router, 
-    private http: HttpClient
+    private http: HttpClient,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef   // 🔥 Forces UI update for placeholder
   ) {}
 
   ngOnInit() {
-    // Locality Suggestion Logic using OpenStreetMap
+    this.typeEffect();
+    this.setupAutocomplete();
+  }
+
+  private setupAutocomplete() {
     this.searchControl.valueChanges.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      // Type guard to ensure value is a string and not null
       filter((val): val is string => typeof val === 'string' && val.length > 2),
       switchMap(val => {
-        // Fetching villages and localities specifically in India
         const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&addressdetails=1&countrycodes=in&limit=5`;
         return this.http.get<any[]>(url).pipe(
           catchError(() => of([]))
@@ -52,10 +73,51 @@ export class SearchBarComponent implements OnInit {
       })
     ).subscribe(results => {
       this.filteredCities = results || [];
+      this.cdr.markForCheck();
     });
   }
 
-  // Formats the display text to show "Locality, City, State"
+  ngOnDestroy() {
+    this.isDestroyed = true;
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+  }
+
+  // --- Optimised Typewriter Logic with ChangeDetectorRef ---
+  private typeEffect() {
+    if (this.isDestroyed) return;
+
+    const currentWord = this.placeholders[this.placeholderIndex];
+    
+    if (this.charIndex < currentWord.length) {
+      this.ngZone.run(() => {
+        this.currentPlaceholder += currentWord.charAt(this.charIndex);
+        this.cdr.markForCheck();   // Immediate UI update
+      });
+      this.charIndex++;
+      this.typingTimeout = setTimeout(() => this.typeEffect(), 40);
+    } else {
+      this.typingTimeout = setTimeout(() => this.eraseEffect(), 1800);
+    }
+  }
+
+  private eraseEffect() {
+    if (this.isDestroyed) return;
+
+    if (this.charIndex > 0) {
+      this.ngZone.run(() => {
+        this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
+        this.cdr.markForCheck();   // Immediate UI update
+      });
+      this.charIndex--;
+      this.typingTimeout = setTimeout(() => this.eraseEffect(), 25);
+    } else {
+      this.placeholderIndex = (this.placeholderIndex + 1) % this.placeholders.length;
+      this.typingTimeout = setTimeout(() => this.typeEffect(), 200);
+    }
+  }
+
   displayCity = (loc: any): string => {
     if (!loc) return '';
     if (typeof loc === 'string') return loc;
@@ -78,13 +140,11 @@ export class SearchBarComponent implements OnInit {
   search(event?: Event) {
     if (event) event.preventDefault();
     
-    // Safety check for null values to avoid TS assignment errors
     const val = this.searchControl.value;
 
     if (val && typeof val === 'object') {
        this.navigateToExplore(val);
     } else if (typeof val === 'string' && val.trim()) {
-       // Manual text fallback
        this.router.navigate(['/explore-listing'], { 
          queryParams: { 
            city: val,
@@ -93,7 +153,6 @@ export class SearchBarComponent implements OnInit {
          } 
        });
     } else {
-       // Search with just filters if input is empty
        this.router.navigate(['/explore-listing'], { 
         queryParams: { 
           propertyType: this.propertyTypeControl.value,
@@ -104,13 +163,12 @@ export class SearchBarComponent implements OnInit {
   }
 
   private navigateToExplore(locData: any) {
-    // Extracting coordinates and local address details
     this.router.navigate(['/explore-listing'], { 
       queryParams: { 
         city: locData.address?.city || locData.address?.town || locData.name, 
         state: locData.address?.state,
-        lat: locData.lat,   // Latitude for locality-based radial search
-        lng: locData.lon,   // Longitude (Nominatim uses 'lon')
+        lat: locData.lat,
+        lng: locData.lon,
         propertyType: this.propertyTypeControl.value,
         maxPrice: this.budgetControl.value
       } 

@@ -217,6 +217,12 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
     
     return params;
   }
+  // --- Get Recent Listings ---
+  getRecentListings(limit: number = 5): Observable<PaginatedResponse> {
+    let params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<PaginatedResponse>(`${this.baseUrl}/listings/recent`, { params });
+  }
+
   reportProperty(payload: any) {
     return this.http.post(`${this.baseUrl}/api/reports/submit`, payload);
   }

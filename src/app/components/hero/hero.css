@@ -88,7 +88,7 @@
   
   .hero-full {
     /* Gives the background image enough height to fit the big search card */
-    min-height: 600px; 
+    min-height: 300px; 
     align-items: flex-start; /* Aligns content to the top so we can control it with padding */
   }
 

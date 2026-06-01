@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -51,10 +51,27 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   currentPage = 0;
   pageSize = 6;
   totalPages = 0;
-  pagesArray: number[] = [];
+  pagesArray: (number | string)[] = [];
   
   private searchSubscription: Subscription | null = null;
-  isMobileFiltersOpen = false; 
+  isMobileFiltersOpen = false;
+
+  // --- Dynamic Placeholder Properties ---
+  placeholders: string[] = [
+    'Search "Civil lines, Prayagraj"',
+    'Search "Mumfordganj, Prayagraj"',
+    'Search "Teliyarganj, Prayagraj"',
+    'Search "George Town, Prayagraj"',
+    'Search "Katra, Prayagraj"',
+    'Search "Allahpur, Prayagraj"',
+    'Search "Kydganj, Prayagraj"',
+    'Search "Naini, Prayagraj"',
+  ];
+  currentPlaceholder: string = '';
+  private charIndex: number = 0;
+  private placeholderIndex: number = 0;
+  private typingTimeout: any;
+  private isDestroyed = false;
 
   constructor(
     private propertyService: PropertyService,
@@ -62,10 +79,13 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private http: HttpClient, // INJECTED HTTP CLIENT
+    private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {}
 
   ngOnInit(): void {
+    this.typeEffect();
+    
     // NEW: Real-time OpenStreetMap Locality Search
     this.searchControl.valueChanges.pipe(
       debounceTime(400),
@@ -116,6 +136,10 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.isDestroyed = true;
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
@@ -227,7 +251,43 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   calculatePagination(): void {
-    this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
+    // Smart pagination: Show max 7 pages with ellipsis for better UX
+    const maxPagesToShow = 7;
+    const pages: (number | string)[] = [];
+    
+    if (this.totalPages <= maxPagesToShow) {
+      // If total pages are less than max, show all
+      this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
+      return;
+    }
+
+    const startPage = Math.max(0, this.currentPage - 2);
+    const endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
+
+    // Always show first page
+    pages.push(0);
+
+    // Add ellipsis if there's a gap after first page
+    if (startPage > 1) {
+      pages.push('...');
+    }
+
+    // Add pages around current page
+    for (let i = startPage; i <= endPage; i++) {
+      if (i !== 0 && i !== this.totalPages - 1) {
+        pages.push(i);
+      }
+    }
+
+    // Add ellipsis if there's a gap before last page
+    if (endPage < this.totalPages - 2) {
+      pages.push('...');
+    }
+
+    // Always show last page
+    pages.push(this.totalPages - 1);
+
+    this.pagesArray = pages;
   }
 
   formatPrice(price: number): string {
@@ -243,8 +303,47 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   scrollToContact(id: string): void {
-  this.router.navigate(['/property-details', id], { 
-    queryParams: { focusContact: 'true' } 
-  });
-}
+    this.router.navigate(['/property-details', id], { 
+      queryParams: { focusContact: 'true' } 
+    });
+  }
+
+  // --- Optimised Typewriter Logic with ChangeDetectorRef ---
+  private typeEffect() {
+    if (this.isDestroyed) return;
+
+    const currentWord = this.placeholders[this.placeholderIndex];
+    
+    if (this.charIndex < currentWord.length) {
+      this.ngZone.run(() => {
+        this.currentPlaceholder += currentWord.charAt(this.charIndex);
+        this.cd.markForCheck();   // Immediate UI update
+      });
+      this.charIndex++;
+      this.typingTimeout = setTimeout(() => this.typeEffect(), 40);
+    } else {
+      this.typingTimeout = setTimeout(() => this.eraseEffect(), 1800);
+    }
+  }
+
+  private eraseEffect() {
+    if (this.isDestroyed) return;
+
+    if (this.charIndex > 0) {
+      this.ngZone.run(() => {
+        this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
+        this.cd.markForCheck();   // Immediate UI update
+      });
+      this.charIndex--;
+      this.typingTimeout = setTimeout(() => this.eraseEffect(), 25);
+    } else {
+      this.placeholderIndex = (this.placeholderIndex + 1) % this.placeholders.length;
+      this.typingTimeout = setTimeout(() => this.typeEffect(), 200);
+    }
+  }
+
+  // Helper for template type checking
+  typeof(val: any): string {
+    return typeof val;
+  }
 }

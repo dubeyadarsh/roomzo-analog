@@ -9,6 +9,7 @@ export interface Listing {
   specs: { beds: number; baths: number; area: number };
   rating?: number;
   isFavorite: boolean;
+  postedDate?: string; // New field for posted date
 }
 
 export function mapBackendListingsToUi(list: any[]): Listing[] {
@@ -41,7 +42,10 @@ export function mapBackendListingsToUi(list: any[]): Listing[] {
     rating: +(4 + Math.random()).toFixed(1), 
 
     // Random boolean for favorite
-    isFavorite: Math.random() >= 0.5
+    isFavorite: Math.random() >= 0.5,
+    
+    // Include posted date from backend
+    postedDate: item.dateCreated || item.createdOn || new Date().toISOString()
   }));
 }
 

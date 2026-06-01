@@ -403,65 +403,103 @@
 /* ========================================================
    NEW CHAT UI CLASSES 
 ======================================================== */
-.nav-desktop .desktop-chat-link {
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  font-weight: 600; 
-  color: var(--rz-primary, #2563eb); 
-  transition: opacity 0.2s ease;
-}
+/* ========================================================
+   CREATIVE CHAT BUTTON – TEAL GRADIENT (RoomZo Brand)
+======================================================== */
 
-.nav-desktop .desktop-chat-link:hover {
-  opacity: 0.8;
-}
-
-.unread-badge-desktop {
-  width: 8px;
-  height: 8px;
-  background-color: #ef4444; 
-  border-radius: 50%;
-  display: inline-block;
-  box-shadow: 0 0 0 2px #ffffff; 
-  transform: translateY(-4px); 
-}
-
+/* Mobile Chat Button */
 .mobile-chat-btn {
-  background: rgba(0, 0, 0, 0.04); 
+  background: linear-gradient(135deg, #0f766e, #0d9488);
   border: none;
-  color: var(--rz-text-main, #1f2937);
+  color: white !important;
   position: relative;
   cursor: pointer;
-  width: 40px;  
-  height: 40px; 
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-.mobile-chat-btn:active {
-  background: rgba(0, 0, 0, 0.08); 
-  transform: scale(0.95); 
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
 }
 
 .mobile-chat-btn mat-icon {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: white;
 }
 
-.unread-badge {
+.mobile-chat-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
+}
+
+/* Desktop Chat Button */
+.desktop-chat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0f766e, #0d9488);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: white !important;
+  transition: 0.2s;
+  padding: 8px 16px;
+  border-radius: 40px;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+}
+
+.desktop-chat-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15, 118, 110, 0.3);
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+}
+
+.desktop-chat-link mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+/* Unread Badge – pulsating red dot */
+.mobile-chat-btn .unread-badge,
+.desktop-chat-link .unread-badge-desktop {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 10px;
-  height: 10px;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
   background-color: #ef4444;
   border-radius: 50%;
-  border: 2px solid #ffffff; 
-  box-sizing: content-box;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
+  animation: pulse 1.2s infinite;
+}
+
+.desktop-chat-link .unread-badge-desktop {
+  position: relative;
+  top: -4px;
+  right: 0;
+  margin-left: 4px;
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+/* Hide desktop chat button on mobile screens */
+@media (max-width: 900px) {
+  .desktop-chat-link {
+    display: none;
+  }
 }

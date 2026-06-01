@@ -93,47 +93,52 @@
   white-space: nowrap;
 }
 /* --- Bulletproof Responsive Mobile Layout --- */
+/* --- Bulletproof Responsive Mobile Layout --- */
 @media (max-width: 900px) {
   .rz-search-pill {
-    flex-direction: column;
-    border-radius: 16px;
-    padding: 20px; /* More breathing room inside the card */
+    flex-direction: row; /* Keep search icon and input inline */
+    border-radius: 8px; /* Slightly squared edges like 99acres */
+    padding: 4px 16px;
     gap: 0;
     box-sizing: border-box;
-    width: 100%;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15); /* Stronger shadow for depth */
+    width: calc(100% - 32px); /* 16px margin on each side */
+    margin: 0 auto;
+    
+    /* The overlap magic */
+    margin-top: 28px; 
+    position: relative;
+    z-index: 10;
+    
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Softer shadow for floating effect */
   }
   
-  .hide-mobile { display: none !important; }
+  .hide-mobile { 
+    display: none !important; 
+  }
   
   .input-group {
     width: 100%;
-    flex: none; /* Override desktop flex */
-    border-bottom: 1px solid var(--rz-border);
-    padding: 0 0 12px 0;
-    margin-bottom: 12px;
-  }
-  
-  .filter-group {
-    width: 100%;
-    flex: none; /* Override desktop flex */
-    border-bottom: 1px solid var(--rz-border);
-    padding: 0 0 12px 0;
-    margin-bottom: 12px;
-  }
-  
-  /* Remove the bottom border/margin from the last filter so it sits flush with the button */
-  .filter-group:last-of-type {
-    border-bottom: none;
+    flex: 1; 
+    border-bottom: none; /* Remove previous mobile styling */
+    padding: 0;
     margin-bottom: 0;
-    padding-bottom: 4px;
+    height: 52px; /* Comfortable touch target */
+  }
+
+  .input-group input {
+    padding: 0 0 0 32px; /* Make room for icon */
+    font-size: 1rem;
+    height: 100%;
+    text-overflow: ellipsis;
   }
   
-  .search-btn {
-    width: 100%;
-    border-radius: 12px;
-    margin-top: 16px;
-    padding: 16px; /* Taller, extremely touch-friendly button */
-    font-size: 1.15rem;
+  .search-icon {
+    color: #6b7280; /* Subtle grey icon for mobile */
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }
