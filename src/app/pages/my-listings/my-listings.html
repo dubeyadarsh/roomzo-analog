@@ -34,6 +34,11 @@
                 <div class="status-badge" [ngClass]="'badge-' + getStatusLabel(prop.isRented).toLowerCase()">
                     <span class="dot"></span> {{ getStatusLabel(prop.isRented) | titlecase }}
                 </div>
+
+                <!-- Posted Date Badge -->
+                <div class="posted-date-badge">
+                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
+                </div>
             </div>
 
             <div class="card-content">

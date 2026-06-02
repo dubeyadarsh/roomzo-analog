@@ -72,7 +72,8 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   private placeholderIndex: number = 0;
   private typingTimeout: any;
   private isDestroyed = false;
-
+private activeCityFilter: string = 'Prayagraj';
+private activeStateFilter: string = 'Uttar Pradesh';
   constructor(
     private propertyService: PropertyService,
     private cd: ChangeDetectorRef,
@@ -88,30 +89,41 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     
     // NEW: Real-time OpenStreetMap Locality Search
     this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      filter(val => typeof val === 'string'), // Only trigger on text, not on object selection
-      switchMap(val => {
-        if (!val || val.length < 2) {
-          this.selectedLocation = null;
-          return of([]); // Clear suggestions if empty
-        }
-        // Search API restricted to India (countrycodes=in) for better local relevance
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val as string)}&addressdetails=1&countrycodes=in&limit=5`;
-        return this.http.get<any[]>(url).pipe(catchError(() => of([])));
-      })
-    ).subscribe(results => {
-      this.filteredCities = results || [];
-      this.cd.detectChanges();
-    });
+  debounceTime(400),
+  distinctUntilChanged(),
+  filter(val => typeof val === 'string'), // Only trigger on text, not on object selection
+  switchMap(val => {
+    if (!val || val.length < 2) {
+      this.selectedLocation = null;
+      return of([]); // Clear suggestions if empty
+    }
+
+    // 1. Dynamically build the search query array
+    const queryParts = [val as string];
+    if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
+    if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
+    
+    // 2. Join the parts (e.g., "Input, Prayagraj, Uttar Pradesh")
+    const searchQuery = queryParts.join(', ');
+
+    // 3. Search API restricted to India (countrycodes=in) for better local relevance
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+    
+    return this.http.get<any[]>(url).pipe(catchError(() => of([])));
+  })
+).subscribe(results => {
+  this.filteredCities = results || [];
+  this.cd.detectChanges();
+});
 
     this.route.queryParams.subscribe(params => {
       if (Object.keys(params).length > 0) {
-        if (params['city'] && params['state']) {
+        if (params['city'] && params['state'] ) {
           const city = params['city'];
           const state = params['state'];
+          const street = params['street'] ?? '';
           this.selectedLocation = { city, state };
-          this.searchControl.setValue(`${city}, ${state}`, { emitEvent: false });
+          this.searchControl.setValue(`${street}, ${city}, ${state}`, { emitEvent: false });
           
           this.filters.city = city;
           this.filters.state = state;
@@ -292,6 +304,27 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   formatPrice(price: number): string {
     return '₹' + (price ? price.toLocaleString() : '0');
+  }
+
+  formatPostedDate(dateString?: string): string {
+    if (!dateString) return 'Recently posted';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}d ago`;
+    } else {
+      return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
   }
   
   viewDetails(id: string) {

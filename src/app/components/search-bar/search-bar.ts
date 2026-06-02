@@ -47,7 +47,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private placeholderIndex: number = 0;
   private typingTimeout: any;
   private isDestroyed = false;
-
+private activeCityFilter: string = 'Prayagraj';
+private activeStateFilter: string = 'Uttar Pradesh';
   constructor(
     private router: Router, 
     private http: HttpClient,
@@ -60,22 +61,33 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     this.setupAutocomplete();
   }
 
-  private setupAutocomplete() {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged(),
-      filter((val): val is string => typeof val === 'string' && val.length > 2),
-      switchMap(val => {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&addressdetails=1&countrycodes=in&limit=5`;
-        return this.http.get<any[]>(url).pipe(
-          catchError(() => of([]))
-        );
-      })
-    ).subscribe(results => {
-      this.filteredCities = results || [];
-      this.cdr.markForCheck();
-    });
-  }
+ private setupAutocomplete() {
+  this.searchControl.valueChanges.pipe(
+    debounceTime(400),
+    distinctUntilChanged(),
+    filter((val): val is string => typeof val === 'string' && val.length > 2),
+    switchMap(val => {
+      
+      // Dynamically build the search query array to handle missing values safely
+      const queryParts = [val];
+      if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
+      if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
+      
+      // Join the parts with a comma (e.g., "Station, Prayagraj, Uttar Pradesh")
+      const searchQuery = queryParts.join(', ');
+        
+      // URL encode the combined search query
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+      
+      return this.http.get<any[]>(url).pipe(
+        catchError(() => of([]))
+      );
+    })
+  ).subscribe(results => {
+    this.filteredCities = results || [];
+    this.cdr.markForCheck();
+  });
+}
 
   ngOnDestroy() {
     this.isDestroyed = true;
@@ -163,8 +175,10 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   }
 
   private navigateToExplore(locData: any) {
+    console.log('Selected Location Data:', locData);
     this.router.navigate(['/explore-listing'], { 
       queryParams: { 
+        street: locData.address?.suburb,
         city: locData.address?.city || locData.address?.town || locData.name, 
         state: locData.address?.state,
         lat: locData.lat,

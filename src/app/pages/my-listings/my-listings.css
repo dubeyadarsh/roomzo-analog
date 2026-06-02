@@ -66,6 +66,30 @@ h1, h2, h3, h4, p { margin: 0; }
 .badge-hidden { background: rgba(245, 158, 11, 0.95); } /* Amber Yellow */
 .dot { width: 6px; height: 6px; background: white; border-radius: 50%; }
 
+/* Posted Date Badge */
+.posted-date-badge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(31, 41, 55, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+}
+
+.posted-date-badge mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 /* Card Content */
 .card-content { padding: 20px; display: flex; flex-direction: column; flex: 1; }
 

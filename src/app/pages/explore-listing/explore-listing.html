@@ -104,6 +104,11 @@
                  <span class="verified-badge rented" *ngIf="prop.isRented === true">Rented</span>
               </div>
 
+              <!-- Posted Date Badge -->
+              <div class="posted-date-badge">
+                <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.createdOn) }}
+              </div>
+
               <div class="price-overlay">
                 <span class="price-amount">{{ formatPrice(prop.rentAmount) }}</span>
                 <span class="price-month">/ mo</span>

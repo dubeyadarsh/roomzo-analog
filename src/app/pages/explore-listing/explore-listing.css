@@ -154,7 +154,31 @@ h1, h2, h3, h4, p { margin: 0; }
   display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 .verified-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
-.verified-badge.rented { background: #4b5563; } 
+.verified-badge.rented { background: #4b5563; }
+
+/* Posted Date Badge */
+.posted-date-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(31, 41, 55, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+}
+
+.posted-date-badge mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
 
 .price-overlay {
   position: absolute; bottom: 0; right: 0;
@@ -174,7 +198,7 @@ h1, h2, h3, h4, p { margin: 0; }
   align-items: flex-start; /* CHANGED: Keeps icon at top when text wraps to multiple lines */
   gap: 4px; 
   margin-bottom: 12px; 
-  word-break: break-word; /* NEW: Forces long OpenStreetMap strings to wrap */
+  word-break: break-word; 
 }
 .location-text mat-icon { font-size: 16px; width: 16px; height: 16px; color: var(--rz-primary); }
 

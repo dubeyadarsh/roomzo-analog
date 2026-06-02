@@ -64,7 +64,7 @@
               
               <div class="map-actions">
                 <div class="search-location-inline">
-                  <input type="text" [formControl]="searchControl" placeholder="🔍 Search area, city, or village...">
+                  <input type="text" [formControl]="searchControl" placeholder="🔍 Search Civil Lines...">
                   
                   <div class="autocomplete-dropdown" *ngIf="searchResults.length > 0">
                     <div class="suggestion-item" *ngFor="let result of searchResults" (click)="selectLocation(result)">

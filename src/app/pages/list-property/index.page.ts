@@ -85,7 +85,8 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   ];
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
-
+private activeCityFilter: string = 'Prayagraj';
+private activeStateFilter: string = 'Uttar Pradesh';
   constructor(
     private fb: FormBuilder, 
     private propertyService: PropertyService, 
@@ -145,17 +146,28 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
     });
 
     this.searchControl.valueChanges.pipe(
-      debounceTime(500), 
-      distinctUntilChanged(),
-      filter(val => (val || '').length > 2), 
-      switchMap(val => {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val!)}&addressdetails=1&limit=5`;
-        return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
-      })
-    ).subscribe(results => {
-      this.searchResults = results || [];
-      this.cd.detectChanges();
-    });
+  debounceTime(500), 
+  distinctUntilChanged(),
+  filter(val => (val || '').length > 2), 
+  switchMap(val => {
+    
+    // Dynamically build the search query to handle missing values safely
+    const queryParts = [val!];
+    if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
+    if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
+    
+    // Join the parts with a comma
+    const searchQuery = queryParts.join(', ');
+    
+    // Encode the combined search query and include countrycodes=in
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+    
+    return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
+  })
+).subscribe(results => {
+  this.searchResults = results || [];
+  this.cd.detectChanges();
+});
 
     if (isPlatformBrowser(this.platformId)) {
       this.fixLeafletIcons();
