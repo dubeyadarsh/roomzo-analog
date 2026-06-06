@@ -1,9 +1,9 @@
-<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100 bg-light pt-header pb-5">  <div class="auth-card rz-card p-0 overflow-hidden shadow-lg mx-3 transition-all" 
+<div class="auth-wrapper d-flex align-items-center justify-content-center min-vh-100 bg-light pt-header pb-5">  
+  <div class="auth-card rz-card p-0 overflow-hidden shadow-lg mx-3 transition-all" 
        [style.max-width]="(!isLoginMode && !isForgotPasswordMode) ? '700px' : '480px'" 
        style="width: 100%; transition: max-width 0.3s ease-in-out;">
     
     <ng-container *ngIf="!isForgotPasswordMode">
-      
       <div class="d-flex auth-tabs border-bottom">
         <button type="button" class="flex-fill border-0 py-3 fw-bold bg-white" 
                 [class.text-primary]="isLoginMode" 
@@ -22,7 +22,6 @@
       </div>
 
       <div class="p-4 p-md-5">
-        
         <div *ngIf="isLoginMode" class="fade-in">
           <div class="text-center mb-4">
             <h2 class="fw-bold text-dark">Welcome Back !</h2>
@@ -38,17 +37,17 @@
             </div>
 
             <div class="mb-3">
-  <label class="form-label text-dark fw-semibold"><i class="bi bi-lock-fill text-primary me-2"></i>Password</label>
-  <div class="input-group has-validation">
-    <input [type]="showLoginPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Enter your password"
-           [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
-    <span class="input-group-text bg-light cursor-pointer" (click)="showLoginPassword = !showLoginPassword"
-          [ngClass]="{'border-danger': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
-<mat-icon class="text-dark">{{ showLoginPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-</span>
-    <div class="invalid-feedback">Password is required.</div>
-  </div>
-</div>
+              <label class="form-label text-dark fw-semibold"><i class="bi bi-lock-fill text-primary me-2"></i>Password</label>
+              <div class="input-group has-validation">
+                <input [type]="showLoginPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Enter your password"
+                       [ngClass]="{'is-invalid': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
+                <span class="input-group-text bg-light cursor-pointer" (click)="showLoginPassword = !showLoginPassword"
+                      [ngClass]="{'border-danger': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}">
+                  <mat-icon class="text-dark">{{ showLoginPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </span>
+                <div class="invalid-feedback">Password is required.</div>
+              </div>
+            </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div class="form-check">
@@ -58,14 +57,13 @@
               <a href="javascript:void(0)" (click)="openForgotPassword()" class="text-primary text-decoration-none fw-semibold fs-sm">Forgot Password?</a>
             </div>
 
-<button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm" [disabled]="isSubmitting">
-      <span *ngIf="!isSubmitting">Sign In</span>
-      <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </button>         
-  
-  </form>
+            <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Sign In</span>
+              <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>         
+          </form>
         </div>
 
         <div *ngIf="!isLoginMode" class="fade-in">
@@ -75,7 +73,6 @@
           </div>
 
           <form [formGroup]="registerForm" (ngSubmit)="onRegisterInit()" *ngIf="!showOtpStep">
-            
             <div class="row g-3 mb-3">
               <div class="col-12 col-md-6">
                 <label class="form-label text-dark fw-semibold"><i class="bi bi-person-fill text-primary me-2"></i>Full Name</label>
@@ -100,47 +97,46 @@
               </div>
               <div class="col-12 col-md-6">
                 <label class="form-label text-dark fw-semibold"><i class="bi bi-person-badge text-primary me-2"></i>Account Type</label>
-<select class="form-select form-select-lg bg-light" formControlName="ownerType">
-  <option value="Tenant">Looking to Rent</option>
-  <option value="Hostel">Hostel Owner</option>
-  <option value="Flat">Flat/Apartment Owner</option>
-  <option value="PG">PG Owner</option>
-</select>
+                <select class="form-select form-select-lg bg-light" formControlName="ownerType">
+                  <option value="Tenant">Looking to Rent</option>
+                  <option value="Hostel">Hostel Owner</option>
+                  <option value="Flat">Flat/Apartment Owner</option>
+                  <option value="PG">PG Owner</option>
+                </select>
               </div>
             </div>
 
-           <div class="row g-3 mb-3">
-  <div class="col-12 col-md-6">
-    <label class="form-label text-dark fw-semibold"><i class="bi bi-lock-fill text-primary me-2"></i>Password</label>
-    <div class="input-group has-validation">
-      <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Create password"
-             [ngClass]="{'is-invalid': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}">
-      <span class="input-group-text bg-light cursor-pointer" (click)="showRegisterPassword = !showRegisterPassword"
-            [ngClass]="{'border-danger': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}">
-<mat-icon class="text-dark">{{ showRegisterPassword ? 'visibility_off' : 'visibility' }}</mat-icon>    </span>
-    </div>
-  </div>
-  <div class="col-12 col-md-6">
-    <label class="form-label text-dark fw-semibold"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Confirm Password</label>
-    <div class="input-group has-validation">
-      <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="confirmPassword" placeholder="Confirm password"
-             [ngClass]="{'is-invalid': (registerForm.get('confirmPassword')?.touched) && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch'))}">
-      <span class="input-group-text bg-light cursor-pointer" (click)="showConfirmPassword = !showConfirmPassword"
-            [ngClass]="{'border-danger': (registerForm.get('confirmPassword')?.touched) && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch'))}">
-<mat-icon class="text-dark">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon></span>
-    </div>
-  </div>
-</div>
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label text-dark fw-semibold"><i class="bi bi-lock-fill text-primary me-2"></i>Password</label>
+                <div class="input-group has-validation">
+                  <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Create password"
+                         [ngClass]="{'is-invalid': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}">
+                  <span class="input-group-text bg-light cursor-pointer" (click)="showRegisterPassword = !showRegisterPassword"
+                        [ngClass]="{'border-danger': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}">
+                    <mat-icon class="text-dark">{{ showRegisterPassword ? 'visibility_off' : 'visibility' }}</mat-icon>    
+                  </span>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label text-dark fw-semibold"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Confirm Password</label>
+                <div class="input-group has-validation">
+                  <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="confirmPassword" placeholder="Confirm password"
+                         [ngClass]="{'is-invalid': (registerForm.get('confirmPassword')?.touched) && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch'))}">
+                  <span class="input-group-text bg-light cursor-pointer" (click)="showConfirmPassword = !showConfirmPassword"
+                        [ngClass]="{'border-danger': (registerForm.get('confirmPassword')?.touched) && (registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch'))}">
+                    <mat-icon class="text-dark">{{ showConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                  </span>
+                </div>
+              </div>
+            </div>
 
-       
-
-<button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm mt-2" [disabled]="isSubmitting">
-  <span *ngIf="!isSubmitting">Continue <i class="bi bi-arrow-right"></i></span>
-  
-  <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</button>
+            <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm mt-2" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Continue <i class="bi bi-arrow-right"></i></span>
+              <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
           </form>
 
           <form [formGroup]="otpForm" (ngSubmit)="onRegisterComplete()" *ngIf="showOtpStep" class="text-center fade-in">
@@ -152,13 +148,19 @@
             <div class="mb-4">
               <input type="text" class="form-control form-control-lg text-center letter-spacing-lg bg-light" formControlName="otp" placeholder="••••" maxlength="4">
             </div>
-            <button type="submit" class="btn btn-success w-100 btn-lg rounded-3 fw-bold shadow-sm">Complete Registration</button>
-            <button type="button" class="btn btn-link text-muted mt-3 w-100 text-decoration-none" (click)="showOtpStep = false">
+            
+            <button type="submit" class="btn btn-success w-100 btn-lg rounded-3 fw-bold shadow-sm" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Complete Registration</span>
+              <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>
+            
+            <button type="button" class="btn btn-link text-muted mt-3 w-100 text-decoration-none" (click)="showOtpStep = false" [disabled]="isSubmitting">
               <i class="bi bi-arrow-left me-1"></i> Back to Details
             </button>
           </form>
         </div>
-
       </div>
     </ng-container>
 
@@ -180,12 +182,13 @@
               <input type="text" class="form-control form-control-lg bg-light" formControlName="identifier" placeholder="Enter registered email."
                      [ngClass]="{'is-invalid': forgotInitForm.get('identifier')?.invalid && forgotInitForm.get('identifier')?.touched}">
             </div>
-<button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm mb-3" [disabled]="isSubmitting">
-  <span *ngIf="!isSubmitting">Send Reset Code</span>
-  <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</button>            <button type="button" class="btn btn-ghost w-100 text-muted fw-semibold" (click)="cancelForgotPassword()">
+            <button type="submit" class="btn btn-primary w-100 btn-lg rounded-3 fw-bold shadow-sm mb-3" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Send Reset Code</span>
+              <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>            
+            <button type="button" class="btn btn-ghost w-100 text-muted fw-semibold" (click)="cancelForgotPassword()">
               <i class="bi bi-arrow-left me-2"></i>Back to log in
             </button>
           </form>
@@ -220,38 +223,37 @@
           </div>
 
           <form [formGroup]="forgotResetForm" (ngSubmit)="onForgotReset()">
-           <div class="mb-3">
-  <label class="form-label text-dark fw-semibold">New Password</label>
-  <div class="input-group has-validation">
-    <input [type]="showForgotNewPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Create new password"
-           [ngClass]="{'is-invalid': forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched}">
-    <span class="input-group-text bg-light cursor-pointer" (click)="showForgotNewPassword = !showForgotNewPassword"
-      [ngClass]="{'border-danger': forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched}">
-  <mat-icon class="text-dark">{{ showForgotNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-</span>
-  </div>
-</div>
+            <div class="mb-3">
+              <label class="form-label text-dark fw-semibold">New Password</label>
+              <div class="input-group has-validation">
+                <input [type]="showForgotNewPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="password" placeholder="Create new password"
+                       [ngClass]="{'is-invalid': forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched}">
+                <span class="input-group-text bg-light cursor-pointer" (click)="showForgotNewPassword = !showForgotNewPassword"
+                  [ngClass]="{'border-danger': forgotResetForm.get('password')?.invalid && forgotResetForm.get('password')?.touched}">
+                  <mat-icon class="text-dark">{{ showForgotNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </span>
+              </div>
+            </div>
 
-<div class="mb-4">
-  <label class="form-label text-dark fw-semibold">Confirm Password</label>
-  <div class="input-group has-validation">
-    <input [type]="showForgotConfirmPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="confirmPassword" placeholder="Confirm new password"
-           [ngClass]="{'is-invalid': (forgotResetForm.get('confirmPassword')?.touched) && (forgotResetForm.get('confirmPassword')?.invalid || forgotResetForm.hasError('passwordMismatch'))}">
-    <span class="input-group-text bg-light cursor-pointer" (click)="showForgotConfirmPassword = !showForgotConfirmPassword"
-      [ngClass]="{'border-danger': (forgotResetForm.get('confirmPassword')?.touched) && (forgotResetForm.get('confirmPassword')?.invalid || forgotResetForm.hasError('passwordMismatch'))}">
-  <mat-icon class="text-dark">{{ showForgotConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-</span>
-  </div>
-</div>
+            <div class="mb-4">
+              <label class="form-label text-dark fw-semibold">Confirm Password</label>
+              <div class="input-group has-validation">
+                <input [type]="showForgotConfirmPassword ? 'text' : 'password'" class="form-control form-control-lg bg-light border-end-0" formControlName="confirmPassword" placeholder="Confirm new password"
+                       [ngClass]="{'is-invalid': (forgotResetForm.get('confirmPassword')?.touched) && (forgotResetForm.get('confirmPassword')?.invalid || forgotResetForm.hasError('passwordMismatch'))}">
+                <span class="input-group-text bg-light cursor-pointer" (click)="showForgotConfirmPassword = !showForgotConfirmPassword"
+                  [ngClass]="{'border-danger': (forgotResetForm.get('confirmPassword')?.touched) && (forgotResetForm.get('confirmPassword')?.invalid || forgotResetForm.hasError('passwordMismatch'))}">
+                  <mat-icon class="text-dark">{{ showForgotConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </span>
+              </div>
+            </div>
 
-      
-
-<button type="submit" class="btn btn-success w-100 btn-lg rounded-3 fw-bold shadow-sm mb-3" [disabled]="isSubmitting">
-  <span *ngIf="!isSubmitting">Reset Password</span>
-  <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</button>            <button type="button" class="btn btn-ghost w-100 text-muted fw-semibold" (click)="cancelForgotPassword()">
+            <button type="submit" class="btn btn-success w-100 btn-lg rounded-3 fw-bold shadow-sm mb-3" [disabled]="isSubmitting">
+              <span *ngIf="!isSubmitting">Reset Password</span>
+              <div *ngIf="isSubmitting" class="spinner-border spinner-border-sm text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </button>            
+            <button type="button" class="btn btn-ghost w-100 text-muted fw-semibold" (click)="cancelForgotPassword()">
               Cancel
             </button>
           </form>

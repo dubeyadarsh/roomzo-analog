@@ -38,6 +38,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
   totalSteps = 4;
   imagePreviews: string[] = [];
   selectedFiles: File[] = [];
+  originalFiles: File[] = []; // Tracks the un-watermarked files
   isUploading: boolean = false;
   states: any[] = [];
   cities: any[] = [];
@@ -157,12 +158,12 @@ private activeStateFilter: string = 'Uttar Pradesh';
     if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
     
     // Join the parts with a comma
-    const searchQuery = queryParts.join(', ');
+      const searchQuery = queryParts.join(', ');
     
     // Encode the combined search query and include countrycodes=in
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
     
-    return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
+      return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
   })
 ).subscribe(results => {
   this.searchResults = results || [];
@@ -294,15 +295,30 @@ private activeStateFilter: string = 'Uttar Pradesh';
 
     try {
       const newFiles: File[] = [];
+      const newOriginals: File[] = [];
       const newPreviews: string[] = [];
 
       for (const file of Array.from(files)) {
+        // 1. Rename the original file to include '-org'
+        const dotIndex = file.name.lastIndexOf('.');
+        const baseName = dotIndex !== -1 ? file.name.substring(0, dotIndex) : file.name;
+        const extension = dotIndex !== -1 ? file.name.substring(dotIndex) : '';
+        const orgFileName = `${baseName}-org${extension}`;
+        
+        const originalFileToSave = new File([file], orgFileName, { type: file.type });
+
+        // 2. Create the watermarked version (keeps the normal name)
         const watermarkedFile = await this.watermarkImage(file);
+
+        // 3. Save both to their respective arrays
+        newOriginals.push(originalFileToSave);
         newFiles.push(watermarkedFile);
+        
         const preview = await this.readFileAsDataURL(watermarkedFile);
         newPreviews.push(preview);
       }
 
+      this.originalFiles = [...this.originalFiles, ...newOriginals];
       this.selectedFiles = [...this.selectedFiles, ...newFiles];
       this.imagePreviews = [...this.imagePreviews, ...newPreviews];
       this.finalGroup.patchValue({ images: this.selectedFiles });
@@ -310,7 +326,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
 
     } catch (err) {
       console.error('Error processing images:', err);
-      this.toastr.error('Failed to process image watermarking.');
+      this.toastr.error('Failed to process images.');
     } finally {
       this.isUploading = false;
       input.value = ''; 
@@ -321,6 +337,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
   removeImage(index: number): void {
     this.imagePreviews.splice(index, 1);
     this.selectedFiles.splice(index, 1);
+    this.originalFiles.splice(index, 1); // Remove the matching original file
     this.finalGroup.patchValue({ images: this.selectedFiles });
   }
 
@@ -363,40 +380,52 @@ private activeStateFilter: string = 'Uttar Pradesh';
 
       const rawData = this.listingForm.value;
 
-      // NEW: Intercept and format the description before sending
+      // 1. Format the description (converting newlines to pipe separators)
       const payload = {
         ...rawData,
         final: {
           ...rawData.final,
           description: rawData.final.description
             ? rawData.final.description
-                .split(/\r?\n/) // Split the text by any newline character
-                .map((line: string) => line.trim()) // Remove extra spaces from each line
-                .filter((line: string) => line.length > 0) // Remove empty lines
-                .join(' | ') // Join them together with the pipe separator
+                .split(/\r?\n/) 
+                .map((line: string) => line.trim()) 
+                .filter((line: string) => line.length > 0) 
+                .join(' | ') 
             : ''
         }
       };
 
-      // Ensure we check the payload for files, not rawData
-      const files: File[] = payload.final.images || [];
+      // 2. Combine watermarked and original files for Hostinger
+      const watermarked: File[] = payload.final.images || [];
+      const filesToSend: File[] = [...watermarked, ...this.originalFiles];
 
-      if (files.length < 2) {
+      // We check the watermarked array length to ensure they have at least 2 valid display photos
+      if (watermarked.length < 2) {
         this.toastr.error('Please upload at least two images.', 'Error');
         return;
       }
 
+      // Reassign the combined array to the payload
+      payload.final.images = filesToSend;
+      
       this.isSubmitting = true;
 
-      // Send the formatted payload instead of rawData
+      // 3. Send to Service
       this.propertyService.saveListing(payload).subscribe({
         next: (response) => {
           this.toastr.success('Listing uploaded successfully!', 'Success');
+          
+          // 4. Reset Form and ALL tracking arrays
           this.listingForm.reset();
           this.imagePreviews = [];
           this.selectedFiles = [];
+          this.originalFiles = []; // NEW: Clears the un-watermarked files
           this.currentStep = 1;
-          if (isPlatformBrowser(this.platformId)) window.scrollTo(0, 0);
+          
+          if (isPlatformBrowser(this.platformId)) {
+            window.scrollTo(0, 0);
+          }
+          
           this.isSubmitting = false;
         },
         error: (error) => {
@@ -406,6 +435,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
         }
       });
     } else {
+      // Handle Validation Failure
       this.listingForm.markAllAsTouched();
       console.warn('Final Form Submission Failed. Missing fields:');
       this.findInvalidControls(this.listingForm);
@@ -413,7 +443,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
     }
   }
 
-  private async watermarkImage(file: File): Promise<File> {
+ private async watermarkImage(file: File): Promise<File> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       
@@ -430,21 +460,38 @@ private activeStateFilter: string = 'Uttar Pradesh';
 
           canvas.width = img.width;
           canvas.height = img.height;
+          
+          // 1. Draw the original image
           ctx.drawImage(img, 0, 0);
 
-          const fontSize = Math.floor(canvas.width * 0.05); 
+          // 2. Set up the transparent, large font
+          // Increased from 0.05 to 0.12 for a larger, bolder presence
+          const fontSize = Math.floor(canvas.width * 0.12); 
           ctx.font = `bold ${fontSize}px Arial`;
-          ctx.textAlign = 'right';
-          ctx.textBaseline = 'bottom';
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-          ctx.shadowBlur = 4;
-          ctx.shadowOffsetX = 2;
-          ctx.shadowOffsetY = 2;
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; 
+          
+          // Center alignment
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // Soft shadow to ensure it's readable on both dark and light walls
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 8;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
+          
+          // 3. Set transparency (0.25 opacity makes it clearly visible but see-through)
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'; 
 
-          const padding = fontSize / 2;
-          ctx.fillText(this.WATERMARK_TEXT, canvas.width - padding, canvas.height - padding);
+          // 4. Move the canvas origin to the dead center of the image
+          ctx.translate(canvas.width / 2, canvas.height / 2);
+          
+          // 5. Rotate the canvas diagonally (-45 degrees)
+          ctx.rotate(-Math.PI / 4); 
 
+          // 6. Draw the text at the new center (0, 0)
+          ctx.fillText(this.WATERMARK_TEXT, 0, 0);
+
+          // Convert back to a File object
           canvas.toBlob((blob) => {
             if (blob) {
               const newFile = new File([blob], file.name, {
@@ -466,7 +513,6 @@ private activeStateFilter: string = 'Uttar Pradesh';
       reader.readAsDataURL(file);
     });
   }
-
   private async fixLeafletIcons() {
     const leaflet = await import('leaflet');
     const iconDefault = leaflet.icon({

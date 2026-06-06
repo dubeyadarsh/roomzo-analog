@@ -141,23 +141,25 @@
           </div>
         </div>
 
-        <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
-          <button class="page-btn nav-btn" (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          
-          <ng-container *ngFor="let p of pagesArray">
-            <span class="pagination-ellipsis" *ngIf="p === '...'">...</span>
-            <button class="page-btn" *ngIf="typeof(p) === 'number'" [class.active]="p === currentPage" (click)="changePage(p)">
-              {{ p + 1 }}
-            </button>
-          </ng-container>
-          
-          <button class="page-btn nav-btn" (click)="changePage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
+<div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+  
+  <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'left')">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+  
+  <div class="pagination-scroll" #scrollContainer (wheel)="onScroll($event, scrollContainer)">
+    <ng-container *ngFor="let p of pagesArray">
+      <button class="page-btn" [class.active]="p === currentPage" (click)="changePage(+p)">
+        {{ +p + 1 }}
+      </button>
+    </ng-container>
+  </div>
+  
+  <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'right')">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
 
+</div>
       </section>
     </div>
   </main>

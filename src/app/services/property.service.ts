@@ -70,7 +70,7 @@ export class PropertyService {
     return []; 
   }
 
-  saveListing(formData: any): Observable<any> {
+saveListing(formData: any): Observable<any> {
     const files: File[] = formData.final.images || [];
 
     const uploadObservables = files.length > 0
@@ -87,17 +87,20 @@ export class PropertyService {
 
     return forkJoin(uploadObservables).pipe(
       switchMap((responses: any[]) => {
+        
+        // This strips out any Hostinger URL that contains '-org'
         const photoUrls = responses
-          .filter(res => res && res.status === 1)
-          .map(res => environment.hostingerUploadUrl +  res.url);
-      const user=  JSON.parse(localStorage.getItem("user") || '{}');
-      const { final, ...rest } = formData;
+          .filter(res => res && res.status === 1 && !res.url.includes('-org'))
+          .map(res => environment.hostingerUploadUrl + res.url);
+
+        const user = JSON.parse(localStorage.getItem("user") || '{}');
+        const { final, ...rest } = formData;
         const { images, ...finalWithoutImages } = final;
 
         const finalPayload = {
           ...rest,
-          final: finalWithoutImages, // keep final object but without images
-          photos: photoUrls      ,     // add uploaded photo URLs
+          final: finalWithoutImages, 
+          photos: photoUrls, // Backend only sees the watermarked URLs
           ownerId: user.id
         };
 

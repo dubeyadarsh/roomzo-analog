@@ -6,14 +6,34 @@ import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router'; 
-import { HttpClient } from '@angular/common/http'; // NEW: Required for API
+import { HttpClient } from '@angular/common/http'; 
 
 import { Subscription, of } from 'rxjs';
-import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators'; // NEW: RxJS operators
+import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators'; 
 
 import { PropertyService, ListingFilter } from '../../services/property.service';
-// REMOVED: country-state-city imports since we are using live API now
+import { RouteMeta } from '@analogjs/router';
 
+export const routeMeta: RouteMeta = {
+  title: 'Brokerless Rooms, Flats & PG for Rent in Prayagraj, Varanasi & Lucknow',
+  meta: [
+    { 
+      name: 'description', 
+      content: 'Find verified, agentless rooms, PGs, and flats in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Lucknow. 100% broker-free trusted rental platform.' 
+    },
+    { 
+      name: 'keywords', 
+      content: 'room rent in prayagraj, pg in varanasi near bhu, flat for rent in lucknow, brokerless pg prayagraj, agentless room rental platform, single room katra, best pg site up' 
+    },
+    // Open Graph for WhatsApp/Facebook link previews
+    { property: 'og:title', content: '100% Brokerless Rooms & PG in UP | Trusted Platform' },
+    { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats.' },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:image', content: 'https://yourdomain.com/assets/seo-banner.webp' }, // Make sure to add a real banner image
+  ]
+};
+
+// ... your existing component code ...
 @Component({
   selector: 'app-explore-listings',
   standalone: true,
@@ -34,7 +54,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   // Search State
   searchControl = new FormControl('');
-  filteredCities: any[] = []; // Now holds Nominatim search results
+  filteredCities: any[] = []; 
   selectedLocation: { city: string, state: string } | null = null;
 
   // Filter State
@@ -72,14 +92,15 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   private placeholderIndex: number = 0;
   private typingTimeout: any;
   private isDestroyed = false;
-private activeCityFilter: string = 'Prayagraj';
-private activeStateFilter: string = 'Uttar Pradesh';
+  private activeCityFilter: string = 'Prayagraj';
+  private activeStateFilter: string = 'Uttar Pradesh';
+
   constructor(
     private propertyService: PropertyService,
     private cd: ChangeDetectorRef,
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient, // INJECTED HTTP CLIENT
+    private http: HttpClient,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {}
@@ -87,34 +108,30 @@ private activeStateFilter: string = 'Uttar Pradesh';
   ngOnInit(): void {
     this.typeEffect();
     
-    // NEW: Real-time OpenStreetMap Locality Search
+    // Real-time OpenStreetMap Locality Search
     this.searchControl.valueChanges.pipe(
-  debounceTime(400),
-  distinctUntilChanged(),
-  filter(val => typeof val === 'string'), // Only trigger on text, not on object selection
-  switchMap(val => {
-    if (!val || val.length < 2) {
-      this.selectedLocation = null;
-      return of([]); // Clear suggestions if empty
-    }
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter(val => typeof val === 'string'), 
+      switchMap(val => {
+        if (!val || val.length < 2) {
+          this.selectedLocation = null;
+          return of([]); 
+        }
 
-    // 1. Dynamically build the search query array
-    const queryParts = [val as string];
-    if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
-    if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
-    
-    // 2. Join the parts (e.g., "Input, Prayagraj, Uttar Pradesh")
-    const searchQuery = queryParts.join(', ');
-
-    // 3. Search API restricted to India (countrycodes=in) for better local relevance
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
-    
-    return this.http.get<any[]>(url).pipe(catchError(() => of([])));
-  })
-).subscribe(results => {
-  this.filteredCities = results || [];
-  this.cd.detectChanges();
-});
+        const queryParts = [val as string];
+        if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
+        if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
+        
+        const searchQuery = queryParts.join(', ');
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+        
+        return this.http.get<any[]>(url).pipe(catchError(() => of([])));
+      })
+    ).subscribe(results => {
+      this.filteredCities = results || [];
+      this.cd.detectChanges();
+    });
 
     this.route.queryParams.subscribe(params => {
       if (Object.keys(params).length > 0) {
@@ -157,7 +174,6 @@ private activeStateFilter: string = 'Uttar Pradesh';
     }
   }
 
-  // Helper to format the long Nominatim API response into a clean "Locality, City, State" string
   displayCity = (result: any): string => {
     if (!result) return '';
     if (typeof result === 'string') return result;
@@ -167,7 +183,6 @@ private activeStateFilter: string = 'Uttar Pradesh';
     const city = addr.city || addr.state_district || addr.county || '';
     const state = addr.state || '';
 
-    // Remove duplicates (e.g., if locality and city are the same) and join with commas
     const parts = [locality, city, state].filter((val, index, arr) => val && arr.indexOf(val) === index);
     return parts.join(', ');
   }
@@ -176,11 +191,9 @@ private activeStateFilter: string = 'Uttar Pradesh';
     const result = event.option.value;
     const addr = result.address || {};
 
-    // Get exact coordinates of the locality selected
     this.filters.lat = parseFloat(result.lat);
-    this.filters.lng = parseFloat(result.lon); // Nominatim uses 'lon' instead of 'lng'
+    this.filters.lng = parseFloat(result.lon); 
     
-    // Extract highest-level city/state for fallback filtering
     const city = addr.city || addr.town || addr.village || addr.county || '';
     const state = addr.state || '';
 
@@ -263,43 +276,8 @@ private activeStateFilter: string = 'Uttar Pradesh';
   }
 
   calculatePagination(): void {
-    // Smart pagination: Show max 7 pages with ellipsis for better UX
-    const maxPagesToShow = 7;
-    const pages: (number | string)[] = [];
-    
-    if (this.totalPages <= maxPagesToShow) {
-      // If total pages are less than max, show all
-      this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
-      return;
-    }
-
-    const startPage = Math.max(0, this.currentPage - 2);
-    const endPage = Math.min(this.totalPages - 1, this.currentPage + 2);
-
-    // Always show first page
-    pages.push(0);
-
-    // Add ellipsis if there's a gap after first page
-    if (startPage > 1) {
-      pages.push('...');
-    }
-
-    // Add pages around current page
-    for (let i = startPage; i <= endPage; i++) {
-      if (i !== 0 && i !== this.totalPages - 1) {
-        pages.push(i);
-      }
-    }
-
-    // Add ellipsis if there's a gap before last page
-    if (endPage < this.totalPages - 2) {
-      pages.push('...');
-    }
-
-    // Always show last page
-    pages.push(this.totalPages - 1);
-
-    this.pagesArray = pages;
+    // UPDATED: Generate a simple array of all pages so CSS can force them to scroll horizontally
+    this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
   }
 
   formatPrice(price: number): string {
@@ -341,7 +319,6 @@ private activeStateFilter: string = 'Uttar Pradesh';
     });
   }
 
-  // --- Optimised Typewriter Logic with ChangeDetectorRef ---
   private typeEffect() {
     if (this.isDestroyed) return;
 
@@ -350,7 +327,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
     if (this.charIndex < currentWord.length) {
       this.ngZone.run(() => {
         this.currentPlaceholder += currentWord.charAt(this.charIndex);
-        this.cd.markForCheck();   // Immediate UI update
+        this.cd.markForCheck();   
       });
       this.charIndex++;
       this.typingTimeout = setTimeout(() => this.typeEffect(), 40);
@@ -365,7 +342,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
     if (this.charIndex > 0) {
       this.ngZone.run(() => {
         this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
-        this.cd.markForCheck();   // Immediate UI update
+        this.cd.markForCheck();   
       });
       this.charIndex--;
       this.typingTimeout = setTimeout(() => this.eraseEffect(), 25);
@@ -378,5 +355,27 @@ private activeStateFilter: string = 'Uttar Pradesh';
   // Helper for template type checking
   typeof(val: any): string {
     return typeof val;
+  }
+
+  // UPDATED: Mouse wheel horizontal scroll logic
+  onScroll(event: WheelEvent, element: HTMLElement): void {
+    const canScrollHorizontally = element.scrollWidth > element.clientWidth;
+    
+    if (canScrollHorizontally && event.deltaY !== 0) {
+      event.preventDefault();
+      element.scrollLeft += event.deltaY;
+    }
+  }
+  // NEW: Button click horizontal scroll logic
+  scrollPagination(element: HTMLElement, direction: 'left' | 'right'): void {
+    // 144px is roughly the width of 3 buttons (40px each + 8px gaps)
+    // You can increase this number if you want it to scroll further per click!
+    const scrollAmount = 144; 
+    
+    if (direction === 'left') {
+      element.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      element.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
   }
 }

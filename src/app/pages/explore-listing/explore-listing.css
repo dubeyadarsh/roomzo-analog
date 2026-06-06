@@ -117,7 +117,7 @@ h1, h2, h3, h4, p { margin: 0; }
   justify-content: space-between; 
   align-items: center; 
   margin-bottom: 24px; 
-  flex-wrap: wrap; /* NEW: Prevents header from breaking if button + text is too wide */
+  flex-wrap: wrap; 
   gap: 12px;
 }
 .results-count { font-size: 1.1rem; color: var(--rz-text-muted); }
@@ -140,7 +140,7 @@ h1, h2, h3, h4, p { margin: 0; }
   box-shadow: var(--rz-shadow-sm); 
   transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid var(--rz-border);
-  min-width: 0; /* NEW: Allows the card to shrink below intrinsic text width */
+  min-width: 0; 
 }
 .listing-card:hover { transform: translateY(-4px); box-shadow: var(--rz-shadow-md); }
 
@@ -195,7 +195,7 @@ h1, h2, h3, h4, p { margin: 0; }
   color: var(--rz-text-muted); 
   font-size: 0.85rem; 
   display: flex; 
-  align-items: flex-start; /* CHANGED: Keeps icon at top when text wraps to multiple lines */
+  align-items: flex-start; 
   gap: 4px; 
   margin-bottom: 12px; 
   word-break: break-word; 
@@ -204,7 +204,7 @@ h1, h2, h3, h4, p { margin: 0; }
 
 .specs-row { 
   display: flex; 
-  flex-wrap: wrap; /* NEW: Prevents bed/bath text from overflowing on 320px screens */
+  flex-wrap: wrap; 
   gap: 12px; 
   color: var(--rz-text-muted); 
   font-size: 0.85rem; 
@@ -274,18 +274,6 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 .view-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
-/* Pagination & Loaders */
-.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; width: 100%; }
-.page-btn {
-  width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--rz-border);
-  background: white; color: var(--rz-text-main); font-weight: 500; cursor: pointer; font-family: inherit;
-  display: flex; align-items: center; justify-content: center; transition: 0.2s;
-}
-.page-btn:hover:not([disabled]) { border-color: var(--rz-primary); color: var(--rz-primary); }
-.page-btn.active { background: var(--rz-primary); color: white; border-color: var(--rz-primary); }
-.page-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
-.pagination-ellipsis { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: var(--rz-text-muted); font-weight: 600; font-size: 1.2rem; }
-
 .loader-container { display: flex; flex-direction: column; align-items: center; padding: 60px 0; color: var(--rz-text-muted); width: 100%; }
 .modern-spinner { width: 40px; height: 40px; border: 3px solid rgba(25, 97, 83, 0.1); border-left-color: var(--rz-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -307,7 +295,6 @@ h1, h2, h3, h4, p { margin: 0; }
 /* Mobile View */
 @media (max-width: 900px) {
   
-  /* Strip X-axis padding/margins completely */
   .layout-grid, .hero-container { 
     padding-left: 16px !important; 
     padding-right: 16px !important; 
@@ -323,15 +310,12 @@ h1, h2, h3, h4, p { margin: 0; }
   .search-icon { display: none; } 
 
   .main-content { padding: 16px 0 60px; width: 100%; }
-.layout-grid { 
-    grid-template-columns: minmax(0, 1fr); /* CHANGED from 1fr */
+  .layout-grid { 
+    grid-template-columns: minmax(0, 1fr); 
     gap: 16px; 
     padding-top: 0; 
   }
   
-  /* Cards Stacked Vertically */
-  
-  /* Mobile Filter Toggle Logic */
   .mobile-filter-toggle {
     display: flex; align-items: center; gap: 6px;
     background: white; border: 1px solid var(--rz-border);
@@ -349,7 +333,6 @@ h1, h2, h3, h4, p { margin: 0; }
   }
   .close-filter-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
-  /* Hide filters by default, show when flag is true */
   .filters-sidebar { 
     display: none; 
     position: static; padding: 16px; border-radius: 12px;
@@ -372,7 +355,6 @@ h1, h2, h3, h4, p { margin: 0; }
   .divider-line { margin: 12px 0; }
   .filter-group label { margin-bottom: 8px; font-size: 0.95rem; }
   
-  /* Horizontal Scrolling Pills for Mobile */
   .pill-group { 
     display: flex; flex-wrap: nowrap; overflow-x: auto; 
     padding-bottom: 4px; -webkit-overflow-scrolling: touch;
@@ -382,14 +364,13 @@ h1, h2, h3, h4, p { margin: 0; }
   .pill-group { -ms-overflow-style: none; scrollbar-width: none; }
   .filter-pill { flex: 0 0 auto; min-width: 70px; padding: 8px 16px; }
   
-  /* Cards Stacked Vertically */
- .property-grid { 
-    grid-template-columns: minmax(0, 1fr); /* CHANGED from 1fr */
+  .property-grid { 
+    grid-template-columns: minmax(0, 1fr); 
     gap: 16px; 
     width: 100%; 
-  }   .card-image { height: 220px; } 
+  }   
+  .card-image { height: 220px; } 
   
-  /* Mobile Action Buttons */
   .action-buttons-container {
     flex-direction: column;
     gap: 8px;
@@ -397,5 +378,100 @@ h1, h2, h3, h4, p { margin: 0; }
   .contact-btn, .view-btn {
     padding: 14px;
     width: 100%;
+  }
+}
+
+/* ========================================================
+   PAGINATION (HORIZONTAL SCROLLING)
+======================================================== */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 40px;
+}
+
+/* Horizontal scroll track */
+.pagination-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  white-space: nowrap;
+  
+  /* Butter smooth trackpad and touch scrolling */
+  -webkit-overflow-scrolling: touch; 
+  
+  /* CRITICAL: Force the box to be smaller than the available space 
+     so it is FORCED to overflow and scroll. */
+  max-width: 240px; 
+  
+  /* Hide native ugly desktop scrollbars */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
+}
+
+/* Hide scrollbar for Chrome/Safari */
+.pagination-scroll::-webkit-scrollbar {
+  display: none; 
+}
+
+/* Page Buttons */
+.page-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--rz-border);
+  background: white;
+  color: var(--rz-text-main);
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+  
+  /* CRITICAL: Prevents Flexbox from squishing the buttons */
+  flex-shrink: 0; 
+}
+
+.page-btn:hover:not([disabled]) {
+  border-color: var(--rz-primary);
+  color: var(--rz-primary);
+}
+
+.page-btn.active {
+  background: var(--rz-primary);
+  color: white;
+  border-color: var(--rz-primary);
+}
+
+.page-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Keep Navigation Arrows outside the scroll track from shrinking */
+.nav-btn {
+  flex-shrink: 0;
+  background: var(--rz-bg-card);
+}
+
+/* Mobile Adjustments for Pagination */
+@media (max-width: 600px) {
+  .pagination {
+    gap: 8px;
+  }
+  
+  .pagination-scroll {
+    /* Make the scroll area dynamically fit the mobile screen width 
+       minus the space needed for the left/right arrows */
+    max-width: calc(100vw - 140px); 
   }
 }

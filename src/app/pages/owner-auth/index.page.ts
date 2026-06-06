@@ -1,11 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router'; // <-- 1. Added ActivatedRoute
+import { Router, ActivatedRoute } from '@angular/router'; 
 import { AuthService } from '../../services/auth.service'; 
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-owner-auth',
   templateUrl: './owner-auth.html',
@@ -30,11 +31,18 @@ export default class OwnerAuthComponent implements OnInit {
   forgotOtpForm!: FormGroup;
   forgotResetForm!: FormGroup;
 
+  // Password Visibility Toggles
+  showLoginPassword = false;
+  showRegisterPassword = false;
+  showConfirmPassword = false;
+  showForgotNewPassword = false;
+  showForgotConfirmPassword = false;
+
   constructor(
     private fb: FormBuilder, 
     private authService: AuthService, 
     private router: Router,
-    private route: ActivatedRoute, // <-- 2. Injected ActivatedRoute here
+    private route: ActivatedRoute, 
     private toastr: ToastrService,
     private cdr: ChangeDetectorRef 
   ) {}
@@ -62,7 +70,7 @@ export default class OwnerAuthComponent implements OnInit {
         Validators.pattern('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&#]).{8,}') 
       ]],
       confirmPassword: ['', Validators.required],
-ownerType: ['Tenant', Validators.required],
+      ownerType: ['Tenant', Validators.required],
       // Advanced Fields
       propertyName: [''],
       alternatePhone: ['', Validators.pattern('^[6-9]\\d{9}$')]
@@ -107,7 +115,7 @@ ownerType: ['Tenant', Validators.required],
     this.isForgotPasswordMode = false;
     this.showOtpStep = false;
     this.loginForm.reset();
-this.registerForm.reset({ ownerType: 'Tenant' });
+    this.registerForm.reset({ ownerType: 'Tenant' });
     this.cdr.detectChanges(); 
   }
 
@@ -124,9 +132,7 @@ this.registerForm.reset({ ownerType: 'Tenant' });
     this.cdr.detectChanges(); 
   }
 
-
   // --- API Integrations via Service ---
-
   onLogin() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
@@ -137,30 +143,20 @@ this.registerForm.reset({ ownerType: 'Tenant' });
     
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
-        // DEBUG 1: Verify exactly what the API is returning
-        console.log('API Response:', res); 
-
-        // Update this condition if your API returns something other than status === 1
         if (res.status === 1) { 
           this.toastr.success('Welcome back!', 'Login Successful');
           
-          // Prevent session saving from silently crashing the function
           try {
             this.authService.saveSession(res.data.user); 
           } catch (error) {
             console.error('Failed to save session data:', error);
           }
 
-          // Check for both 'returnUrl' and 'redirect' just to be safe
           const queryParams = this.route.snapshot.queryParams;
           const returnUrl = queryParams['returnUrl'] || queryParams['redirect'] || '/';
           
-          console.log('Attempting to navigate to:', returnUrl);
-
-          // USE navigateByUrl SO QUERY PARAMETERS ARE PARSED CORRECTLY
           this.router.navigateByUrl(returnUrl).then(success => {
             if (!success) {
-              console.warn('Navigation to returnUrl failed. Falling back to root /');
               this.router.navigateByUrl('/'); 
             }
           });
@@ -186,7 +182,7 @@ this.registerForm.reset({ ownerType: 'Tenant' });
       this.registerForm.markAllAsTouched();
       return;
     }
-this.isSubmitting = true;
+    this.isSubmitting = true;
     this.authService.sendOtp(this.registerForm.value.email).subscribe({
       next: (res) => {
         this.isSubmitting = false;
@@ -196,13 +192,13 @@ this.isSubmitting = true;
         } else {
           this.toastr.error(res.message, 'Failed to send OTP');
         }
-                  this.cdr.detectChanges();
-
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isSubmitting = false;
         console.error('OTP Send error', err);
         this.toastr.error('Failed to send OTP. Please try again.', 'Server Error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -213,6 +209,8 @@ this.isSubmitting = true;
       return;
     }
 
+    this.isSubmitting = true; // Disabled button flag added
+
     const payload = { 
       ...this.registerForm.value, 
       otp: this.otpForm.value.otp 
@@ -220,17 +218,21 @@ this.isSubmitting = true;
     
     this.authService.completeRegistration(payload).subscribe({
       next: (res) => {
+        this.isSubmitting = false; // Release button flag
         if (res.status === 1) {
           this.toastr.success('Your account is ready!', 'Registration Successful');
           this.toggleMode('login');
           this.cdr.detectChanges();
         } else {
           this.toastr.warning(res.message, 'Registration Notice');
+          this.cdr.detectChanges();
         }
       },
       error: (err) => {
+        this.isSubmitting = false; // Release button flag on error
         console.error('Registration error', err);
         this.toastr.error('Registration failed. Please try again.', 'Server Error');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -240,7 +242,7 @@ this.isSubmitting = true;
       this.forgotInitForm.markAllAsTouched();
       return;
     }
-this.isSubmitting = true;
+    this.isSubmitting = true;
     const identifier = this.forgotInitForm.value.identifier;
     this.authService.forgotPasswordInit(identifier).subscribe({
       next: (res) => {
@@ -252,15 +254,16 @@ this.isSubmitting = true;
 
           this.toastr.info(res.message);
           this.cdr.detectChanges();
-
         } else {
-          this.isSubmitting = false;
           this.toastr.error(res.message, 'Account Not Found');
-                    this.cdr.detectChanges();
-
+          this.cdr.detectChanges();
         }
       },
-      error: () => this.toastr.error('Server error. Please try again later.')
+      error: () => {
+        this.isSubmitting = false;
+        this.toastr.error('Server error. Please try again later.');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -277,7 +280,7 @@ this.isSubmitting = true;
       this.forgotResetForm.markAllAsTouched();
       return;
     }
-this.isSubmitting = true;
+    this.isSubmitting = true;
     const payload = {
       email: this.recoveryEmail,
       otp: this.forgotOtpForm.value.otp,
@@ -291,7 +294,6 @@ this.isSubmitting = true;
           this.toastr.success(res.message, 'Success!');
           this.cancelForgotPassword(); 
           this.cdr.detectChanges();
-
         } else {
           this.toastr.error(res.message, 'Reset Failed');
           if (res.message.includes('OTP') || res.message.includes('expired')) {
@@ -300,16 +302,11 @@ this.isSubmitting = true;
           }
         }
       },
-      error: () =>{
-this.isSubmitting = false;
-       this.toastr.error('Server error. Please try again later.')
+      error: () => {
+        this.isSubmitting = false;
+        this.toastr.error('Server error. Please try again later.');
+        this.cdr.detectChanges();
       }
     });
   }
-  // --- ADD THESE NEW VARIABLES ---
-  showLoginPassword = false;
-  showRegisterPassword = false;
-  showConfirmPassword = false;
-  showForgotNewPassword = false;
-  showForgotConfirmPassword = false;
 }
