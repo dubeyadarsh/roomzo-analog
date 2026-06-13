@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone, HostListener, Renderer2 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,32 +8,33 @@ import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router'; 
 import { HttpClient } from '@angular/common/http'; 
 
-import { Subscription, of } from 'rxjs';
-import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators'; 
+import { Subscription, of, forkJoin } from 'rxjs';
+import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators'; 
 
 import { PropertyService, ListingFilter } from '../../services/property.service';
 import { RouteMeta } from '@analogjs/router';
 
 export const routeMeta: RouteMeta = {
-  title: 'Brokerless Rooms, Flats & PG for Rent in Prayagraj, Varanasi & Lucknow',
+  title: 'Roomzo : Trusted Rooms, PG & Flats Near You | No Broker | No Fake Listing',
   meta: [
     { 
+      // Keep under 160 characters! Highlighting top hubs only for readability.
       name: 'description', 
-      content: 'Find verified, agentless rooms, PGs, and flats in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Lucknow. 100% broker-free trusted rental platform.' 
+      content: 'Find 100% broker-free rooms, PGs, and flats for rent in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Pune. Connect directly with owners.' 
     },
     { 
+      // You can go heavier here with famous and non-famous localities.
       name: 'keywords', 
-      content: 'room rent in prayagraj, pg in varanasi near bhu, flat for rent in lucknow, brokerless pg prayagraj, agentless room rental platform, single room katra, best pg site up' 
+      content: 'room rent in prayagraj, pg in varanasi, flat for rent in pune, brokerless pg, katra room rent, civil lines flats, allahpur pg, mumfordganj, teliyarganj, naini, jhunsi, dhoomanganj, lanka varanasi pg, bhu rooms, assi ghat, sigra, mahmoorganj, pandeypur, sarnath, hinjewadi pg, viman nagar flats, kothrud rooms, wakad, baner, zero brokerage roomzo, agentless rental platform' 
     },
     // Open Graph for WhatsApp/Facebook link previews
-    { property: 'og:title', content: '100% Brokerless Rooms & PG in UP | Trusted Platform' },
-    { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats.' },
+    { property: 'og:title', content: '100% Brokerless Rooms & PG in UP & Pune | Roomzo' },
+    { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats in Prayagraj, Varanasi, and Pune.' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:image', content: 'https://yourdomain.com/assets/seo-banner.webp' }, // Make sure to add a real banner image
+    { property: 'og:image', content: 'https://www.roomzo.in/favicon.ico' }, // Ensure this URL points to a real, attractive banner image
   ]
 };
 
-// ... your existing component code ...
 @Component({
   selector: 'app-explore-listings',
   standalone: true,
@@ -62,14 +63,15 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     minPrice: 0,
     maxPrice: 50000,
     propertyType: 'Any',
-    bedrooms: 'Any'
+    bedrooms: 'Any',
+    sortBy: 'nearest' // NEW Default
   };
 
   availabilityFilter: 'available' | 'all' = 'all';
 
   // Pagination
   currentPage = 0;
-  pageSize = 6;
+  pageSize = 15;
   totalPages = 0;
   pagesArray: (number | string)[] = [];
   
@@ -81,9 +83,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     'Search "Civil lines, Prayagraj"',
     'Search "Mumfordganj, Prayagraj"',
     'Search "Teliyarganj, Prayagraj"',
-    'Search "George Town, Prayagraj"',
+    'Search "Viman Nagar, Pune"', // Pune context
     'Search "Katra, Prayagraj"',
-    'Search "Allahpur, Prayagraj"',
+    'Search "Lanka, Varanasi"',  // Varanasi context
     'Search "Kydganj, Prayagraj"',
     'Search "Naini, Prayagraj"',
   ];
@@ -92,8 +94,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   private placeholderIndex: number = 0;
   private typingTimeout: any;
   private isDestroyed = false;
-  private activeCityFilter: string = 'Prayagraj';
-  private activeStateFilter: string = 'Uttar Pradesh';
+  private documentClickListener: (() => void) | null = null;
+  
+  isDropdownOpen = false;
 
   constructor(
     private propertyService: PropertyService,
@@ -102,31 +105,44 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private http: HttpClient,
     private ngZone: NgZone,
-    @Inject(PLATFORM_ID) private platformId: Object 
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private renderer: Renderer2
   ) {}
 
   ngOnInit(): void {
     this.typeEffect();
     
-    // Real-time OpenStreetMap Locality Search
+    // Real-time OpenStreetMap Locality Search using forkJoin for both UP and MH
     this.searchControl.valueChanges.pipe(
       debounceTime(400),
       distinctUntilChanged(),
-      filter(val => typeof val === 'string'), 
+      filter((val): val is string => typeof val === 'string' && val.trim().length > 2), 
       switchMap(val => {
-        if (!val || val.length < 2) {
-          this.selectedLocation = null;
-          return of([]); 
-        }
+        const text = val as string;
 
-        const queryParts = [val as string];
-        if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
-        if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
+        // 1. Prepare queries for both target states
+        const upQuery = `${text}, Uttar Pradesh`;
+        const mhQuery = `${text}, Maharashtra`;
+
+        // 2. Build the Nominatim URLs
+        const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+        const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         
-        const searchQuery = queryParts.join(', ');
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
-        
-        return this.http.get<any[]>(url).pipe(catchError(() => of([])));
+        // 3. Execute both calls in parallel using forkJoin
+        return forkJoin({
+          up: this.http.get<any[]>(upUrl).pipe(catchError(() => of([]))),
+          mh: this.http.get<any[]>(mhUrl).pipe(catchError(() => of([])))
+        }).pipe(
+          map(({ up, mh }) => {
+            // Combine results from both states
+            const combined = [...up, ...mh];
+            
+            // Sort by OpenStreetMap's relevance 'importance' score
+            return combined
+              .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+              .slice(0, 6); // Keep the top 6 most relevant results overall
+          })
+        );
       })
     ).subscribe(results => {
       this.filteredCities = results || [];
@@ -135,12 +151,15 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
     this.route.queryParams.subscribe(params => {
       if (Object.keys(params).length > 0) {
-        if (params['city'] && params['state'] ) {
+        if (params['city'] && params['state']) {
           const city = params['city'];
           const state = params['state'];
           const street = params['street'] ?? '';
           this.selectedLocation = { city, state };
-          this.searchControl.setValue(`${street}, ${city}, ${state}`, { emitEvent: false });
+          
+          // Only show the street and city in the bar if possible to keep it clean
+          const displayVal = street ? `${street}, ${city}` : city;
+          this.searchControl.setValue(displayVal, { emitEvent: false });
           
           this.filters.city = city;
           this.filters.state = state;
@@ -162,6 +181,17 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
       this.loadListings();
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.documentClickListener = this.renderer.listen('document', 'click', (event: Event) => {
+        const target = event.target as HTMLElement;
+        const dropdownElement = document.querySelector('.pro-dropdown');
+        if (this.isDropdownOpen && dropdownElement && !dropdownElement.contains(target)) {
+          this.isDropdownOpen = false;
+          this.cd.detectChanges();
+        }
+      });
+    }
   }
 
   ngOnDestroy(): void {
@@ -171,6 +201,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+    if (this.documentClickListener) {
+      this.documentClickListener();
     }
   }
 
@@ -261,7 +294,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any' };
+    this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'nearest' };    
     this.searchControl.setValue('');
     this.selectedLocation = null;
     this.availabilityFilter = 'available';
@@ -276,7 +309,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   calculatePagination(): void {
-    // UPDATED: Generate a simple array of all pages so CSS can force them to scroll horizontally
+    // Generate a simple array of all pages so CSS can force them to scroll horizontally
     this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
   }
 
@@ -357,7 +390,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     return typeof val;
   }
 
-  // UPDATED: Mouse wheel horizontal scroll logic
+  // Mouse wheel horizontal scroll logic
   onScroll(event: WheelEvent, element: HTMLElement): void {
     const canScrollHorizontally = element.scrollWidth > element.clientWidth;
     
@@ -366,16 +399,36 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       element.scrollLeft += event.deltaY;
     }
   }
-  // NEW: Button click horizontal scroll logic
+  
+  // Button click horizontal scroll logic
   scrollPagination(element: HTMLElement, direction: 'left' | 'right'): void {
-    // 144px is roughly the width of 3 buttons (40px each + 8px gaps)
-    // You can increase this number if you want it to scroll further per click!
     const scrollAmount = 144; 
     
     if (direction === 'left') {
       element.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     } else {
       element.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
+
+  // Simple toggle – no stopPropagation needed
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+    this.cd.detectChanges();  // Force view update
+  }
+
+  selectSort(value: string) {
+    this.filters.sortBy = value;
+    this.isDropdownOpen = false;
+    this.applyFilters();
+    this.cd.detectChanges();
+  }
+
+  getSortLabel(): string {
+    switch(this.filters.sortBy) {
+      case 'latest': return 'Latest First';
+      case 'oldest': return 'Oldest First';
+      default: return 'Nearest First';
     }
   }
 }

@@ -513,3 +513,36 @@
   color: var(--rz-text-main);
   margin: 0 0 8px 0;
 }
+
+/* ========================================================
+   ADVERTISEMENT BANNER
+======================================================== */
+.ad-banner-container {
+  margin-top: 60px;
+  width: 100%;
+  border-radius: var(--rz-radius);
+  overflow: hidden;
+  box-shadow: var(--rz-shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--rz-bg-card);
+  cursor: pointer; /* Optional: If you plan to make it clickable later */
+}
+
+.ad-banner-container:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--rz-shadow-lg);
+}
+
+.promo-banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .ad-banner-container {
+    margin-top: 40px;
+    border-radius: var(--rz-radius-sm); /* Slightly smaller corners on mobile */
+  }
+}

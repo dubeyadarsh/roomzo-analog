@@ -468,3 +468,53 @@ div.truncated {
     background-color: var(--rz-primary);
   }
 }
+
+/* ========================================================
+   META & QUICK ACTIONS ROW (Mobile Optimization)
+/* ========================================================
+   INLINE META & ACTIONS (Mobile Optimization)
+======================================================== */
+.mobile-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.mobile-meta-row .posted-info {
+  margin-top: 0; /* Override default margin so it aligns nicely */
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon-only-btn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  color: var(--rz-primary);
+}
+
+.icon-only-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.icon-only-btn.report-icon {
+  color: #ef4444; /* Standard red for reporting */
+}
+
+.icon-only-btn:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}

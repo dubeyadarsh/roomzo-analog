@@ -2,11 +2,11 @@
   
   <div class="input-group">
     <mat-icon class="search-icon">search</mat-icon>
-  <input type="search" 
-       [formControl]="searchControl" 
-       [matAutocomplete]="auto" 
-       [placeholder]="currentPlaceholder" 
-       aria-label="Search">
+    <input type="search" 
+         [formControl]="searchControl" 
+         [matAutocomplete]="auto" 
+         [placeholder]="currentPlaceholder" 
+         aria-label="Search">
            
     <mat-autocomplete #auto="matAutocomplete" 
                       [displayWith]="displayCity" 

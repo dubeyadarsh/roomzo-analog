@@ -10,6 +10,7 @@ export interface ListingFilter {
   propertyType?: string;
   bedrooms?: string | number;
   searchQuery?: string; // This handles the text input
+  sortBy?: string; // NEW
 }
 export interface PropertyListing {
   id: string;
@@ -213,7 +214,7 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
       // Geo-spatial sorting parameters ONLY
       if (filters.lat) params = params.set('lat', filters.lat);
       if (filters.lng) params = params.set('lng', filters.lng);
-      
+      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
       // DELETED the fallback logic for city/state here. 
       // The backend /searchWithFilters endpoint does not accept them.
     }

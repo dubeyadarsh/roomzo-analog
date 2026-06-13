@@ -33,7 +33,7 @@ h1, h2, h3, h4, p { margin: 0; }
   color: white;
   text-align: center;
 }
-.hero-container { max-width: 900px; margin: 0 auto; padding: 0 20px; width: 100%; }
+.hero-container { max-width: 900px; margin: 5px auto; padding: 0 20px; width: 100%; }
 .hero-container h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; }
 .hero-container p { color: rgba(255,255,255,0.8); margin-bottom: 32px; font-size: 1.1rem; }
 
@@ -111,14 +111,13 @@ h1, h2, h3, h4, p { margin: 0; }
   box-shadow: 0 4px 10px rgba(25, 97, 83, 0.2);
 }
 
-/* --- 5. Results & Property Cards --- */
 .results-header { 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   margin-bottom: 24px; 
-  flex-wrap: wrap; 
-  gap: 12px;
+  gap: 16px;
+  width: 100%;
 }
 .results-count { font-size: 1.1rem; color: var(--rz-text-muted); }
 .results-count strong { color: var(--rz-text-main); }
@@ -475,3 +474,169 @@ h1, h2, h3, h4, p { margin: 0; }
     max-width: calc(100vw - 140px); 
   }
 }
+/* --- Desktop and Base Styles --- */
+/* --- Pro Custom Dropdown Container --- */
+.pro-dropdown {
+  position: relative;
+  width: 160px;
+  user-select: none;
+}
+
+/* The Box */
+.dropdown-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius-sm, 8px);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--rz-text-main);
+  background: white;
+  cursor: pointer;
+  box-shadow: var(--rz-shadow-sm);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-trigger:hover, .dropdown-trigger.open {
+  border-color: var(--rz-primary);
+  box-shadow: 0 0 0 3px rgba(25, 97, 83, 0.15); /* Website primary focus ring */
+}
+
+/* Custom Arrow Animation */
+.dropdown-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--rz-text-muted);
+  transition: transform 0.2s ease;
+}
+.dropdown-trigger.open .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+/* The Popup Menu */
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius-sm, 8px);
+  box-shadow: var(--rz-shadow-md);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeInDown 0.2s ease-out;
+}
+
+/* The Options */
+.dropdown-item {
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--rz-text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+/* Beautiful Custom Hover - Light Primary Background */
+.dropdown-item:hover {
+  background: rgba(25, 97, 83, 0.08); 
+  color: var(--rz-primary);
+}
+
+/* Beautiful Custom Selected - Solid Primary Background */
+.dropdown-item.active {
+  background: var(--rz-primary); 
+  color: white;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================================
+   MOBILE OPTIMIZATIONS 
+======================================================== */
+@media (max-width: 900px) {
+  .results-header {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .sort-container { 
+    flex: 1; 
+    max-width: 65%; 
+    /* Inherit the no-wrap from base styles */
+  }
+  
+  .pro-dropdown { 
+    flex: 1;         /* Let it fill remaining space next to the label */
+    width: auto;     /* Do NOT use 100% here, or it breaks the line */
+  } 
+
+  .dropdown-trigger {
+    padding: 9px 12px;
+    font-size: 0.85rem;
+  }
+
+  .mobile-filter-toggle {
+    display: flex !important;
+    margin: 0 !important;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    height: 38px;
+    align-items: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .sort-label { display: none; }
+}
+.sort-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.sort-label {
+  white-space: nowrap;
+}
+
+.pro-dropdown {
+  flex-shrink: 0;
+  min-width: 160px;
+  width: auto;
+}
+/* Force dropdown to appear above everything */
+.pro-dropdown {
+  position: relative;
+  z-index: 10;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 160px;
+  background: white;
+  border: 1px solid var(--rz-border);
+  border-radius: var(--rz-radius-sm, 8px);
+  box-shadow: var(--rz-shadow-md);
+  z-index: 1000;        /* High value */
+  overflow: visible;    /* No clipping */
+  display: block;       /* Ensure it's a block when visible */
+}
+
+/* Debug: if you want to test visibility, remove *ngIf temporarily */
+

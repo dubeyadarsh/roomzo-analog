@@ -9,9 +9,9 @@ import { ToastrService } from 'ngx-toastr';
 import { HttpClient } from '@angular/common/http';
 import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators';
-import { of } from 'rxjs';
-
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
+import { Router } from '@angular/router'; // <-- Add this import
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
 };
@@ -84,16 +84,17 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
       { label: 'Washing Machine', formControlName: 'washingMachine', icon: 'local_laundry_service' }
     ]}
   ];
+  
   private map: L.Map | undefined;
   private marker: L.Marker | undefined;
-private activeCityFilter: string = 'Prayagraj';
-private activeStateFilter: string = 'Uttar Pradesh';
+
   constructor(
     private fb: FormBuilder, 
     private propertyService: PropertyService, 
     private cd: ChangeDetectorRef,
     private toastr: ToastrService,
     private http: HttpClient,
+    private router: Router, // <-- Add this line
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -114,7 +115,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
           longitude: [null, Validators.required]
         })
       }),
-      // NEW: Form controls matching the Tier-2 amenities
+      // Form controls matching the Tier-2 amenities
       amenities: this.fb.group({
         bed: [false], almirah: [false], studyTable: [false], fanLight: [false],
         roWater: [false], inverter: [false], cooling: [false], geyser: [false],
@@ -146,29 +147,42 @@ private activeStateFilter: string = 'Uttar Pradesh';
       }
     });
 
+    // Real-time OpenStreetMap Locality Search using forkJoin for UP and MH
     this.searchControl.valueChanges.pipe(
-  debounceTime(500), 
-  distinctUntilChanged(),
-  filter(val => (val || '').length > 2), 
-  switchMap(val => {
-    
-    // Dynamically build the search query to handle missing values safely
-    const queryParts = [val!];
-    if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
-    if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
-    
-    // Join the parts with a comma
-      const searchQuery = queryParts.join(', ');
-    
-    // Encode the combined search query and include countrycodes=in
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
-    
-      return this.http.get<any[]>(url).pipe(catchError(() => of([]))); 
-  })
-).subscribe(results => {
-  this.searchResults = results || [];
-  this.cd.detectChanges();
-});
+      debounceTime(500), 
+      distinctUntilChanged(),
+      filter((val): val is string => typeof val === 'string' && val.trim().length > 2), 
+      switchMap(val => {
+        const text = val as string;
+        
+        // Prepare queries for both target states
+        const upQuery = `${text}, Uttar Pradesh`;
+        const mhQuery = `${text}, Maharashtra`;
+        
+        // Build the Nominatim URLs
+        const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+        const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=5`;
+        
+        // Execute both calls in parallel using forkJoin
+        return forkJoin({
+          up: this.http.get<any[]>(upUrl).pipe(catchError(() => of([]))),
+          mh: this.http.get<any[]>(mhUrl).pipe(catchError(() => of([])))
+        }).pipe(
+          map(({ up, mh }) => {
+            // Combine results from both states
+            const combined = [...up, ...mh];
+            
+            // Sort by OpenStreetMap's relevance 'importance' score
+            return combined
+              .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+              .slice(0, 6); // Keep the top 6 most relevant results overall
+          })
+        );
+      })
+    ).subscribe(results => {
+      this.searchResults = results || [];
+      this.cd.detectChanges();
+    });
 
     if (isPlatformBrowser(this.platformId)) {
       this.fixLeafletIcons();
@@ -410,23 +424,22 @@ private activeStateFilter: string = 'Uttar Pradesh';
       
       this.isSubmitting = true;
 
-      // 3. Send to Service
+     // 3. Send to Service
       this.propertyService.saveListing(payload).subscribe({
-        next: (response) => {
+        next: (response: any) => {
           this.toastr.success('Listing uploaded successfully!', 'Success');
-          
-          // 4. Reset Form and ALL tracking arrays
-          this.listingForm.reset();
-          this.imagePreviews = [];
-          this.selectedFiles = [];
-          this.originalFiles = []; // NEW: Clears the un-watermarked files
-          this.currentStep = 1;
-          
-          if (isPlatformBrowser(this.platformId)) {
-            window.scrollTo(0, 0);
-          }
-          
           this.isSubmitting = false;
+          
+          // Assuming your backend returns the new object in response.data or directly in response
+          const newListingId = response?.data?.listingId || response?.listingId;
+
+          if (newListingId) {
+            // Navigate directly to the new property details page
+            this.router.navigate(['/property-details', newListingId]);
+          } else {
+            // Fallback just in case the ID isn't returned
+            this.router.navigate(['/explore-listing']);
+          }
         },
         error: (error) => {
           console.error('Error:', error);
@@ -513,6 +526,7 @@ private activeStateFilter: string = 'Uttar Pradesh';
       reader.readAsDataURL(file);
     });
   }
+  
   private async fixLeafletIcons() {
     const leaflet = await import('leaflet');
     const iconDefault = leaflet.icon({

@@ -77,6 +77,74 @@
       </div>
     </div>
 
+
+    <div class="section-header" *ngIf="isLoadingNearby || nearbyListings.length > 0" style="margin-top: 60px;">
+      <h2>Properties Near You</h2>
+    </div>
+
+    <div class="loader-container" *ngIf="isLoadingNearby">
+      <div class="modern-spinner"></div>
+      <p class="loader-text">Locating properties around you...</p>
+    </div>
+
+    <div class="carousel-container" *ngIf="!isLoadingNearby && nearbyListings.length > 0">
+      
+      <button class="carousel-nav carousel-prev" (click)="scrollNearbyLeft()" [disabled]="nearbyIsAtStart" [attr.aria-label]="'Previous nearby listings'">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <div class="listings-grid" #nearbyCarouselGrid (scroll)="onNearbyScroll()">
+        <div class="listing-card" *ngFor="let item of nearbyListings">
+          
+          <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
+            <img [src]="item.image" [alt]="item.title">
+            
+            <div class="verified-badge">
+              <mat-icon>check</mat-icon> Owner Verified
+            </div>
+
+            <div class="posted-date-badge">
+              <mat-icon>schedule</mat-icon> {{ formatPostedDate(item.postedDate) }}
+            </div>
+            
+            <div class="price-overlay">
+              <span class="price-amount">{{ formatPrice(item.price) }}</span>
+              <span class="price-month" *ngIf="item.priceUnit">/ {{ item.priceUnit }}</span>
+            </div>
+          </div>
+
+          <div class="card-content" (click)="viewDetails(item.id)">
+            <h3>{{ item.title }}</h3>
+            
+            <div class="location-text">
+              <mat-icon>location_on</mat-icon> {{ item.location }}
+            </div>
+
+            <div class="specs-row">
+              <span><mat-icon>bed</mat-icon> {{ item.specs.beds }} Bed</span>
+              <span><mat-icon>bathtub</mat-icon> {{ item.specs.baths }} Bath</span>
+              <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
+            </div>
+
+            <div class="action-pill-container">
+              <button class="action-btn left" (click)="scrollToContact(item.id)">
+                <mat-icon>message</mat-icon> Contact Us
+              </button>
+              <div class="btn-divider"></div>
+              <button class="action-btn right" (click)="viewDetails(item.id)">
+                <mat-icon>info</mat-icon> View Details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="carousel-nav carousel-next" (click)="scrollNearbyRight()" [disabled]="nearbyIsAtEnd" [attr.aria-label]="'Next nearby listings'">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+
     <div class="bottom-features-row">
       <div class="feature-box">
         <mat-icon class="feature-icon">verified_user</mat-icon>
@@ -99,8 +167,15 @@
       </div>
     </div>
 
-  </div>
-  
-  <app-contact></app-contact>
+
+    <div class="ad-banner-container">
+      <picture>
+        <source media="(max-width: 768px)" srcset="rz-banner-phone.png">
+        
+      <img src="rz-banner-desktop.png" alt="Looking for Room & PG with Pocket-Friendly price" class="promo-banner-img">
+      </picture>
+    </div>
+
+  </div> <app-contact></app-contact>
   
 </section>

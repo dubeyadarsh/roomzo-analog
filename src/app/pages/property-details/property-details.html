@@ -10,10 +10,6 @@
     <button class="mobile-floating-btn back-btn" routerLink="/explore-listing">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <button class="mobile-floating-btn share-btn" (click)="shareProperty()">
-      <mat-icon>ios_share</mat-icon>
-    </button>
-
     <div class="main-image-wrapper">
       <button class="nav-arrow prev-arrow" (click)="prevPhoto($event)" *ngIf="property.photos?.length > 1">
         <mat-icon>chevron_left</mat-icon>
@@ -64,7 +60,7 @@
     
     <header class="property-header">
       <div class="header-content">
-        <div class="title-section">
+        <div class="title-section" style="width: 100%;">
           <div class="breadcrumbs desktop-only">
             <a routerLink="/explore-listing">Explore</a> &gt; {{ property.city }}
           </div>
@@ -73,11 +69,23 @@
             <mat-icon>location_on</mat-icon>
             {{ property.street }}, {{ property.city }}, {{ property.state }}
           </p>
-          <div class="posted-info" *ngIf="property.createdOn">
-            <mat-icon>schedule</mat-icon>
-            <span>Posted {{ property.createdOn | date: 'MMM d, y' }}</span>
+          
+          <div class="mobile-meta-row">
+            <div class="posted-info" *ngIf="property.createdOn">
+              <mat-icon>schedule</mat-icon>
+              <span>Posted {{ property.createdOn | date: 'MMM d, y' }}</span>
+            </div>
+            
+            <div class="inline-actions mobile-only">
+              <button class="icon-only-btn" (click)="shareProperty()" aria-label="Share">
+                <mat-icon>ios_share</mat-icon>
+              </button>
+              <button class="icon-only-btn report-icon" (click)="reportProperty()" aria-label="Report">
+                <mat-icon>flag</mat-icon>
+              </button>
+            </div>
           </div>
-        </div>
+          </div>
         <div class="action-buttons desktop-only">
           <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
             <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
@@ -201,11 +209,12 @@
             {{ property.isRented ? 'Currently Rented' : 'Available Now' }}
           </div>
           
-<button class="btn-primary full-width mt-16" 
-        [ngClass]="{'pulse-highlight': highlightContact}" 
-        (click)="contactAgent()">
-  Contact Owner
-</button>          <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
+          <button class="btn-primary full-width mt-16" 
+                  [ngClass]="{'pulse-highlight': highlightContact}" 
+                  (click)="contactAgent()">
+            Contact Owner
+          </button>          
+          <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
         </div>
 
         <div class="agent-card">
@@ -219,12 +228,6 @@
         </div>
       </div>
 
-    </div>
-
-    <div class="mobile-report-section mobile-only mt-24">
-      <button class="mobile-report-btn" (click)="reportProperty()">
-        <mat-icon>flag</mat-icon> Report this listing
-      </button>
     </div>
 
     <section class="similar-section" *ngIf="similarProperties.length > 0">
@@ -249,11 +252,12 @@
     <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
     <div class="status" [class.available]="!property.isRented">{{ property.isRented ? 'Rented' : 'Available' }}</div>
   </div>
-<button class="btn-primary" 
-        [ngClass]="{'pulse-highlight': highlightContact}" 
-        (click)="contactAgent()">
-  Contact Owner
-</button></div>
+  <button class="btn-primary" 
+          [ngClass]="{'pulse-highlight': highlightContact}" 
+          (click)="contactAgent()">
+    Contact Owner
+  </button>
+</div>
 
 <div class="not-found-state" *ngIf="!isLoading && !property">
   <mat-icon>search_off</mat-icon>

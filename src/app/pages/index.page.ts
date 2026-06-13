@@ -32,10 +32,13 @@ interface Listing {
 })
 export default class HomeComponent implements OnInit {
   @ViewChild('carouselGrid') carouselGrid!: ElementRef;
-  
+  @ViewChild('nearbyCarouselGrid', { static: false }) nearbyCarouselGrid!: ElementRef;
   listings: Listing[] = [];
   isLoading: boolean = true;
-  
+  nearbyListings: Listing[] = [];
+  isLoadingNearby: boolean = false;
+  nearbyIsAtStart: boolean = true;
+  nearbyIsAtEnd: boolean = false;
   currentCarouselIndex: number = 0;
   carouselItemsToShow: number = 3; 
   isAtStart: boolean = true;
@@ -53,6 +56,7 @@ export default class HomeComponent implements OnInit {
     afterNextRender(() => {
       this.calculateItemsToShow();
       this.fetchRecentListings();
+      this.fetchNearbyProperties(); // NEW: Trigger location request
       if (isPlatformBrowser(this.platformId)) {
         window.addEventListener('resize', () => this.calculateItemsToShow());
       }
@@ -214,5 +218,65 @@ formatPostedDate(dateString?: string): string {
     this.router.navigate(['/property-details', id], { 
       queryParams: { focusContact: 'true' } 
     });
+  }
+  fetchNearbyProperties(): void {
+    if (!isPlatformBrowser(this.platformId) || !('geolocation' in navigator)) return;
+
+    this.isLoadingNearby = true;
+    
+    // Request User Location
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        // Call our backend with the coordinates and 'nearest' sort
+        this.propertyService.searchListingsWithFilters(0, 5, { lat, lng, sortBy: 'nearest' }).subscribe(
+          (res: any) => {
+            if (res.listings && res.listings.length > 0) {
+              this.nearbyListings = mapBackendListingsToUi(res.listings);
+            }
+            this.isLoadingNearby = false;
+            this.cd.detectChanges();
+            setTimeout(() => this.onNearbyScroll(), 100);
+          },
+          (err) => {
+            console.error('Error fetching nearby listings', err);
+            this.isLoadingNearby = false;
+            this.cd.detectChanges();
+          }
+        );
+      },
+      (error) => {
+        // If user denies location, it fails silently and section remains hidden
+        console.warn('Geolocation denied or failed', error);
+        this.isLoadingNearby = false;
+        this.cd.detectChanges();
+      }
+    );
+  }
+
+  onNearbyScroll(): void {
+    if (!this.nearbyCarouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.nearbyCarouselGrid.nativeElement;
+    this.nearbyIsAtStart = el.scrollLeft <= 0;
+    this.nearbyIsAtEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
+    this.cd.detectChanges();
+  }
+
+  scrollNearbyLeft(): void {
+    if (!this.nearbyCarouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.nearbyCarouselGrid.nativeElement;
+    const cardWidth = el.querySelector('.listing-card').offsetWidth;
+    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+    el.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' });
+  }
+
+  scrollNearbyRight(): void {
+    if (!this.nearbyCarouselGrid || !isPlatformBrowser(this.platformId)) return;
+    const el = this.nearbyCarouselGrid.nativeElement;
+    const cardWidth = el.querySelector('.listing-card').offsetWidth;
+    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
+    el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
   }
 }

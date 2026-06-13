@@ -26,7 +26,6 @@
   --rz-shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
   --rz-shadow-md: 0 10px 25px rgba(0,0,0,0.1);
 }
-/* ... Keep the rest of your styles.css exactly the same ... */
 
 * { box-sizing: border-box; }
 
@@ -207,4 +206,8 @@ label{display:block;font-weight:600;color:var(--rz-primary);margin-bottom:6px}
     transform: scale(1.15);
     opacity: 0;
   }
+}
+
+#toast-container {
+  z-index: 999999 !important; /* Forces toaster to sit above the Chatbox (z-index: 999) */
 }

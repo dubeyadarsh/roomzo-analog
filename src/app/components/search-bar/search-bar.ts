@@ -6,8 +6,8 @@ import { MatAutocompleteModule } from "@angular/material/autocomplete";
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select'; 
 import { HttpClient } from '@angular/common/http';
-import { of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-search-bar',
@@ -35,25 +35,23 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     'Search "Civil lines, Prayagraj"',
     'Search "Mumfordganj, Prayagraj"',
     'Search  "Teliyarganj, Prayagraj"',
-    'Search  "George Town, Prayagraj"',
+    'Search  "Viman Nagar, Pune"', // Added Pune context
     'Search  "Katra, Prayagraj"',
-    'Search  "Allahpur, Prayagraj"',
+    'Search  "Lanka, Varanasi"',  // Added Varanasi context
     'Search  "Kydganj, Prayagraj"',
     'Search  "Naini, Prayagraj"',
-  
   ];
   currentPlaceholder: string = '';
   private charIndex: number = 0;
   private placeholderIndex: number = 0;
   private typingTimeout: any;
   private isDestroyed = false;
-private activeCityFilter: string = 'Prayagraj';
-private activeStateFilter: string = 'Uttar Pradesh';
+
   constructor(
     private router: Router, 
     private http: HttpClient,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef   // 🔥 Forces UI update for placeholder
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -61,33 +59,41 @@ private activeStateFilter: string = 'Uttar Pradesh';
     this.setupAutocomplete();
   }
 
- private setupAutocomplete() {
-  this.searchControl.valueChanges.pipe(
-    debounceTime(400),
-    distinctUntilChanged(),
-    filter((val): val is string => typeof val === 'string' && val.length > 2),
-    switchMap(val => {
-      
-      // Dynamically build the search query array to handle missing values safely
-      const queryParts = [val];
-      if (this.activeCityFilter) queryParts.push(this.activeCityFilter);
-      if (this.activeStateFilter) queryParts.push(this.activeStateFilter);
-      
-      // Join the parts with a comma (e.g., "Station, Prayagraj, Uttar Pradesh")
-      const searchQuery = queryParts.join(', ');
+  private setupAutocomplete() {
+    this.searchControl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged(),
+      filter((val): val is string => typeof val === 'string' && val.length > 2),
+      switchMap(val => {
+        // 1. Prepare queries for both target states
+        const upQuery = `${val}, Uttar Pradesh`;
+        const mhQuery = `${val}, Maharashtra`;
+
+        // 2. Build the Nominatim URLs
+        const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=7`;
+        const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=7`;
         
-      // URL encode the combined search query
-      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&addressdetails=1&countrycodes=in&limit=5`;
-      
-      return this.http.get<any[]>(url).pipe(
-        catchError(() => of([]))
-      );
-    })
-  ).subscribe(results => {
-    this.filteredCities = results || [];
-    this.cdr.markForCheck();
-  });
-}
+        // 3. Execute both calls in parallel using forkJoin
+        return forkJoin({
+          up: this.http.get<any[]>(upUrl).pipe(catchError(() => of([]))),
+          mh: this.http.get<any[]>(mhUrl).pipe(catchError(() => of([])))
+        }).pipe(
+          map(({ up, mh }) => {
+            // Combine results from both states
+            const combined = [...up, ...mh];
+            
+            // Sort by OpenStreetMap's relevance 'importance' score
+            return combined
+              .sort((a, b) => (b.importance || 0) - (a.importance || 0))
+              .slice(0, 6); // Keep the top 6 most relevant results overall
+          })
+        );
+      })
+    ).subscribe(results => {
+      this.filteredCities = results || [];
+      this.cdr.markForCheck();
+    });
+  }
 
   ngOnDestroy() {
     this.isDestroyed = true;

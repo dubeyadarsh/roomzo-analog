@@ -17,6 +17,7 @@ import { AnalyticsService } from './services/analytics.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ComingSoonModalComponent } from './components/coming-soon/coming-soon-modal';
 import { isPlatformBrowser } from '@angular/common';
+import { ChatBotComponent } from "./components/chat-bot/chat-bot";
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -25,8 +26,9 @@ import { isPlatformBrowser } from '@angular/common';
     HeaderComponent,
     FooterComponent,
     CommonModule,
-    ChatDrawerComponent
-  ],
+    ChatDrawerComponent,
+    ChatBotComponent
+],
   template: `
     <div *ngIf="isRouteLoading" class="global-loader"></div>
 
@@ -39,6 +41,7 @@ import { isPlatformBrowser } from '@angular/common';
     <app-footer></app-footer>
 
     <app-chat-drawer></app-chat-drawer>
+     <app-chat-bot></app-chat-bot>
   `,
   styles: [`
     .global-loader {
