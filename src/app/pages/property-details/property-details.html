@@ -177,7 +177,22 @@
         </section>
         
         <div class="divider"></div>
-
+<section class="info-block safety-section">
+          <div class="safety-card">
+            <div class="safety-header">
+              <mat-icon class="shield-icon">gpp_maybe</mat-icon>
+              <h3>Tenant Safety Tips</h3>
+            </div>
+            <ul class="safety-list">
+              <li><mat-icon>verified_user</mat-icon> Meet in a public place first</li>
+              <li><mat-icon>money_off</mat-icon> Never pay advance without visiting the property</li>
+              <li><mat-icon>fact_check</mat-icon> Verify owner and property details carefully</li>
+              <li><mat-icon>history_edu</mat-icon> Read the agreement before signing</li>
+              <li><mat-icon>psychology</mat-icon> Trust your instincts and stay alert</li>
+            </ul>
+          </div>
+        </section>
+        <div class="divider"></div>
         <section class="info-block">
           <div class="map-header-row">
             <div>
@@ -272,6 +287,10 @@
       <button class="close-btn" (click)="closeContactModal()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="modal-body">
+      <div class="mini-safety-alert">
+        <mat-icon>warning</mat-icon>
+        <p><strong>Protect yourself:</strong> Never transfer money or pay an advance without visiting the property and meeting the owner.</p>
+      </div>
       <div class="owner-profile">
         <div class="avatar-large">{{ ownerDetails.name.charAt(0) | uppercase }}</div>
         <h4>{{ ownerDetails.name }}</h4>

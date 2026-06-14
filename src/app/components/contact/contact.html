@@ -27,14 +27,22 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label>Subject</label>
-            <mat-select formControlName="subject" placeholder="Select an inquiry type" class="custom-contact-select" panelClass="custom-select-panel">
-              <mat-option value="rent">Renting</mat-option>
-              <mat-option value="list">Listing a Property</mat-option>
-              <mat-option value="general">General Question</mat-option>
-            </mat-select>
-            <div class="error" *ngIf="contactForm.get('subject')?.touched && contactForm.get('subject')?.invalid">Please select a subject</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" formControlName="phone" placeholder="Your phone number">
+              <div class="error" *ngIf="contactForm.get('phone')?.touched && contactForm.get('phone')?.invalid">Valid phone number required</div>
+            </div>
+
+            <div class="form-group">
+              <label>Subject</label>
+              <mat-select formControlName="subject" placeholder="Select an inquiry type" class="custom-contact-select" panelClass="custom-select-panel">
+                <mat-option value="rent">Renting</mat-option>
+                <mat-option value="list">Listing a Property</mat-option>
+                <mat-option value="general">General Question</mat-option>
+              </mat-select>
+              <div class="error" *ngIf="contactForm.get('subject')?.touched && contactForm.get('subject')?.invalid">Please select a subject</div>
+            </div>
           </div>
 
           <div class="form-group">

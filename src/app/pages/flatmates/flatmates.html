@@ -64,6 +64,10 @@
               <button class="btn-message" (click)="messageOwner(mate.userId, mate.name)">
                 <mat-icon>message</mat-icon>
               </button>
+            } @else {
+              <button class="btn-delete" (click)="openDeleteModal(mate.id)" title="Delete your post">
+                <mat-icon>delete</mat-icon>
+              </button>
             }
           </div>
 
@@ -111,4 +115,26 @@
     }
 
   </main>
+  @if (showDeleteModal) {
+    <div class="delete-modal-overlay fade-in" (click)="cancelDelete()">
+      <div class="delete-modal-card scale-in" (click)="$event.stopPropagation()">
+        
+        <div class="modal-icon-circle">
+          <mat-icon>delete_outline</mat-icon>
+        </div>
+        
+        <h3 class="modal-title">Delete Flatmate Post?</h3>
+        <p class="modal-desc">
+          Are you sure you want to permanently delete this post? This action cannot be undone and it will be removed from all feeds.
+        </p>
+
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" (click)="cancelDelete()">Cancel</button>
+          <button class="btn-modal-confirm" (click)="confirmDelete()">Delete Permanently</button>
+        </div>
+
+      </div>
+    </div>
+  }
+
 </div>

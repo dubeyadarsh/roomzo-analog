@@ -623,3 +623,216 @@
   width: 22px;
   height: 22px;
 }
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.delete-modal-card {
+  background: var(--rz-bg-card, #ffffff);
+  width: 100%;
+  max-width: 400px;
+  border-radius: 24px;
+  padding: 32px 24px 24px 24px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--rz-border);
+}
+
+.modal-icon-circle {
+  width: 64px;
+  height: 64px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+}
+
+.modal-icon-circle mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: #ef4444;
+}
+
+.modal-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--rz-text-main);
+  margin-bottom: 12px;
+}
+
+.modal-desc {
+  font-size: 0.95rem;
+  color: var(--rz-text-muted);
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-modal-cancel {
+  flex: 1;
+  padding: 14px 0;
+  border: 1px solid var(--rz-border);
+  background: transparent;
+  color: var(--rz-text-main);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-modal-cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.btn-modal-confirm {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  background: #ef4444;
+  color: white;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-modal-confirm:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .delete-modal-overlay {
+    align-items: flex-end; /* Slide up from bottom on mobile */
+    padding: 0;
+  }
+  
+  .delete-modal-card {
+    border-radius: 24px 24px 0 0;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  
+  .scale-in {
+    animation: slideUpMobile 0.3s ease-out;
+  }
+  
+  @keyframes slideUpMobile {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
+
+/* =========================================
+   PREMIUM DELETE BUTTON
+========================================= */
+.btn-delete {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border: 1px solid var(--rz-border, #e5e7eb);
+  border-radius: 50%;
+  background: var(--rz-bg-card, #ffffff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Default state: Professional muted grey */
+.btn-delete mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #94a3b8; 
+  transition: color 0.2s ease;
+}
+
+/* Hover state: Soft, elegant destructive reveal */
+.btn-delete:hover {
+  background: #fef2f2; 
+  border-color: #fca5a5; 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.12);
+}
+
+.btn-delete:hover mat-icon {
+  color: #dc2626; 
+}
+
+/* Active/Click state */
+.btn-delete:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1);
+}
+
+/* Mobile glassmorphism override */
+@media (max-width: 768px) {
+  .btn-delete {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: none;
+  }
+  
+  .btn-delete mat-icon {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .btn-delete:hover {
+    background: rgba(239, 68, 68, 0.85);
+    border-color: rgba(239, 68, 68, 1);
+  }
+  
+  .btn-delete:hover mat-icon {
+    color: white;
+  }
+}

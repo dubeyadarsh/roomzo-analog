@@ -61,14 +61,12 @@ export default class OwnerAuthComponent implements OnInit {
 
     // 2. Registration Form
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.pattern('^[a-zA-Z ]*$')]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern('^[6-9]\\d{9}$')]], 
       password: ['', [
-        Validators.required, 
-        Validators.minLength(8),
-        Validators.pattern('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&#]).{8,}') 
-      ]],
+        Validators.required
+          ]],
       confirmPassword: ['', Validators.required],
       ownerType: ['Tenant', Validators.required],
       // Advanced Fields
@@ -92,7 +90,7 @@ export default class OwnerAuthComponent implements OnInit {
     });
 
     this.forgotResetForm = this.fb.group({
-      password: ['', [Validators.required, Validators.minLength(8), Validators.pattern('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&#]).{8,}')]],
+      password: ['', [Validators.required]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }

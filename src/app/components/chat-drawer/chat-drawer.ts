@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Inject, PLATFORM_ID, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,7 +36,8 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
     private chatService: ChatService,
     private authService: AuthService,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
@@ -63,7 +64,7 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
           this.loadConversations();
           this.chatService.connectWebSocket(this.currentUserId);
         }
-        setTimeout(() => this.cd.markForCheck(), 0);
+        setTimeout(() => this.cd.detectChanges(), 0);
       }));
 
       this.subs.add(this.chatService.openSpecificChat$.subscribe(targetUser => {
@@ -93,36 +94,38 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
               });
               if (existingConv) existingConv.unreadCount = 0;
 
-              setTimeout(() => this.cd.markForCheck(), 0);
+              setTimeout(() => this.cd.detectChanges(), 0);
             }
           });
         }
       }));
 
       this.subs.add(this.chatService.incomingMessage$.subscribe(msg => {
-        if (msg.isRead && !msg.content) {
-            const m = this.currentMessages.find(x => x.id === msg.messageId);
-            if (m) m.isRead = true;
-            setTimeout(() => this.cd.markForCheck(), 0);
-            return;
-        }
+        this.ngZone.run(() => {
+          if (msg.isRead && !msg.content) {
+              const m = this.currentMessages.find(x => x.id === msg.messageId);
+              if (m) m.isRead = true;
+              this.cd.detectChanges();
+              return;
+          }
 
-        if (msg.senderId === this.currentUserId) {
+          if (msg.senderId === this.currentUserId) {
+              this.loadConversations();
+              return; 
+          }
+
+          if (this.activeChatUserId === msg.senderId) {
+            this.currentMessages.push(msg);
+            this.scrollToBottom();
+            
+            this.chatService.markMessageAsReadWS(msg.id, msg.senderId);
+            msg.isRead = true;
+
+            this.cd.detectChanges();
+          } else {
             this.loadConversations();
-            return; 
-        }
-
-        if (this.activeChatUserId === msg.senderId) {
-          this.currentMessages.push(msg);
-          this.scrollToBottom();
-          
-          this.chatService.markMessageAsReadWS(msg.id, msg.senderId);
-          msg.isRead = true;
-
-          setTimeout(() => this.cd.markForCheck(), 0);
-        } else {
-          this.loadConversations();
-        }
+          }
+        });
       }));
     }
   }
@@ -143,17 +146,17 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
     if (!this.currentUserId) return;
     
     this.loading = true;
-    setTimeout(() => this.cd.markForCheck(), 0);
+    setTimeout(() => this.cd.detectChanges(), 0);
 
     this.chatService.getConversations(this.currentUserId).subscribe({
       next: (res: any) => {
         this.conversations = res.data || [];
         this.loading = false;
-        setTimeout(() => this.cd.markForCheck(), 0);
+        setTimeout(() => this.cd.detectChanges(), 0);
       },
       error: (err) => {
         this.loading = false;
-        setTimeout(() => this.cd.markForCheck(), 0);
+        setTimeout(() => this.cd.detectChanges(), 0);
       }
     });
   }
@@ -192,7 +195,7 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
             conv.unreadCount = 0;
         }
 
-        setTimeout(() => this.cd.markForCheck(), 0);
+        setTimeout(() => this.cd.detectChanges(), 0);
       }
     });
   }
@@ -210,6 +213,7 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
     this.chatService.sendMessageWS(this.currentUserId, this.activeChatUserId, this.newMessage);
 
     this.currentMessages.push({
+      id: Date.now(), 
       senderId: this.currentUserId,
       receiverId: this.activeChatUserId,
       content: this.newMessage,
@@ -223,7 +227,7 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
 
     this.newMessage = '';
     this.scrollToBottom();
-    setTimeout(() => this.cd.markForCheck(), 0);
+    this.cd.detectChanges();
   }
 
   acceptRequest() {
@@ -231,7 +235,7 @@ export class ChatDrawerComponent implements OnInit, OnDestroy {
       this.chatService.acceptConversation(this.activeConversationId).subscribe(() => {
         this.hasAcceptedCurrentChat = true;
         this.activeTab = 'accepted';
-        setTimeout(() => this.cd.markForCheck(), 0);
+        setTimeout(() => this.cd.detectChanges(), 0);
       });
     }
   }

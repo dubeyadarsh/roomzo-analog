@@ -201,4 +201,43 @@ export default class FlatmatesComponent implements OnInit {
     }
     this.router.navigate(['/post-flatmate']); 
   }
+  // Add these state variables near your other variables at the top of the class
+  showDeleteModal = false;
+  postToDeleteId: number | null = null;
+
+  // =========================================
+  // DELETE MODAL LOGIC
+  // =========================================
+
+  openDeleteModal(postId: number) {
+    this.postToDeleteId = postId;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete() {
+    this.showDeleteModal = false;
+    this.postToDeleteId = null;
+  }
+
+  confirmDelete() {
+    if (!this.postToDeleteId) return;
+
+    this.flatmateService.deletePost(this.postToDeleteId).subscribe({
+      next: (res: any) => {
+        if (res.status === 1) {
+          this.toastr.success('Post deleted successfully');
+          // Instantly remove the post from the UI
+          this.flatmates = this.flatmates.filter(mate => mate.id !== this.postToDeleteId);
+          this.saveCache(); // Update local cache
+        } else {
+          this.toastr.error(res.message || 'Failed to delete post');
+        }
+        this.cancelDelete(); // Close modal and reset state
+      },
+      error: () => {
+        this.toastr.error('Error deleting post. Please try again.');
+        this.cancelDelete(); // Close modal and reset state
+      }
+    });
+  }
 }

@@ -39,6 +39,7 @@ export class ContactComponent {
     this.contactForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern('^[0-9+\\- ]{10,15}$')]], // Added phone with basic validation
       subject: ['', Validators.required],
       message: ['', Validators.required]
     });
@@ -51,6 +52,7 @@ export class ContactComponent {
       const payload = {
         name: this.contactForm.value.fullName,
         email: this.contactForm.value.email,
+        phone: this.contactForm.value.phone, // <--- Added here
         subject: this.contactForm.value.subject,
         message: this.contactForm.value.message
       };

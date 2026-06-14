@@ -256,4 +256,13 @@ export class FlatmateService {
       }
     );
   }
+  // =========================================
+  // DELETE POST
+  // =========================================
+
+  deletePost(postId: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${postId}`, {
+      headers: this.getHeaders()
+    });
+  }
 }
