@@ -100,6 +100,15 @@
   <meta property="og:description" content="Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://www.roomzo.in/favicon.ico">
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "28ecc355-4f32-451a-a649-de8531af3289",
+    });
+  });
+</script>
 </head>
   <body>
     <app-root></app-root>
