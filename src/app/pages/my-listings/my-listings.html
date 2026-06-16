@@ -72,14 +72,19 @@
     <mat-option [value]="2">Hidden</mat-option>
 </mat-select>
 
-                    <div class="btn-group">
-                        <a [routerLink]="['/property-details', prop.id]" class="btn-icon" title="View Property">
-                            <mat-icon>visibility</mat-icon>
-                        </a>
-                        <button class="btn-icon edit" (click)="editProperty(prop.id)" title="Edit Property">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                    </div>
+                  <div class="btn-group">
+    <a [routerLink]="['/property-details', prop.id]" class="btn-icon" title="View Property">
+        <mat-icon>visibility</mat-icon>
+    </a>
+    
+    <button class="btn-icon edit" (click)="editProperty(prop.id)" title="Edit Listing">
+        <mat-icon>edit</mat-icon>
+    </button>
+
+    <button class="btn-icon delete" (click)="deleteProperty(prop.id)" title="Delete Listing">
+        <mat-icon>delete_outline</mat-icon>
+    </button>
+</div>
 
                 </div>
             </div>

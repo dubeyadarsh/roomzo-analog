@@ -19,7 +19,6 @@ export class HeroComponent implements AfterViewInit {
   @ViewChild('heroText', { static: false }) heroText?: ElementRef<HTMLDivElement>;
   @ViewChild('lottieContainer', { static: false }) lottieContainer?: ElementRef<HTMLDivElement>;
 
-  // 1. Inject PLATFORM_ID into the constructor
   constructor(
     private router: Router,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -30,23 +29,18 @@ export class HeroComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // 2. Protect ALL browser-specific code (GSAP, window, document)
     if (isPlatformBrowser(this.platformId)) {
       const tl = gsap.timeline();
 
-      // Only animate if elements are present
       if (this.heroText?.nativeElement) {
         tl.from(this.heroText.nativeElement, { y: 20, autoAlpha: 0, duration: 0.7, ease: 'power2.out' });
       }
 
       if (this.lottieContainer?.nativeElement) {
         tl.from(this.lottieContainer.nativeElement, { x: 40, autoAlpha: 0, duration: 0.9, ease: 'power2.out' }, '-=0.4');
-
-        // gentle floating on the visual
         gsap.to(this.lottieContainer.nativeElement, { y: -8, repeat: -1, yoyo: true, duration: 3, ease: 'sine.inOut', delay: 0.6 });
       }
 
-      // load lottie from CDN if available; fallback if already present
       const initLottie = (lottieLib: any) => {
         try {
           if (!this.lottieContainer?.nativeElement) return;
@@ -55,12 +49,9 @@ export class HeroComponent implements AfterViewInit {
             renderer: 'svg',
             loop: true,
             autoplay: true,
-            // public Lottie sample - replace with your custom exported JSON later
             path: 'https://assets10.lottiefiles.com/packages/lf20_jcikwtux.json'
           });
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) {}
       };
 
       const win = window as any;

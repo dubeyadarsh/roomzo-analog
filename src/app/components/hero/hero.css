@@ -11,7 +11,8 @@
 .hero-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
+  /* Premium Slate Gradient - much softer and more professional than pure black */
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
   z-index: 1;
 }
 
@@ -21,8 +22,15 @@
   text-align: center;
   width: 100%;
   max-width: 900px;
-  padding: 80px 20px 40px; /* Increased top padding to 80px */
+  padding: 80px 20px 40px; 
 }
+
+/* ========================================================
+   DESKTOP / MOBILE VISIBILITY
+======================================================== */
+.show-mobile { display: none !important; }
+
+/* Desktop Static Features */
 .hero-features {
   display: flex;
   align-items: center;
@@ -38,83 +46,87 @@
 .hero-features mat-icon { font-size: 20px; width: 20px; height: 20px; }
 .hero-features .divider { opacity: 0.6; }
 
-/* The new search pill */
-.search-bar-pill {
-  background: white;
-  padding: 8px 8px 8px 24px;
-  border-radius: var(--rz-radius-pill);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  box-shadow: var(--rz-shadow-md);
-}
-
-.search-input {
-  flex: 1;
-  border: none !important;
-  outline: none;
-  font-size: 1.1rem;
-  color: var(--rz-text-main);
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-.filter-chips {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.chip {
-  background: #f1f5f9;
-  padding: 8px 16px;
-  border-radius: var(--rz-radius-pill);
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--rz-text-main);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.search-btn {
-  border-radius: var(--rz-radius-pill);
-  padding: 14px 32px;
-  font-size: 1.1rem;
-}
 /* ========================================================
-   MOBILE RESPONSIVENESS (HERO BANNER)
+   MOBILE RESPONSIVENESS (PREMIUM ELEGANT UI)
 ======================================================== */
 @media (max-width: 900px) {
-  
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: flex !important; }
+
   .hero-full {
-    /* Gives the background image enough height to fit the big search card */
-    min-height: 300px; 
-    align-items: flex-start; /* Aligns content to the top so we can control it with padding */
+    min-height: 340px; /* Perfect height for breathing room */
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 32px; /* Lifts search bar gracefully off the bottom edge */
   }
 
   .hero-content-center {
-    /* CRITICAL FIX: Pushes the text safely 100px down, below the transparent header */
-    padding-top: 100px !important; 
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 40px;
+    padding: 0 20px !important; /* Perfect left/right balance */
     width: 100%;
   }
 
+  /* Premium Typography for H1 */
   .hero-content-center h1 {
-    font-size: 2.1rem; /* Slightly smaller so it fits beautifully on one or two lines */
-    line-height: 1.3;
-    margin-bottom: 24px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.5); /* Helps text stand out against the image */
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px; /* Modern tight tracking */
+    line-height: 1.25;
+    color: #ffffff;
+    text-align: left;
+    margin: 0 0 16px 0;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 
-  .hero-features { 
-    flex-direction: column; 
-    gap: 12px; 
-    margin-bottom: 32px;
+  /* Elegant Glassmorphism Badge for the Slider */
+  .feature-slider-container {
+    display: inline-flex !important; /* Shrinks to fit content perfectly */
+    align-items: center;
+    background: rgba(255, 255, 255, 0.15); /* Soft glass effect */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Crisp outer edge */
+    padding: 6px 16px 6px 12px;
+    border-radius: 50px;
+    margin-bottom: 28px; /* Pushes the search bar down smoothly */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
-  
-  .hero-features .divider { 
-    display: none; /* Hide the vertical pipes on mobile */
+
+  .check-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    font-weight: bold;
+    color: #34d399; /* A beautiful, eye-soothing mint/emerald green */
+    margin-right: 8px;
+  }
+
+  .feature-slider-viewport {
+    height: 22px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .feature-slide {
+    height: 22px;
+    line-height: 22px;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.95); /* Slightly off-white for softness */
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+  }
+
+  .feature-slider-track {
+    display: flex;
+    flex-direction: column;
+    animation: slideUpVertical 8s infinite cubic-bezier(0.85, 0, 0.15, 1);
+  }
+
+  /* Adjusted animation heights to match the new 22px line-height perfectly */
+  @keyframes slideUpVertical {
+    0%, 20%   { transform: translateY(0); }
+    33%, 53%  { transform: translateY(-22px); }
+    66%, 86%  { transform: translateY(-44px); }
+    100%      { transform: translateY(-66px); }
   }
 }

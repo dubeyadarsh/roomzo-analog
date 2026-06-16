@@ -546,3 +546,124 @@
     border-radius: var(--rz-radius-sm); /* Slightly smaller corners on mobile */
   }
 }
+
+/* ========================================================
+   ========================================================
+   NEW ADDITIONS BELOW (SAFE APPEND)
+   ========================================================
+======================================================== */
+
+/* ========================================================
+   UNIFIED DESKTOP HEADERS
+======================================================== */
+.section-header-mobile {
+  margin-bottom: 24px;
+  text-align: center;
+}
+.section-header-mobile h3 {
+  font-size: 1.5rem;
+  color: var(--rz-text-main);
+  font-weight: 700;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================================
+   POPULAR CITIES SECTION (DESKTOP) - IMAGE & INACTIVE STATES
+======================================================== */
+.popular-cities-section {
+  padding: 40px 20px 10px;
+  background-color: var(--rz-bg);
+}
+
+.cities-container {
+  display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 10px;
+}
+
+.city-wrapper {
+  display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; transition: transform 0.2s ease;
+}
+
+.city-circle {
+  width: 140px; height: 140px; border-radius: 50%; overflow: hidden; position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: box-shadow 0.3s ease;
+  border: 4px solid #ffffff; background: #f8fafc;
+}
+
+.city-circle img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.city-name-outside { color: var(--rz-text-main); font-weight: 600; font-size: 1.1rem; text-align: center; }
+
+/* Active Hover States */
+.city-wrapper:not(.inactive):hover { transform: translateY(-4px); }
+.city-wrapper:not(.inactive):hover .city-circle { box-shadow: 0 10px 20px rgba(25, 97, 83, 0.2); }
+.city-wrapper:not(.inactive):hover img { transform: scale(1.15); }
+
+/* --- Inactive / Coming Soon State --- */
+.city-wrapper.inactive {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.city-wrapper.inactive .city-circle img {
+  filter: grayscale(100%); /* Turns image black and white */
+}
+
+.coming-soon-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.45); /* Dark overlay */
+  display: flex; align-items: center; justify-content: center;
+}
+
+.coming-soon-overlay span {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--rz-text-main);
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* ========================================================
+   MOBILE RESPONSIVENESS (CITIES SCROLL & TIGHT PADDING)
+======================================================== */
+@media (max-width: 768px) {
+  
+  /* Crush Vertical Spacing */
+  .popular-cities-section { padding: 8px 0 0 !important; }
+  .featured-section { padding: 8px 0 40px !important; }
+
+  /* Left-Aligned Headers */
+  .section-header-mobile { text-align: left !important; padding: 0 20px; margin-bottom: 16px; width: 100%; }
+  .section-header-mobile h3 { text-align: left !important; font-size: 0.9rem; }
+
+  /* Smooth swipeable horizontal row */
+  .cities-container {
+    gap: 16px; 
+    padding: 0 20px 10px; 
+    margin-top: 0;
+    flex-wrap: nowrap; 
+    overflow-x: auto; 
+    justify-content: flex-start;
+    scroll-snap-type: x mandatory; 
+    scroll-behavior: smooth; 
+    -webkit-overflow-scrolling: touch; 
+    scrollbar-width: none; /* Firefox hide scrollbar */
+  }
+  
+  .cities-container::-webkit-scrollbar { display: none; /* Chrome/Safari hide scrollbar */ }
+  
+  .city-wrapper { flex-shrink: 0; scroll-snap-align: start; gap: 8px; }
+  
+  /* Shrunk sizes for mobile */
+  .city-circle { width: 80px; height: 80px; border-width: 2px; }
+  .city-name-outside { font-size: 0.85rem; font-weight: 500; }
+  
+  /* Shrink the coming soon badge for mobile */
+  .coming-soon-overlay span { font-size: 0.6rem; padding: 4px 8px; }
+}

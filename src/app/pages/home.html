@@ -1,10 +1,35 @@
 <app-hero></app-hero>
 
+<section class="popular-cities-section">
+  <div class="container">
+    <div class="section-header-mobile">
+      <h3>EXPLORE CITIES</h3>
+    </div>
+    
+<div class="cities-container">
+      <div 
+        class="city-wrapper" 
+        *ngFor="let city of popularCities" 
+        [class.inactive]="!city.active"
+        (click)="city.active ? exploreCity(city.name, city.state) : null"> <div class="city-circle">
+          <img [src]="city.image" [alt]="city.name">
+          
+          <div class="coming-soon-overlay" *ngIf="!city.active">
+             <span>Coming<br>Soon</span>
+          </div>
+        </div>
+        
+        <span class="city-name-outside">{{ city.name }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="featured-section">
   <div class="container">
     
-    <div class="section-header">
-      <h2>Featured Properties</h2>
+    <div class="section-header-mobile">
+      <h3>FEATURED PROPERTIES</h3>
     </div>
 
     <div class="loader-container" *ngIf="isLoading">
@@ -78,8 +103,7 @@
     </div>
 
 
-    <div class="section-header" *ngIf="isLoadingNearby || nearbyListings.length > 0" style="margin-top: 60px;">
-      <h2>Properties Near You</h2>
+<div class="section-header-mobile" *ngIf="isLoadingNearby || nearbyListings.length > 0" style="margin-top: 16px;">      <h3>PROPERTIES NEAR YOU</h3>
     </div>
 
     <div class="loader-container" *ngIf="isLoadingNearby">
@@ -171,11 +195,11 @@
     <div class="ad-banner-container">
       <picture>
         <source media="(max-width: 768px)" srcset="rz-banner-phone.png">
-        
-      <img src="rz-banner-desktop.png" alt="Looking for Room & PG with Pocket-Friendly price" class="promo-banner-img">
+        <img src="rz-banner-desktop.png" alt="Looking for Room & PG with Pocket-Friendly price" class="promo-banner-img">
       </picture>
     </div>
 
-  </div> <app-contact></app-contact>
+  </div> 
+  <app-contact></app-contact>
   
 </section>

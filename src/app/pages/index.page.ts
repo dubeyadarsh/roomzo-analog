@@ -62,7 +62,44 @@ export default class HomeComponent implements OnInit {
       }
     });
   }
-
+popularCities = [
+    { 
+      name: 'Prayagraj', 
+      state: 'Uttar Pradesh', 
+      image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=400&q=80',
+      active: true
+    },
+    { 
+      name: 'Varanasi', 
+      state: 'Uttar Pradesh', 
+      image: 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=400&q=80',
+      active: true
+    },
+    { 
+      name: 'Pune', 
+      state: 'Maharashtra', 
+      image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&q=80',
+      active: true
+    },
+    { 
+      name: 'Mumbai', 
+      state: 'Maharashtra', 
+      image: 'https://images.unsplash.com/photo-1522256658092-1279a04a6fc6?w=400&q=80',
+      active: false
+    },
+    { 
+      name: 'Jaipur', 
+      state: 'Rajasthan', 
+      image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
+      active: false
+    },
+    { 
+      name: 'Kota', 
+      state: 'Rajasthan', 
+      image: 'https://images.unsplash.com/photo-1565019018445-560b435af769?w=400&q=80',
+      active: false
+    }
+  ];
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {
       if (fragment === 'contact' && isPlatformBrowser(this.platformId)) {
@@ -278,5 +315,14 @@ formatPostedDate(dateString?: string): string {
     const cardWidth = el.querySelector('.listing-card').offsetWidth;
     const gap = parseInt(window.getComputedStyle(el).gap) || 0;
     el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
+  }
+  exploreCity(cityName: string, stateName: string) {
+    // Navigates to the brand new page!
+    this.router.navigate(['/explore-city'], { 
+      queryParams: { 
+        city: cityName,
+        state: stateName
+      } 
+    });
   }
 }

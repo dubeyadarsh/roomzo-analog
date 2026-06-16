@@ -2,14 +2,25 @@
   <div class="hero-overlay"></div>
   <div class="container hero-content-center">
     
-    <h1>Find Your Perfect Room & PG</h1>
-    
-    <div class="hero-features">
+<h1 #heroText>Find Your Perfect Room & PG</h1>    
+    <div class="hero-features hide-mobile">
       <span><mat-icon>check</mat-icon> Verified Listings</span>
       <span class="divider">|</span>
       <span><mat-icon>check</mat-icon> No Broker Fees</span>
       <span class="divider">|</span>
       <span><mat-icon>check</mat-icon> Connect Directly with Owners</span>
+    </div>
+
+    <div class="feature-slider-container show-mobile">
+      <mat-icon class="check-icon">check</mat-icon>
+      <div class="feature-slider-viewport">
+        <div class="feature-slider-track">
+          <div class="feature-slide">Verified Listings</div>
+          <div class="feature-slide">No Broker Fees</div>
+          <div class="feature-slide">Connect with Owners</div>
+          <div class="feature-slide">Verified Listings</div> 
+        </div>
+      </div>
     </div>
 
     <app-search-bar></app-search-bar>

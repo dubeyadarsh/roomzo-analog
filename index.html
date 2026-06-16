@@ -107,6 +107,9 @@
     await OneSignal.init({
       appId: "28ecc355-4f32-451a-a649-de8531af3289",
     });
+    
+    // Explicitly show the slidedown prompt to users who aren't subscribed
+    OneSignal.Slidedown.promptPush();
   });
 </script>
 </head>

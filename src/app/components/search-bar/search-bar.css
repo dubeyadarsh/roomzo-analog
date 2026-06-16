@@ -96,20 +96,19 @@
 /* --- Bulletproof Responsive Mobile Layout --- */
 @media (max-width: 900px) {
   .rz-search-pill {
-    flex-direction: row; /* Keep search icon and input inline */
-    border-radius: 8px; /* Slightly squared edges like 99acres */
-    padding: 4px 16px;
+    flex-direction: row; 
+    border-radius: 8px; 
+    padding: 0 12px; /* Thinner padding */
     gap: 0;
     box-sizing: border-box;
-    width: calc(100% - 32px); /* 16px margin on each side */
-    margin: 0 auto;
-    
-    /* The overlap magic */
-    margin-top: 28px; 
+    width: calc(100% - 32px); /* Stretched to fit width with 16px margins */
+    margin: 0 auto; /* Centered */
+    margin-top: 0; 
     position: relative;
     z-index: 10;
-    
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Softer shadow for floating effect */
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Softer, less 'bold' shadow */
+    border: 1px solid #e2e8f0; /* Optional: adds a crisp edge */
   }
   
   .hide-mobile { 
@@ -119,24 +118,26 @@
   .input-group {
     width: 100%;
     flex: 1; 
-    border-bottom: none; /* Remove previous mobile styling */
+    border: none; 
     padding: 0;
-    margin-bottom: 0;
-    height: 52px; /* Comfortable touch target */
+    margin: 0;
+    height: 46px; /* Slimmer, less chunky height */
   }
 
   .input-group input {
-    padding: 0 0 0 32px; /* Make room for icon */
-    font-size: 1rem;
+    padding: 0 0 0 32px; 
+    font-size: 0.95rem; /* Slightly smaller, cleaner text */
+    font-weight: 400; /* Removes bold feel */
     height: 100%;
+    width: 100%;
     text-overflow: ellipsis;
   }
   
   .search-icon {
-    color: #6b7280; /* Subtle grey icon for mobile */
-    font-size: 22px;
-    width: 22px;
-    height: 22px;
+    color: #64748b; /* Lighter slate grey */
+    font-size: 20px; /* Slightly smaller icon */
+    width: 20px;
+    height: 20px;
     left: 0;
     top: 50%;
     transform: translateY(-50%);

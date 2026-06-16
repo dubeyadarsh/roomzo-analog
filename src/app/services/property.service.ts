@@ -230,6 +230,23 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
   reportProperty(payload: any) {
     return this.http.post(`${this.baseUrl}/api/reports/submit`, payload);
   }
+  deleteListing(id: number): Observable<any> {
+      return this.http.delete(`${this.baseUrl}/listings/delete/${id}`);
+    }
+
+   // Add this inside property.service.ts
+  exploreByExactCity(city: string, state: string, sortBy: string, page: number, size: number) {
+    let params = new HttpParams()
+      .set('city', city)
+      .set('page', page)
+      .set('size', size)
+      .set('sortBy', sortBy);
+
+    if (state) params = params.set('state', state);
+    
+    // Ensure the endpoint matches your ListingController route (e.g., /listings/exploreCity)
+    return this.http.get(`${this.baseUrl}/listings/exploreCity`, { params });
+  }
 }
 
 export interface ListingFilter {

@@ -1,0 +1,142 @@
+<div class="page-wrapper">
+
+  <nav class="glass-header">
+    <div class="header-container">
+      <button class="header-action-ring" (click)="goBack()" aria-label="Go back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      
+      <div class="header-typography">
+        <h2>Explore {{ city }}</h2>
+      </div>
+      
+      <div class="sort-action-container">
+        <button class="sort-trigger-pill" [class.menu-active]="isSortMenuOpen" (click)="toggleSortMenu($event)" aria-label="Sort listings">
+          <span class="sort-label-text">{{ getSortLabel() }}</span>
+          <mat-icon>sort</mat-icon>
+        </button>
+        
+        <div class="premium-sort-dropdown" *ngIf="isSortMenuOpen">
+          <div class="dropdown-option" [class.selected]="sortBy === 'latest'" (click)="applySort('latest', $event)">
+            <span>Newest First</span>
+            <mat-icon *ngIf="sortBy === 'latest'">check</mat-icon>
+          </div>
+          <div class="dropdown-option" [class.selected]="sortBy === 'oldest'" (click)="applySort('oldest', $event)">
+            <span>Oldest First</span>
+            <mat-icon *ngIf="sortBy === 'oldest'">check</mat-icon>
+          </div>
+          <div class="dropdown-option" [class.selected]="sortBy === 'price_low'" (click)="applySort('price_low', $event)">
+            <span>Price: Low to High</span>
+            <mat-icon *ngIf="sortBy === 'price_low'">check</mat-icon>
+          </div>
+          <div class="dropdown-option" [class.selected]="sortBy === 'price_high'" (click)="applySort('price_high', $event)">
+            <span>Price: High to Low</span>
+            <mat-icon *ngIf="sortBy === 'price_high'">check</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="city-hero-banner" [style.backgroundImage]="'url(' + getCityHeaderImage() + ')'">
+    <div class="banner-gradient-shading"></div>
+    <div class="banner-text-block container">
+      <span class="premium-tag">Broker-Free Hub</span>
+      <h1>{{ city }}</h1>
+      <p>Handpicked rooms, flats & PGs direct from verified owners.</p>
+    </div>
+  </div>
+
+  <main class="feed-layout-area">
+    <div class="container">
+      
+      <div class="feed-loader-box" *ngIf="isLoading">
+        <div class="premium-pulse-spinner"></div>
+        <p>Curating exceptional spaces...</p>
+      </div>
+
+      <div class="premium-empty-state" *ngIf="!isLoading && listings.length === 0">
+        <div class="empty-vector-circle">
+          <mat-icon>night_shelter</mat-icon>
+        </div>
+        <h3>No spaces found yet</h3>
+        <p>We're currently onboarding verified listings in {{ city }}. Check back soon!</p>
+      </div>
+
+      <div class="listings-grid-layout" *ngIf="!isLoading && listings.length > 0">
+        
+        <div class="refined-property-card" *ngFor="let prop of listings">
+          <div class="media-frame" (click)="viewDetails(prop.id)">
+            <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Property Space">
+            
+            <div class="floating-badge-cluster">
+              <span class="feed-status-badge" [class.badge-rented]="prop.isRented === 1">
+                <mat-icon>{{ prop.isRented === 1 ? 'gpp_maybe' : 'verified' }}</mat-icon>
+                {{ prop.isRented === 1 ? 'Rented' : 'Verified Available' }}
+              </span>
+            </div>
+
+            <div class="media-age-chip">
+              <mat-icon>schedule</mat-icon>
+              <span>{{ formatPostedDate(prop.createdOn) }}</span>
+            </div>
+            
+            <div class="media-price-overlay">
+              <span class="currency-symbol">₹</span>
+              <span class="price-digits">{{ prop.rentAmount ? prop.rentAmount.toLocaleString('en-IN') : '0' }}</span>
+              <span class="price-duration">/mo</span>
+            </div>
+          </div>
+
+          <div class="metadata-details-block">
+            <div class="structural-header-row" (click)="viewDetails(prop.id)">
+              <h3 class="structural-title-text">{{ prop.propertyType }} in {{ prop.street || 'Prime Location' }}</h3>
+            </div>
+            
+            <p class="geographical-location-row">
+              <mat-icon>location_on</mat-icon>
+              <span>{{ prop.street }}, {{ prop.city }}</span>
+            </p>
+
+            <div class="structural-spec-grid">
+              <div class="spec-capsule">
+                <mat-icon>bed</mat-icon>
+                <span>{{ prop.bedrooms }} {{ prop.bedrooms === 1 ? 'Bed' : 'Beds' }}</span>
+              </div>
+              <div class="spec-capsule">
+                <mat-icon>bathtub</mat-icon>
+                <span>{{ prop.bathrooms || 1 }} {{ prop.bathrooms === 1 ? 'Bath' : 'Baths' }}</span>
+              </div>
+              <div class="spec-capsule" *ngIf="prop.propertySize">
+                <mat-icon>square_foot</mat-icon>
+                <span>{{ prop.propertySize }} sqft</span>
+              </div>
+            </div>
+
+            <div class="card-action-button-tray">
+              <button class="tray-action-btn secondary-pill" (click)="viewDetails(prop.id); $event.stopPropagation()">
+                <mat-icon>info</mat-icon>
+                <span>Details</span>
+              </button>
+              <button class="tray-action-btn primary-pill" (click)="scrollToContact(prop.id); $event.stopPropagation()">
+                <mat-icon>chat_bubble</mat-icon>
+                <span>Contact</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="feed-pagination-trigger-area" *ngIf="currentPage < totalPages - 1 && !isLoading">
+        <button class="premium-load-more-action" (click)="loadMore()" [disabled]="isLoadingMore">
+          <span *ngIf="!isLoadingMore">Load More Spaces</span>
+          <div class="premium-pulse-spinner mini" *ngIf="isLoadingMore"></div>
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="dropdown-backdrop-shield" *ngIf="isSortMenuOpen" (click)="isSortMenuOpen = false"></div>
