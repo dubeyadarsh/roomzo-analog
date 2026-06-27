@@ -213,42 +213,54 @@ h1, h2, h3, h4, p { margin: 0; }
 }
 .specs-row span { display: flex; align-items: center; gap: 4px; }
 .specs-row mat-icon { font-size: 16px; width: 16px; height: 16px; }
-
 .action-buttons-container {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Creates exactly two equal columns */
+  gap: 10px;
   margin-top: auto;
 }
 
 .contact-btn {
-  flex: 1;
   background: white;
   color: var(--rz-primary);
-  border: 2px solid var(--rz-primary);
-  padding: 10px;
+  border: 1px solid var(--rz-primary); /* Thinner border for tighter fit */
+  padding: 10px 4px;
   border-radius: var(--rz-radius-sm, 8px);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 0.95rem;
+  font-size: 0.9rem; /* Scaled down slightly to fit text side-by-side */
   font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
+
 .contact-btn:hover {
   background: var(--rz-primary);
   color: white;
   transform: translateY(-2px);
 }
+
 .contact-btn:active {
   transform: scale(0.98);
 }
+
 .contact-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
+/* Specific WhatsApp Button Styling */
+.contact-btn.wa-btn {
+  border-color: #25d366;
+  color: #25d366;
+}
+.contact-btn.wa-btn:hover {
+  background: #25d366;
+  color: white;
+}
+
 .view-btn {
-  flex: 1;
+  grid-column: span 2; /* Forces this button to take up the full bottom row */
   background: var(--rz-primary);
   color: white;
   border: none;
@@ -264,6 +276,7 @@ h1, h2, h3, h4, p { margin: 0; }
   justify-content: center;
   gap: 6px;
 }
+
 .view-btn:hover {
   background: var(--rz-primary-hover);
   transform: translateY(-2px);
@@ -272,7 +285,6 @@ h1, h2, h3, h4, p { margin: 0; }
   transform: scale(0.98);
 }
 .view-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
-
 .loader-container { display: flex; flex-direction: column; align-items: center; padding: 60px 0; color: var(--rz-text-muted); width: 100%; }
 .modern-spinner { width: 40px; height: 40px; border: 3px solid rgba(25, 97, 83, 0.1); border-left-color: var(--rz-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -370,14 +382,15 @@ h1, h2, h3, h4, p { margin: 0; }
   }   
   .card-image { height: 220px; } 
   
-  .action-buttons-container {
-    flex-direction: column;
-    gap: 8px;
+  .contact-btn {
+    padding: 12px 4px;
+    font-size: 0.85rem; /* Prevents text wrap on very small phones */
   }
-  .contact-btn, .view-btn {
-    padding: 14px;
-    width: 100%;
+  
+  .view-btn {
+    padding: 12px;
   }
+  
 }
 
 /* ========================================================

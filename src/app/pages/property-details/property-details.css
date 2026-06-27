@@ -87,16 +87,6 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
 
 .action-buttons { display: flex; gap: 12px; }
 
-/* Specs Bar */
-.specs-bar {
-  display: flex; gap: 32px; padding: 24px 0; border-top: 1px solid var(--rz-border);
-  border-bottom: 1px solid var(--rz-border); margin-bottom: 40px;
-}
-.spec-item { display: flex; align-items: center; gap: 12px; }
-.spec-item mat-icon { font-size: 28px; width: 28px; height: 28px; color: var(--rz-primary); }
-.spec-item div { font-size: 0.9rem; color: var(--rz-text-muted); line-height: 1.4; }
-.spec-item strong { display: block; font-size: 1.1rem; color: var(--rz-text-main); }
-
 /* Layout Grid */
 .content-layout { display: grid; grid-template-columns: 2.5fr 1fr; gap: 60px; align-items: start;}
 
@@ -191,7 +181,6 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   :host { padding-bottom: 90px; } 
   .page-container { padding: 0; }
   
-  /* --- UPGRADED MOBILE GALLERY STYLES --- */
   .gallery-container.mobile-only {
     position: relative;
     background: var(--rz-bg);
@@ -276,7 +265,6 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   .thumbnail-btn:not(.active) img {
     opacity: 0.6;
   }
-  /* -------------------------------------- */
 
   .mobile-floating-btn {
     position: absolute; 
@@ -301,7 +289,6 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   .mobile-floating-btn.share-btn { right: 16px; }
   .mobile-floating-btn mat-icon { display: block; font-size: 22px; width: 22px; height: 22px; }
 
-  /* OVERLAPPING CARD FIX (Removed negative margin) */
   .content-wrapper {
     position: relative; z-index: 20;
     background: var(--rz-bg); 
@@ -315,33 +302,10 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
   .posted-info { font-size: 0.9rem; margin-top: 10px; }
   .content-layout { grid-template-columns: 1fr; gap: 32px; }
   
-  .specs-bar {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    border: none; padding: 0; margin-bottom: 32px;
-  }
-  .spec-item {
-    background: white; border: 1px solid var(--rz-border); border-radius: var(--rz-radius);
-    padding: 16px; flex-direction: column; align-items: flex-start; gap: 8px;
-    box-shadow: var(--rz-shadow-sm);
-  }
-  
   .amenities-grid, .nearby-grid { grid-template-columns: 1fr; }
   .info-block { margin-bottom: 32px; }
   .divider { margin: 32px 0; }
 
-  .mobile-bottom-bar {
-    position: fixed; bottom: 0; left: 0; width: 100%;
-    background: white; border-top: 1px solid var(--rz-border);
-    padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-  }
-  .bottom-price-info .price { font-size: 1.25rem; font-weight: 800; color: var(--rz-text-main); }
-  .bottom-price-info .price span { font-size: 0.85rem; font-weight: 500; color: var(--rz-text-muted); }
-  .bottom-price-info .status { font-size: 0.8rem; font-weight: 600; color: #64748b; margin-top: 2px; }
-  .bottom-price-info .status.available { color: #10b981; }
-  .mobile-bottom-bar .btn-primary { padding: 12px 24px; }
-  
   .similar-grid { grid-template-columns: 1fr; gap: 16px; }
   .similar-section { padding-bottom: 20px; }
 
@@ -403,7 +367,6 @@ h1 { font-size: 2.25rem; font-weight: 700; margin-bottom: 8px; line-height: 1.2;
 .report-btn mat-icon { color: #ef4444; }
 .report-btn:hover { background-color: #fef2f2; border-color: #ef4444; }
 
-/* --- Forms for Modals --- */
 .form-group { display: flex; flex-direction: column; gap: 8px; }
 .form-group label { font-size: 0.9rem; font-weight: 600; color: var(--rz-text-main); }
 .form-control { padding: 12px; border: 1px solid var(--rz-border); border-radius: var(--rz-radius-sm); font-family: inherit; font-size: 1rem; color: var(--rz-text-main); background: #f8fafc; width: 100%; }
@@ -414,205 +377,194 @@ textarea.form-control { resize: vertical; }
 .report-submit-btn:hover { background: #dc2626; }
 .report-submit-btn:disabled { background: #fca5a5; cursor: not-allowed; }
 
-/* --- Description Bullet Points --- */
-.custom-bullet-list {
-  padding-left: 20px;
-  margin: 0;
-  color: var(--rz-text-muted);
-  font-size: 1.05rem;
-  line-height: 1.6;
-}
+.custom-bullet-list { padding-left: 20px; margin: 0; color: var(--rz-text-muted); font-size: 1.05rem; line-height: 1.6; }
+.custom-bullet-list li { margin-bottom: 8px; }
+.custom-bullet-list li:last-child { margin-bottom: 0; }
+div.truncated { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-.custom-bullet-list li {
-  margin-bottom: 8px; /* Adds breathing room between bullet points */
-}
-
-.custom-bullet-list li:last-child {
-  margin-bottom: 0;
-}
-
-/* Ensure the wrapper handles the "Show More" truncation properly */
-div.truncated {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ========================================================
-   DYNAMIC HIGHLIGHT ANIMATIONS
-======================================================== */
-/* ========================================================
-   DYNAMIC HIGHLIGHT ANIMATIONS
-======================================================== */
-.pulse-highlight {
-  animation: intense-pulse 1.2s infinite ease-in-out !important;
-  position: relative;
-  z-index: 10;
-}
-
+.pulse-highlight { animation: intense-pulse 1.2s infinite ease-in-out !important; position: relative; z-index: 10; }
 @keyframes intense-pulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.9); /* Emerald Green glow */
-    background-color: var(--rz-primary);
-  }
-  50% {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
-    background-color: #059669; /* Slightly brighter shade to create a flash effect */
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-    background-color: var(--rz-primary);
-  }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.9); background-color: var(--rz-primary); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); background-color: #059669; }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); background-color: var(--rz-primary); }
+}
+
+.mobile-meta-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; width: 100%; }
+.mobile-meta-row .posted-info { margin-top: 0; }
+.inline-actions { display: flex; align-items: center; gap: 12px; }
+.icon-only-btn { background: none; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 4px; border-radius: 50%; transition: background-color 0.2s; color: var(--rz-primary); }
+.icon-only-btn mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.icon-only-btn.report-icon { color: #ef4444; }
+.icon-only-btn:active { background-color: rgba(0, 0, 0, 0.05); }
+
+.safety-card { background-color: #fffbeb; border: 1px solid #fde68a; border-radius: var(--rz-radius, 16px); padding: 24px; }
+.safety-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.safety-header h3 { font-size: 1.25rem; font-weight: 700; color: #b45309; margin: 0; }
+.shield-icon { color: #d97706; }
+.safety-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.safety-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 1rem; color: #92400e; line-height: 1.4; }
+.safety-list li mat-icon { font-size: 20px; width: 20px; height: 20px; color: #d97706; flex-shrink: 0; }
+
+.mini-safety-alert { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px 16px; border-radius: 12px; display: flex; gap: 12px; margin-bottom: 24px; font-size: 0.9rem; align-items: flex-start; line-height: 1.4; }
+.mini-safety-alert mat-icon { font-size: 20px; width: 20px; height: 20px; color: #dc2626; flex-shrink: 0; }
+
+@media (max-width: 900px) {
+  .safety-card { padding: 20px; border-radius: 16px; }
+  .safety-header h3 { font-size: 1.15rem; }
+  .safety-list li { font-size: 0.95rem; }
+  .mini-safety-alert { padding: 10px 14px; font-size: 0.85rem; }
 }
 
 /* ========================================================
-   META & QUICK ACTIONS ROW (Mobile Optimization)
-/* ========================================================
-   INLINE META & ACTIONS (Mobile Optimization)
+   NEW UI UPGRADES (Tags, Specs, Verification, Why Roomzo)
 ======================================================== */
-.mobile-meta-row {
+
+.overlay-tags-container {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  width: 100%;
-}
-
-.mobile-meta-row .posted-info {
-  margin-top: 0; /* Override default margin so it aligns nicely */
-}
-
-.inline-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.icon-only-btn {
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-  color: var(--rz-primary);
-}
-
-.icon-only-btn mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
-
-.icon-only-btn.report-icon {
-  color: #ef4444; /* Standard red for reporting */
-}
-
-.icon-only-btn:active {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-
-/* ========================================================
-   TENANT SAFETY UI COMPONENT
-======================================================== */
-.safety-card {
-  background-color: #fffbeb; /* Soft amber background */
-  border: 1px solid #fde68a;
-  border-radius: var(--rz-radius, 16px);
-  padding: 24px;
-}
-
-.safety-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.safety-header h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #b45309; /* Dark amber text */
-  margin: 0;
-}
-
-.shield-icon {
-  color: #d97706;
-}
-
-.safety-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.safety-list li {
-  display: flex;
   align-items: flex-start;
-  gap: 12px;
-  font-size: 1rem;
-  color: #92400e; 
-  line-height: 1.4;
+  z-index: 15;
+  pointer-events: none; 
 }
-
-.safety-list li mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  color: #d97706; /* Icon color matches theme */
-  flex-shrink: 0; /* Prevents icon from squishing on small mobile screens */
+.tags-left { display: flex; flex-wrap: wrap; gap: 8px; max-width: 70%; }
+.tags-right { display: flex; justify-content: flex-end; }
+.img-tag {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px;
+  border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: white;
 }
+.img-tag mat-icon { font-size: 14px; width: 14px; height: 14px; }
+.tag-verified { color: #059669; }
+.tag-danger { color: #dc2626; }
+.tag-success { background: #d1fae5; color: #059669; }
+.tag-dark { background: rgba(0,0,0,0.7); color: white; border: 1px solid rgba(255,255,255,0.2); }
 
-/* ========================================================
-   MINI ALERT (INSIDE CONTACT MODAL)
-======================================================== */
-.mini-safety-alert {
-  background-color: #fef2f2; /* Soft red */
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 12px;
-  display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
-  align-items: flex-start;
-  line-height: 1.4;
+.premium-specs-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 0; border: none;
 }
-
-.mini-safety-alert mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  color: #dc2626;
-  flex-shrink: 0;
+.spec-card {
+  background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 16px 12px; text-align: center; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
+.spec-card mat-icon { color: var(--rz-primary); font-size: 24px; width: 24px; height: 24px; margin-bottom: 8px; }
+.spec-val { font-size: 1.1rem; font-weight: 700; color: var(--rz-text-main); margin-bottom: 2px; }
+.spec-lbl { font-size: 0.8rem; color: var(--rz-text-muted); }
 
-/* Mobile adjustments */
+.verification-badges-section {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding: 24px 0; border-bottom: 1px dashed #cbd5e1;
+}
+.v-badge { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.v-icon-wrapper {
+  width: 40px; height: 40px; background: #ecfdf5; color: #10b981; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+}
+.v-icon-wrapper mat-icon { font-size: 20px; width: 20px; height: 20px; }
+.v-badge strong { font-size: 0.9rem; color: var(--rz-text-main); margin-bottom: 4px; }
+.v-badge span { font-size: 0.75rem; color: var(--rz-text-muted); line-height: 1.2; }
+
+.desc-roomzo-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px; align-items: start; }
+.why-roomzo-card { background: #f0fdf4; border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
+.why-roomzo-card h3 { color: #065f46; font-size: 1.1rem; font-weight: 700; margin-bottom: 16px; }
+.roomzo-benefits { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2; }
+.roomzo-benefits li { display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: #064e3b; font-weight: 500; }
+.roomzo-benefits mat-icon { color: #10b981; font-size: 20px; width: 20px; height: 20px; }
+.watermark-icon { position: absolute; right: -20px; bottom: -20px; font-size: 120px; width: 120px; height: 120px; color: #d1fae5; opacity: 0.5; z-index: 1; }
+
 @media (max-width: 900px) {
-  .safety-card {
-    padding: 20px;
-    border-radius: 16px;
+  .premium-specs-grid { grid-template-columns: repeat(2, 1fr); }
+.sticky-contact-actions {
+    /* --- RESTORED STICKY PROPERTIES --- */
+    position: fixed;    
+    bottom: 0;          
+    left: 0;
+    width: 100%;
+    background: white;
+    z-index: 1000;      
+    border-top: 1px solid var(--rz-border);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+    
+    /* --- NEW SLIMMER SPACING --- */
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    gap: 12px;
+    padding: 8px 16px; 
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
   }
-  .safety-header h3 {
-    font-size: 1.15rem;
+  
+  .action-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px; 
+    border-radius: 10px; 
+    font-size: 0.95rem; 
+    font-weight: 600;
+    cursor: pointer; transition: transform 0.1s; font-family: inherit;
   }
-  .safety-list li {
-    font-size: 0.95rem;
+  /* --- 2. IMAGE TAGS VISIBILITY FIX --- */
+  .overlay-tags-container {
+    top: 98px; /* Pushes the tags down so they don't hide behind the floating back button */
   }
-  .mini-safety-alert {
-    padding: 10px 14px;
-    font-size: 0.85rem;
+  .tags-left {
+    gap: 6px;
   }
+  .img-tag {
+    font-size: 0.65rem; /* Slightly smaller so they don't overflow on small phones */
+    padding: 4px 8px;
+  }
+
+  /* --- 3. CLEANER LABELS (HIDE DESCRIPTIONS) FIX --- */
+  .v-badge span {
+    display: none; /* Hides the description text on mobile */
+  }
+  .v-badge strong { 
+    font-size: 0.7rem;         /* Slightly smaller to prevent multi-line wrap */
+    text-align: center;
+    line-height: 1.1;
+    display: block;
+  }
+ .v-icon-wrapper {
+    width: 38px; 
+    height: 38px;
+    margin-bottom: 6px;
+    flex-shrink: 0;            /* Prevents the circle from squishing */
+  }
+  .v-icon-wrapper mat-icon { 
+    font-size: 18px; 
+    width: 18px; 
+    height: 18px; 
+  }
+  .verification-badges-section {
+    display: flex;             /* Changed to flex */
+    justify-content: space-between;
+    gap: 8px; 
+    overflow-x: auto;          /* Allows side-scrolling if badges don't fit */
+    padding-bottom: 12px; 
+    scrollbar-width: none;     /* Hides scrollbar for clean look */
+    border-bottom: 1px dashed #cbd5e1;
+  }
+  .v-badge { 
+    flex: 0 0 22%;             /* Each badge takes ~22% width so they fit 4 nicely */
+    min-width: 70px; 
+    align-items: center;
+  }
+  .desc-roomzo-layout { grid-template-columns: 1fr; gap: 24px; }
+  
+  .sticky-contact-actions {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 12px 20px; padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  
+  
+  .action-btn:active { transform: scale(0.98); }
+  .verification-badges-section::-webkit-scrollbar { display: none; }
+  .btn-call { background: white; color: var(--rz-primary); border: 1px solid var(--rz-primary); }
+  .btn-whatsapp { background: #059669; color: white; border: none; }
+
+  /* Target the host or the parent container of the property details page */
+
 }

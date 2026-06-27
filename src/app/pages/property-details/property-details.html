@@ -6,11 +6,22 @@
 <div class="page-container" *ngIf="!isLoading && property">
 
   <section class="gallery-container mobile-only" *ngIf="isBrowser">
-    
     <button class="mobile-floating-btn back-btn" routerLink="/explore-listing">
       <mat-icon>arrow_back</mat-icon>
     </button>
+
     <div class="main-image-wrapper">
+      <div class="overlay-tags-container">
+        <div class="tags-left">
+          <span class="img-tag tag-verified"><mat-icon>verified</mat-icon> Verified Owner</span>
+          <span class="img-tag tag-danger"><mat-icon>block</mat-icon> No Brokerage</span>
+          <!-- <span class="img-tag tag-success"><mat-icon>bolt</mat-icon> Available Now</span> -->
+        </div>
+        <div class="tags-right">
+          <span class="img-tag tag-dark"><mat-icon>camera_alt</mat-icon> {{ activePhotoIndex + 1 }} / {{ property.photos?.length || 1 }}</span>
+        </div>
+      </div>
+
       <button class="nav-arrow prev-arrow" (click)="prevPhoto($event)" *ngIf="property.photos?.length > 1">
         <mat-icon>chevron_left</mat-icon>
       </button>
@@ -37,7 +48,18 @@
 
   <section class="gallery-section desktop-only mt-24">
     <div class="gallery-grid">
-      <div class="main-img">
+      <div class="main-img relative">
+        <div class="overlay-tags-container">
+          <div class="tags-left">
+            <span class="img-tag tag-verified"><mat-icon>verified</mat-icon> Verified Owner</span>
+            <span class="img-tag tag-danger"><mat-icon>block</mat-icon> No Brokerage</span>
+            <span class="img-tag tag-success"><mat-icon>bolt</mat-icon> Available Now</span>
+          </div>
+          <div class="tags-right">
+            <span class="img-tag tag-dark"><mat-icon>camera_alt</mat-icon> 1 / {{ property.photos?.length || 1 }}</span>
+          </div>
+        </div>
+
         <img [src]="(property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Main" (click)="openImage(property.photos[0]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 1">
@@ -85,7 +107,7 @@
               </button>
             </div>
           </div>
-          </div>
+        </div>
         <div class="action-buttons desktop-only">
           <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
             <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
@@ -99,34 +121,83 @@
       </div>
     </header>
 
-    <section class="specs-bar">
-      <div class="spec-item"><mat-icon>bed</mat-icon> <div><strong>{{ property.bedrooms }}</strong> Beds</div></div>
-      <div class="spec-item"><mat-icon>bathtub</mat-icon> <div><strong>{{ property.bathrooms }}</strong> Baths</div></div>
-      <div class="spec-item"><mat-icon>square_foot</mat-icon> <div><strong>{{ property.propertySize | number }}</strong> Sq Ft</div></div>
-      <div class="spec-item"><mat-icon>pets</mat-icon> <div><strong>{{ property.pets ? 'Allowed' : 'No Pets' }}</strong></div></div>
+    <section class="premium-specs-grid">
+      <div class="spec-card">
+        <mat-icon>bed</mat-icon>
+        <div class="spec-val">{{ property.bedrooms }} BHK</div>
+        <div class="spec-lbl">Bedrooms</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>square_foot</mat-icon>
+        <div class="spec-val">{{ property.propertySize | number }}</div>
+        <div class="spec-lbl">Sq. Ft.</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>bathtub</mat-icon>
+        <div class="spec-val">{{ property.bathrooms || 1 }}</div>
+        <div class="spec-lbl">Bathrooms</div>
+      </div>
+      <div class="spec-card">
+        <mat-icon>directions_car</mat-icon>
+        <div class="spec-val">{{ property.parking || 1 }}</div>
+        <div class="spec-lbl">Parking</div>
+      </div>
     </section>
+
+    <section class="verification-badges-section mt-24">
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>verified_user</mat-icon></div>
+        <strong>Owner Verified</strong>
+        <span>Verified owner details</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>money_off</mat-icon></div>
+        <strong>No Brokerage</strong>
+        <span>Zero brokerage fee</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>location_on</mat-icon></div>
+        <strong>Location Verified</strong>
+        <span>Verified address</span>
+      </div>
+      <div class="v-badge">
+        <div class="v-icon-wrapper"><mat-icon>photo_camera</mat-icon></div>
+        <strong>Photos Verified</strong>
+        <span>Real photos of property</span>
+      </div>
+    </section>
+    
+    <div class=" mt-24" style="margin-bottom: 24px;"></div>
 
     <div class="content-layout">
       
       <div class="details-column">
-       <section class="info-block">
-          <h2>About this home</h2>
-          
-          <div [class.truncated]="!showFullDescription">
-            
-            <ul *ngIf="formattedDescription.length > 1; else singleDesc" class="custom-bullet-list">
-              <li *ngFor="let line of formattedDescription">{{ line }}</li>
-            </ul>
-            
-            <ng-template #singleDesc>
-              <p>{{ property.description }}</p>
-            </ng-template>
-            
-          </div>
+        
+        <section class="info-block desc-roomzo-layout">
+          <div class="desc-content">
+  <h2>Description</h2>
+  <!-- Removed the [class.truncated] logic to always show full content -->
+  <div>
+    <ul *ngIf="formattedDescription.length > 1; else singleDesc" class="custom-bullet-list">
+      <li *ngFor="let line of formattedDescription">{{ line }}</li>
+    </ul>
+    <ng-template #singleDesc>
+      <p>{{ property.description }}</p>
+    </ng-template>
+  </div>
+  <!-- Removed the "See More" button completely -->
+</div>
 
-          <button class="link-btn" (click)="showFullDescription = !showFullDescription" *ngIf="property.description?.length > 150">
-            {{ showFullDescription ? 'Show less' : 'Show more' }} <mat-icon>expand_more</mat-icon>
-          </button>
+          <div class="why-roomzo-card">
+            <h3>Why Roomzo?</h3>
+            <ul class="roomzo-benefits">
+              <li><mat-icon>check_circle</mat-icon> Direct Owner Contact</li>
+              <li><mat-icon>check_circle</mat-icon> No Brokerage</li>
+              <li><mat-icon>check_circle</mat-icon> Verified Listings</li>
+              <li><mat-icon>check_circle</mat-icon> Fast & Reliable Support</li>
+            </ul>
+            <mat-icon class="watermark-icon">security</mat-icon>
+          </div>
         </section>
 
         <div class="divider"></div>
@@ -177,7 +248,7 @@
         </section>
         
         <div class="divider"></div>
-<section class="info-block safety-section">
+        <section class="info-block safety-section">
           <div class="safety-card">
             <div class="safety-header">
               <mat-icon class="shield-icon">gpp_maybe</mat-icon>
@@ -262,15 +333,12 @@
   </div> 
 </div>
 
-<div class="mobile-bottom-bar mobile-only" *ngIf="!isLoading && property">
-  <div class="bottom-price-info">
-    <div class="price">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
-    <div class="status" [class.available]="!property.isRented">{{ property.isRented ? 'Rented' : 'Available' }}</div>
-  </div>
-  <button class="btn-primary" 
-          [ngClass]="{'pulse-highlight': highlightContact}" 
-          (click)="contactAgent()">
-    Contact Owner
+<div class="mobile-bottom-bar mobile-only sticky-contact-actions" *ngIf="!isLoading && property">
+  <button class="action-btn btn-call" (click)="handleContactAction('call')">
+    <mat-icon>call</mat-icon> Call Owner
+  </button>
+  <button class="action-btn btn-whatsapp" (click)="handleContactAction('whatsapp')">
+    <mat-icon>chat</mat-icon> WhatsApp
   </button>
 </div>
 
@@ -349,3 +417,10 @@
     </div>
   </div>
 </div>
+
+<app-safety-consent-bottom-sheet
+      [isOpen]="isConsentModalOpen()"
+      [pendingAction]="pendingAction()"
+      (accept)="onConsentAccepted($event)"
+      (closeModal)="isConsentModalOpen.set(false)"
+    />

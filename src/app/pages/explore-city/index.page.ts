@@ -1,9 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router'; 
 import { PropertyService } from '../../services/property.service';
 import { RouteMeta } from '@analogjs/router';
+import { AuthService } from '../../services/auth.service';
+import { ToastrService } from 'ngx-toastr';
+
+// 1. Import Safety Consent Bottom Sheet & Type
+import { SafetyConsentBottomSheetComponent, PendingAction } from '../../components/safety-consent/safety-consent';
 
 export const routeMeta: RouteMeta = {
   title: 'Explore City | RoomZo',
@@ -12,7 +17,11 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-explore-city',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [
+    CommonModule, 
+    MatIconModule,
+    SafetyConsentBottomSheetComponent // 2. Add to imports
+  ],
   templateUrl: './explore-city.html',
   styleUrls: ['./explore-city.css']
 })
@@ -35,12 +44,19 @@ export default class ExploreCityComponent implements OnInit {
   totalPages = 0;
   totalItems = 0;
 
+  // 3. Safety Consent State Signals
+  userHasGivenConsent = signal(false); 
+  isConsentModalOpen = signal(false);
+  pendingAction = signal<PendingAction | any>(null);
+
   constructor(
     private propertyService: PropertyService,
     private route: ActivatedRoute,
     private router: Router,
     private cd: ChangeDetectorRef,
     private location: Location,
+    private authService: AuthService,
+    private toastr: ToastrService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -53,6 +69,9 @@ export default class ExploreCityComponent implements OnInit {
       this.currentPage = 0;
       this.loadCityData();
     });
+
+    // 4. Check if returning from Login
+    this.checkReturnFromLogin();
   }
 
   loadCityData(isLoadMore = false): void {
@@ -100,14 +119,13 @@ export default class ExploreCityComponent implements OnInit {
     }
   }
 
-  // --- FIXED SORTING LOGIC ---
   toggleSortMenu(event?: Event) {
     if (event) {
       event.preventDefault();
       event.stopPropagation(); 
     }
     this.isSortMenuOpen = !this.isSortMenuOpen;
-    this.cd.detectChanges(); // FORCE UI UPDATE
+    this.cd.detectChanges(); 
   }
 
   applySort(newSort: string, event?: Event) {
@@ -118,9 +136,8 @@ export default class ExploreCityComponent implements OnInit {
     
     this.sortBy = newSort;
     this.isSortMenuOpen = false;
-    this.cd.detectChanges(); // FORCE UI UPDATE
+    this.cd.detectChanges(); 
     
-    // Reset and reload
     this.currentPage = 0;
     this.listings = []; 
     this.loadCityData();
@@ -136,7 +153,6 @@ export default class ExploreCityComponent implements OnInit {
     }
   }
 
-  // --- UI Helpers ---
   goBack() {
     this.location.back();
   }
@@ -161,14 +177,154 @@ export default class ExploreCityComponent implements OnInit {
 
   getCityHeaderImage(): string {
     const cityLower = this.city.toLowerCase();
-    if (cityLower.includes('prayagraj')) return 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=1600&q=80';
+    if (cityLower.includes('prayagraj')) return 'prayagraj.jpeg';
     if (cityLower.includes('varanasi')) return 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=1600&q=80';
     if (cityLower.includes('pune')) return 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=1600&q=80';
     return 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1600&q=80'; 
   }
+  
   scrollToContact(id: string): void {
     this.router.navigate(['/property-details', id], { 
       queryParams: { focusContact: 'true' } 
     });
+  }
+
+  // --- 5. Contact & Consent Logic ---
+
+  checkReturnFromLogin() {
+    if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      const pending = localStorage.getItem('pendingAction');
+      
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          localStorage.removeItem('pendingAction'); 
+
+          this.propertyService.getListingById(parsed.propertyId).subscribe({
+            next: (res: any) => {
+              if (res.status === 1 && res.data) {
+                this.handleCardContactAction(res.data, parsed.action);
+              }
+            }
+          });
+        } catch (e) {
+          localStorage.removeItem('pendingAction');
+        }
+      }
+    }
+  }
+
+  handleCardContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      const actionPayload = { prop, actionType };
+      
+      this.checkAndExecuteConsent(actionPayload, () => {
+        this.executeContactAction(prop, actionType);
+      });
+      
+    } else {
+      const returnUrl = this.router.url;
+      localStorage.setItem('pendingAction', JSON.stringify({ action: actionType, propertyId: prop.id }));
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    const phone = prop.contactNo || prop.tempContactNo;
+    if (!phone) {
+      this.propertyService.getListingById(prop.id).subscribe((res: any) => {
+          const p = res.data;
+          const phoneNum = p.contactNo || p.tempContactNo;
+          if(phoneNum) this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
+          else this.toastr.error('Contact number not available');
+      });
+      return;
+    }
+    this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+  }
+
+  private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
+    if (this.userHasGivenConsent() || (isPlatformBrowser(this.platformId) && localStorage.getItem('safetyConsentGiven') === 'true')) {
+      this.userHasGivenConsent.set(true);
+      successCallback();
+      return;
+    }
+
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    if (userId) {
+      this.propertyService.checkSafetyConsent(userId).subscribe({
+        next: (res: any) => {
+          if (res.status === 1 && res.hasConsent) {
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            this.userHasGivenConsent.set(true);
+            successCallback();
+          } else {
+            this.pendingAction.set(actionData);
+            this.isConsentModalOpen.set(true);
+            this.cd.detectChanges(); 
+          }
+        },
+        error: () => {
+          this.pendingAction.set(actionData);
+          this.isConsentModalOpen.set(true);
+          this.cd.detectChanges();
+        }
+      });
+    } else {
+      this.pendingAction.set(actionData);
+      this.isConsentModalOpen.set(true);
+      this.cd.detectChanges();
+    }
+  }
+
+  onConsentAccepted(action: any) {
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    const proceedWithAction = () => {
+      this.executeContactAction(action.prop, action.actionType);
+    };
+
+    if (userId) {
+      this.propertyService.updateSafetyConsent(userId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 1) {
+            this.userHasGivenConsent.set(true);
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            proceedWithAction();
+          } else {
+            this.toastr.error('Failed to record consent. Please try again.');
+          }
+        },
+        error: (err) => {
+          console.error('Consent save error:', err);
+          this.toastr.error('Server error while recording consent.');
+        }
+      });
+    } else {
+      this.userHasGivenConsent.set(true);
+      if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+      proceedWithAction();
+    }
+  }
+
+  isUserLoggedIn(): boolean {
+    return !!(localStorage.getItem('token') || localStorage.getItem('user'));
+  }
+
+  isOwnerLoggedIn(): boolean {
+    return this.isUserLoggedIn(); 
   }
 }

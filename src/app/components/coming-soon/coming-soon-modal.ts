@@ -12,7 +12,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       <div class="modal-icon">
         <mat-icon>location_city</mat-icon>
       </div>
-      <h2>RoomZo is coming to <span class="highlight">Pune</span> soon!</h2>
+      <h2>RoomZo is coming to <span class="highlight">Varanasi</span> soon!</h2>
       <p>We’re preparing the best verified rooms, PGs, and flatmates for you.<br>
          You will see the update soon, stay tuned.</p>
       <div class="modal-actions">
@@ -100,7 +100,7 @@ export class ComingSoonModalComponent {
   ) {}
 
   notify() {
-    alert('🎉 Thank you! We’ll notify you as soon as RoomZo launches in Pune.');
+    alert('🎉 Thank you! We’ll notify you as soon as RoomZo launches in Varanasi.');
     this.dialogRef.close();
   }
 

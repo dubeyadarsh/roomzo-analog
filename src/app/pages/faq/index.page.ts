@@ -58,7 +58,7 @@ export default class FaqComponent implements OnInit, OnDestroy {
     },
     {
       question: 'How do I contact customer support?',
-      answer: 'You can reach out to our 24/7 support team via the "Contact Us" page or email us directly at support@roomzo.com.',
+      answer: 'You can reach out to our 24/7 support team via the "Contact Us" page or email us directly at support@roomzo.in.',
       category: 'General'
     },
 

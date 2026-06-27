@@ -1,132 +1,272 @@
+/* ============================================================
+   HERO — RoomZo
+   Theme color: #196153 (deep teal)
+
+   Image: Unsplash photo-1484154218962-a197022b5858
+   Bright, airy modern room interior — warm whites + wood tones
+   complement the deep teal perfectly. 100% free commercial use.
+   Alt option: photo-1556909114-f6e7ad7d3136 (cozy desk setup)
+============================================================ */
+
 .hero-full {
   position: relative;
-  min-height: 450px;
+  min-height: 480px;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  /* Use a nice cityscape image here */
-  background: url('https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1600&q=80') center/cover no-repeat;
+  background: url('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1400&q=85')
+              center center / cover no-repeat;
 }
 
 .hero-overlay {
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  /* Premium Slate Gradient - much softer and more professional than pure black */
-  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
+  inset: 0;
+  /* Teal-tinted overlay instead of plain black — ties to brand */
+  background:
+    linear-gradient(
+      105deg,
+      rgba(15, 40, 35, 0.88) 0%,
+      rgba(15, 40, 35, 0.60) 50%,
+      rgba(15, 40, 35, 0.10) 100%
+    ),
+    linear-gradient(
+      to top,
+      rgba(15, 40, 35, 0.75) 0%,
+      transparent 55%
+    );
   z-index: 1;
 }
 
 .hero-content-center {
   position: relative;
   z-index: 2;
-  text-align: center;
   width: 100%;
-  max-width: 900px;
-  padding: 80px 20px 40px; 
+  max-width: 960px;
+  padding: 56px 24px 44px;
+  text-align: left;
 }
 
-/* ========================================================
-   DESKTOP / MOBILE VISIBILITY
-======================================================== */
-.show-mobile { display: none !important; }
+/* ---- Heading ---- */
+.hero-content-center h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.9rem, 4.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+  margin: 0 0 6px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
 
-/* Desktop Static Features */
-.hero-features {
+.hero-accent {
+  /* Lighter teal-green for accent — visible on dark overlay */
+  color: #4ade80;
+  display: block;
+}
+
+/* ---- Sub ---- */
+.hero-sub {
+  font-family: 'Outfit', sans-serif;
+  color: rgba(255,255,255,0.80);
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0 0 18px;
+}
+
+/* ---- Trust badges ---- */
+.hero-badges {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 16px;
-  color: white;
-  margin-bottom: 40px;
-  font-weight: 500;
-  font-size: 1.05rem;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  gap: 10px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
 }
-.hero-features span { display: flex; align-items: center; gap: 6px; }
-.hero-features mat-icon { font-size: 20px; width: 20px; height: 20px; }
-.hero-features .divider { opacity: 0.6; }
 
-/* ========================================================
-   MOBILE RESPONSIVENESS (PREMIUM ELEGANT UI)
-======================================================== */
-@media (max-width: 900px) {
-  .hide-mobile { display: none !important; }
-  .show-mobile { display: flex !important; }
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.22);
+  color: #fff;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+}
 
+.badge-pill mat-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  color: #4ade80;
+}
+
+.badge-sep {
+  color: rgba(255,255,255,0.35);
+  font-size: 1rem;
+}
+
+/* ============================================================
+   STATS STRIP — below hero
+============================================================ */
+.hero-stats-strip {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  max-width: 960px;
+  width: calc(100% - 32px);
+  margin: 14px auto 0;
+  padding: 16px 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.stat-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  color: #196153;
+  flex-shrink: 0;
+}
+
+.stat-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.stat-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #196153;
+}
+
+.stat-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+  margin: 0 8px;
+}
+
+/* ============================================================
+   MOBILE (≤ 768px)
+============================================================ */
+@media (max-width: 768px) {
   .hero-full {
-    min-height: 340px; /* Perfect height for breathing room */
-    display: flex;
-    align-items: flex-end;
-    padding-bottom: 32px; /* Lifts search bar gracefully off the bottom edge */
+    min-height: 370px;
   }
 
   .hero-content-center {
-    padding: 0 20px !important; /* Perfect left/right balance */
-    width: 100%;
+    padding: 0 16px 22px !important;
   }
 
-  /* Premium Typography for H1 */
   .hero-content-center h1 {
+    font-size: 1.65rem;
+    margin: 0 0 4px;
+  }
+
+  .hero-accent {
     font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.5px; /* Modern tight tracking */
-    line-height: 1.25;
-    color: #ffffff;
-    text-align: left;
-    margin: 0 0 16px 0;
-    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 
-  /* Elegant Glassmorphism Badge for the Slider */
-  .feature-slider-container {
-    display: inline-flex !important; /* Shrinks to fit content perfectly */
-    align-items: center;
-    background: rgba(255, 255, 255, 0.15); /* Soft glass effect */
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Crisp outer edge */
-    padding: 6px 16px 6px 12px;
-    border-radius: 50px;
-    margin-bottom: 28px; /* Pushes the search bar down smoothly */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  .hero-sub {
+    font-size: 0.85rem;
+    margin: 0 0 12px;
   }
 
-  .check-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    font-weight: bold;
-    color: #34d399; /* A beautiful, eye-soothing mint/emerald green */
-    margin-right: 8px;
+  .hero-badges {
+    margin-bottom: 16px;
+    gap: 8px;
   }
 
-  .feature-slider-viewport {
-    height: 22px;
-    overflow: hidden;
-    position: relative;
+  .badge-pill {
+    padding: 5px 11px;
+    font-size: 0.80rem;
   }
 
-  .feature-slide {
-    height: 22px;
-    line-height: 22px;
-    white-space: nowrap;
-    color: rgba(255, 255, 255, 0.95); /* Slightly off-white for softness */
-    font-weight: 500;
-    font-size: 0.9rem;
-    letter-spacing: 0.3px;
+  /* Stats mobile */
+  .hero-stats-strip {
+    width: calc(100% - 32px);
+    margin: 10px auto 0;
+    padding: 12px 10px;
+    border-radius: 12px;
   }
 
-  .feature-slider-track {
-    display: flex;
-    flex-direction: column;
-    animation: slideUpVertical 8s infinite cubic-bezier(0.85, 0, 0.15, 1);
+  .stat-item { gap: 7px; }
+
+  .stat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 
-  /* Adjusted animation heights to match the new 22px line-height perfectly */
-  @keyframes slideUpVertical {
-    0%, 20%   { transform: translateY(0); }
-    33%, 53%  { transform: translateY(-22px); }
-    66%, 86%  { transform: translateY(-44px); }
-    100%      { transform: translateY(-66px); }
+  .stat-number { font-size: 0.95rem; }
+  .stat-label  { font-size: 0.70rem; }
+
+  .stat-divider {
+    height: 28px;
+    margin: 0 4px;
+  }
+  
+}
+/* ============================================================
+   ANIMATED CITY STATS (Works on all screens)
+============================================================ */
+.stat-city {
+  display: block;
+  height: 1.5em;
+  position: relative; /* Allows absolute positioning of child items */
+  overflow: hidden;
+  min-width: 80px;    /* Prevents the container from collapsing */
+}
+
+.city-item {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  opacity: 0;         /* Default hidden */
+  display: block;
+  animation: cityRotate 9s infinite ease-in-out;
+}
+
+/* Staggered delays for 3 items over a 9-second loop */
+.city-item:nth-child(1) { animation-delay: 0s; }
+.city-item:nth-child(2) { animation-delay: 3s; }
+.city-item:nth-child(3) { animation-delay: 6s; }
+
+@keyframes cityRotate {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  5%, 28% {            /* Fades in and stays visible */
+    opacity: 1;
+    transform: translateY(0);
+  }
+  33%, 100% {          /* Fades out and slides up */
+    opacity: 0;
+    transform: translateY(-15px);
   }
 }

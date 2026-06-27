@@ -24,7 +24,48 @@
     </div>
   </div>
 </section>
+<section class="explore-category-section">
+  <div class="container">
+    <div class="section-header-mobile">
+      <h3>EXPLORE BY CATEGORY</h3>
+    </div>
+    
+    <div class="categories-container">
+       <div class="category-card" (click)="navigateToCategory('flatmate')">
+        <div class="category-icon-wrapper icon-orange">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <span class="category-title">Flatmates</span>
+        <span class="category-subtitle">Find Flatmates</span>
+      </div>
+      <div class="category-card" (click)="navigateToCategory('room')">
+        <div class="category-icon-wrapper icon-blue">
+          <mat-icon>home</mat-icon>
+        </div>
+        <span class="category-title">Rooms</span>
+        <span class="category-subtitle">Find Rooms</span>
+      </div>
 
+      <div class="category-card" (click)="navigateToCategory('pg')">
+        <div class="category-icon-wrapper icon-green">
+          <mat-icon>bed</mat-icon>
+        </div>
+        <span class="category-title">PG / Hostels</span>
+        <span class="category-subtitle">Boys &amp; Girls PG</span>
+      </div>
+
+      <div class="category-card" (click)="navigateToCategory('flat')">
+        <div class="category-icon-wrapper icon-purple">
+          <mat-icon>apartment</mat-icon>
+        </div>
+        <span class="category-title">Flats</span>
+        <span class="category-subtitle">1 BHK, 2 BHK, 3 BHK</span>
+      </div>
+
+     
+    </div>
+  </div>
+</section>
 <section class="featured-section">
   <div class="container">
     
@@ -63,8 +104,8 @@
             </div>
           </div>
 
-          <div class="card-content" (click)="viewDetails(item.id)">
-            <h3>{{ item.title }}</h3>
+          <div class="card-content" >
+            <h3 (click)="viewDetails(item.id)">{{ item.title }}</h3>
             
             <div class="location-text">
               <mat-icon>fiber_manual_record</mat-icon> {{ item.location }}
@@ -76,15 +117,19 @@
               <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
             </div>
 
-            <div class="action-pill-container">
-              <button class="action-btn left" (click)="scrollToContact(item.id)">
-                <mat-icon>message</mat-icon> Contact Us
-              </button>
-              <div class="btn-divider"></div>
-              <button class="action-btn right" (click)="viewDetails(item.id)">
-                <mat-icon>info</mat-icon> View Details
-              </button>
-            </div>
+               <div class="action-buttons-container">
+  <button class="contact-btn" (click)="handleCardContactAction(item, 'call')">
+    <mat-icon>call</mat-icon> Call
+  </button>
+  
+  <button class="contact-btn wa-btn" (click)="handleCardContactAction(item, 'whatsapp')">
+    <mat-icon>whatsapp</mat-icon> WhatsApp
+  </button>
+  
+  <button class="view-btn" (click)="viewDetails(item.id)">
+    <mat-icon>info</mat-icon> View
+  </button>
+</div>
 
           </div>
         </div>
@@ -137,8 +182,8 @@
             </div>
           </div>
 
-          <div class="card-content" (click)="viewDetails(item.id)">
-            <h3>{{ item.title }}</h3>
+          <div class="card-content" >
+            <h3 (click)="viewDetails(item.id)">{{ item.title }}</h3>
             
             <div class="location-text">
               <mat-icon>location_on</mat-icon> {{ item.location }}
@@ -150,15 +195,19 @@
               <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
             </div>
 
-            <div class="action-pill-container">
-              <button class="action-btn left" (click)="scrollToContact(item.id)">
-                <mat-icon>message</mat-icon> Contact Us
-              </button>
-              <div class="btn-divider"></div>
-              <button class="action-btn right" (click)="viewDetails(item.id)">
-                <mat-icon>info</mat-icon> View Details
-              </button>
-            </div>
+          <div class="action-buttons-container">
+  <button class="contact-btn" (click)="handleCardContactAction(item, 'call')">
+    <mat-icon>call</mat-icon> Call
+  </button>
+  
+  <button class="contact-btn wa-btn" (click)="handleCardContactAction(item, 'whatsapp')">
+    <mat-icon>chat</mat-icon> WhatsApp
+  </button>
+  
+  <button class="view-btn" (click)="viewDetails(item.id)">
+    <mat-icon>info</mat-icon> View
+  </button>
+</div>
           </div>
         </div>
       </div>
@@ -167,7 +216,55 @@
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
+ <section class="trust-features-section">
+  <div class="container">
+    <div class="section-header-mobile">
+      <h3>WHY CHOOSE ROOMZO?</h3>
+    </div>
+    
+    <div class="trust-features-container">
+      <div class="trust-feature-card">
+        <div class="trust-icon-wrapper trust-icon-green">
+          <mat-icon>verified_user</mat-icon>
+        </div>
+        <div class="trust-text">
+          <span class="trust-title">Verified Owners</span>
+          <span class="trust-subtitle">Your safety first</span>
+        </div>
+      </div>
 
+      <div class="trust-feature-card">
+        <div class="trust-icon-wrapper trust-icon-blue">
+          <mat-icon>chat</mat-icon>
+        </div>
+        <div class="trust-text">
+          <span class="trust-title">Direct Contact</span>
+          <span class="trust-subtitle">Talk on WhatsApp</span>
+        </div>
+      </div>
+
+      <div class="trust-feature-card">
+        <div class="trust-icon-wrapper trust-icon-yellow">
+          <mat-icon>currency_rupee</mat-icon>
+        </div>
+        <div class="trust-text">
+          <span class="trust-title">No Brokerage</span>
+          <span class="trust-subtitle">Zero Commission</span>
+        </div>
+      </div>
+
+      <div class="trust-feature-card">
+        <div class="trust-icon-wrapper trust-icon-purple">
+          <mat-icon>location_on</mat-icon>
+        </div>
+        <div class="trust-text">
+          <span class="trust-title">Local &amp; Trusted</span>
+          <span class="trust-subtitle">Properties in Prayagraj</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
     <div class="bottom-features-row">
       <div class="feature-box">
@@ -201,5 +298,12 @@
 
   </div> 
   <app-contact></app-contact>
-  
+ 
+  <!-- Add this at the absolute bottom of your homepage HTML -->
+<app-safety-consent-bottom-sheet
+  [isOpen]="isConsentModalOpen()"
+  [pendingAction]="pendingAction()"
+  (accept)="onConsentAccepted($event)"
+  (closeModal)="isConsentModalOpen.set(false)"
+/>
 </section>

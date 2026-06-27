@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, Inject, PLATFORM_ID, Renderer2, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,10 +11,12 @@ import { getAmenitiesMap } from '../../services/Utility';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
+import { PendingAction, SafetyConsentBottomSheetComponent } from '../../components/safety-consent/safety-consent';
+
 @Component({
   selector: 'app-property-details',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule, SafetyConsentBottomSheetComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './property-details.html',
   styleUrls: ['./property-details.css']
@@ -53,8 +55,12 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   };
 
   isBrowser = isPlatformBrowser(this.platformId);
-  activePhotoIndex = 0; // State for the native mobile gallery
+  activePhotoIndex = 0;
   private routeSub: Subscription | null = null;
+
+  userHasGivenConsent = signal(false); 
+  isConsentModalOpen = signal(false);
+  pendingAction = signal<PendingAction | any>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -64,7 +70,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private toastr: ToastrService,
     private authService: AuthService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document
   ) {}
 
   ngOnInit(): void {
@@ -75,10 +83,11 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         this.similarProperties = [];
         this.mapUrl = null; 
         this.showContactModal = false; 
-        this.activePhotoIndex = 0; // Reset gallery index on new property load
+        this.activePhotoIndex = 0; 
         
         if (this.isBrowser) {
           window.scrollTo(0, 0);
+          this.renderer.addClass(this.document.body, 'hide-global-bottom-nav');
         }
         
         this.cd.detectChanges();
@@ -124,8 +133,158 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
       }
     });
   }
+private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
+    if (this.userHasGivenConsent() || (this.isBrowser && localStorage.getItem('safetyConsentGiven') === 'true')) {
+      this.userHasGivenConsent.set(true);
+      successCallback();
+      return;
+    }
 
-  // Mobile Native Gallery Methods
+    let userId = null;
+    if (this.isBrowser) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    if (userId) {
+      this.propertyService.checkSafetyConsent(userId).subscribe({
+        next: (res: any) => {
+          console.log("Backend Response:", res); // Debug log
+          if (res.status === 1 && res.hasConsent) {
+            if (this.isBrowser) localStorage.setItem('safetyConsentGiven', 'true');
+            this.userHasGivenConsent.set(true);
+            successCallback();
+          } else {
+            console.log("Opening Modal..."); // Debug log
+            // Not in DB -> Show Modal
+            this.pendingAction.set(actionData);
+            this.isConsentModalOpen.set(true);
+            
+            // ADD THIS LINE: Force Angular to update the UI immediately
+            this.cd.detectChanges(); 
+          }
+        },
+        error: () => {
+          this.pendingAction.set(actionData);
+          this.isConsentModalOpen.set(true);
+          this.cd.detectChanges(); // ADD THIS LINE HERE TOO
+        }
+      });
+    } else {
+      this.pendingAction.set(actionData);
+      this.isConsentModalOpen.set(true);
+      this.cd.detectChanges(); // AND HERE
+    }
+  }
+
+  // Triggered via Desktop Sidebar
+  contactAgent() {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      const actionPayload = { actionType: 'contactOwnerModal' };
+      
+      this.checkAndExecuteConsent(actionPayload, () => {
+        this.openContactModal();
+      });
+    } else {
+      const returnUrl = `/property-details/${this.currentId}?showContact=true`;
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  // Triggered via Mobile Bottom Bar
+  handleContactAction(actionType: 'call' | 'whatsapp') {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      if (this.ownerDetails.propertyPhone || this.ownerDetails.ownerPhone) {
+        this.executeContactAction(actionType);
+      } else {
+        this.isLoading = true;
+        this.authService.getOwnerDetails(this.property.ownerId).subscribe({
+          next: (res: any) => {
+            this.isLoading = false;
+            if (res.status === 1 && res.data) {
+              this.ownerDetails = {
+                name: res.data.name,
+                ownerPhone: res.data.phone,
+                propertyPhone: this.property.contactNo || this.property.tempContactNo || res.data.phone,
+                email: res.data.email
+              };
+              this.executeContactAction(actionType);
+            } else {
+              this.toastr.error('Could not fetch owner details');
+            }
+          },
+          error: () => {
+            this.isLoading = false;
+            this.toastr.error('Failed to load contact info');
+          }
+        });
+      }
+    } else {
+      const returnUrl = `/property-details/${this.currentId}?action=${actionType}`;
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  private executeContactAction(actionType: 'call' | 'whatsapp') {
+    const phoneValue = this.ownerDetails.propertyPhone || this.ownerDetails.ownerPhone;
+    const phone = phoneValue ? String(phoneValue) : null; 
+
+    if (!phone) {
+      this.toastr.error('Phone number not available');
+      return;
+    }
+
+    const actionPayload = { phone, actionType, prop: this.property };
+
+    this.checkAndExecuteConsent(actionPayload, () => {
+      this.propertyService.triggerPhoneAndWP(phone, actionType, this.property);
+    });
+  }
+
+  onConsentAccepted(action: any) {
+    let userId = null;
+    if (this.isBrowser) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    const proceedWithAction = () => {
+      if (action.actionType === 'contactOwnerModal') {
+        this.openContactModal();
+      } else {
+        this.propertyService.triggerPhoneAndWP(action.phone, action.actionType, action.prop);
+      }
+    };
+
+    if (userId) {
+      this.propertyService.updateSafetyConsent(userId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 1) {
+            this.userHasGivenConsent.set(true);
+            if (this.isBrowser) localStorage.setItem('safetyConsentGiven', 'true');
+            proceedWithAction();
+          } else {
+            this.toastr.error('Failed to record consent. Please try again.');
+          }
+        },
+        error: (err) => {
+          console.error('Consent save error:', err);
+          this.toastr.error('Server error while recording consent.');
+        }
+      });
+    } else {
+      this.userHasGivenConsent.set(true);
+      if (this.isBrowser) localStorage.setItem('safetyConsentGiven', 'true');
+      proceedWithAction();
+    }
+  }
+
+  // ... (All other existing methods remain exactly the same: isUserLoggedIn, openContactModal, loadMapCoordinates, shareProperty, etc.)
+  
   nextPhoto(event: Event) {
     event.stopPropagation();
     if (this.property?.photos) {
@@ -144,25 +303,12 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     this.activePhotoIndex = index;
   }
 
- contactAgent() {
-    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
-      this.openContactModal();
-    } else {
-      const returnUrl = `/property-details/${this.currentId}?showContact=true`;
-      // CHANGE: Route to owner-auth instead of login
-      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
-    }
-  }
-
-isUserLoggedIn(): boolean {
+  isUserLoggedIn(): boolean {
     if (!this.isBrowser) return false;
-    
-    // 1. Updated to check for 'user' instead of 'currentUser'
     const hasToken = !!localStorage.getItem('token') || !!localStorage.getItem('user');
     if (hasToken) return true;
 
     const isVerified = localStorage.getItem('userVerifiedWithOtp'); 
-    // 2. Updated to 'loginTimestamp' to match your auth service
     const loginTime = localStorage.getItem('loginTimestamp'); 
     
     if (isVerified === 'true' && loginTime) {
@@ -175,8 +321,6 @@ isUserLoggedIn(): boolean {
   
   isOwnerLoggedIn(): boolean {
     if (!this.isBrowser) return false;
-    
-    // 1. Updated to check for 'user' instead of 'currentUser'
     const hasToken = !!localStorage.getItem('token') || !!localStorage.getItem('user');
     if (hasToken) return true;
 
@@ -195,15 +339,12 @@ isUserLoggedIn(): boolean {
     const params = this.route.snapshot.queryParams;
     if (params['showContact'] === 'true' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
       this.openContactModal();
-      this.router.navigate([], {
-        relativeTo: this.route,
-        queryParams: { showContact: null },
-        queryParamsHandling: 'merge',
-        replaceUrl: true
-      });
       this.clearQueryParams();
     } else if (params['action'] === 'report' && ( this.isUserLoggedIn() || this.isOwnerLoggedIn() )) {
       this.openReportModal(); 
+      this.clearQueryParams();
+    } else if ((params['action'] === 'call' || params['action'] === 'whatsapp') && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      this.handleContactAction(params['action'] as 'call' | 'whatsapp');
       this.clearQueryParams();
     }
   }
@@ -230,7 +371,7 @@ isUserLoggedIn(): boolean {
           this.ownerDetails = {
             name: res.data.name,
             ownerPhone: res.data.phone, 
-            propertyPhone: this.property.contactNo || this.property.tempContactNo, 
+            propertyPhone: this.property.contactNo || this.property.tempContactNo || res.data.phone, 
             email: res.data.email
           };
           this.showContactModal = true;
@@ -321,6 +462,9 @@ isUserLoggedIn(): boolean {
   scheduleTour() { this.toastr.info('Tour scheduling feature coming soon!', 'Coming Soon'); }
 
   ngOnDestroy(): void {
+    if (this.isBrowser) {
+      this.renderer.removeClass(this.document.body, 'hide-global-bottom-nav');
+    }
     if (this.routeSub) this.routeSub.unsubscribe();
   }
   
@@ -400,7 +544,6 @@ isUserLoggedIn(): boolean {
       this.openReportModal(); 
     } else {
       const returnUrl = `/property-details/${this.currentId}?action=report`;
-      // CHANGE: Route to owner-auth instead of login
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
@@ -446,46 +589,43 @@ isUserLoggedIn(): boolean {
   closeReportModal() {
     this.showReportModal = false;
   }
-  // NEW: Helper method to format description into bullet points
+
   get formattedDescription(): string[] {
     if (!this.property || !this.property.description) return [];
     
-    // Split by '|', remove extra whitespace, and filter out any empty strings
     return this.property.description
       .split('|')
       .map((item: string) => item.trim())
       .filter((item: string) => item.length > 0);
   }
   
-highlightContact = false;
-checkFocusContact() {
-  const params = this.route.snapshot.queryParams;
-  if (params['focusContact'] === 'true') {
-    this.highlightContact = true;
-    this.cd.detectChanges();
-    
-    if (this.isBrowser) {
-      setTimeout(() => {
-        // Target the button inside the booking card (works for both desktop and mobile flow)
-        const targetBtn = document.querySelector('.booking-card .btn-primary');
-        if (targetBtn) {
-          targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        // Remove highlight animation after 3 seconds and clean the URL
+  highlightContact = false;
+  checkFocusContact() {
+    const params = this.route.snapshot.queryParams;
+    if (params['focusContact'] === 'true') {
+      this.highlightContact = true;
+      this.cd.detectChanges();
+      
+      if (this.isBrowser) {
         setTimeout(() => {
-          this.highlightContact = false;
-          this.cd.detectChanges();
+          const targetBtn = document.querySelector('.booking-card .btn-primary');
+          if (targetBtn) {
+            targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           
-          this.router.navigate([], {
-            relativeTo: this.route,
-            queryParams: { focusContact: null },
-            queryParamsHandling: 'merge',
-            replaceUrl: true
-          });
-        }, 3000);
-      }, 300); // Brief delay to ensure DOM is fully rendered
+          setTimeout(() => {
+            this.highlightContact = false;
+            this.cd.detectChanges();
+            
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { focusContact: null },
+              queryParamsHandling: 'merge',
+              replaceUrl: true
+            });
+          }, 3000);
+        }, 300); 
+      }
     }
   }
-}
 }

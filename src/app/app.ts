@@ -41,7 +41,7 @@ import { ChatBotComponent } from "./components/chat-bot/chat-bot";
     <app-footer></app-footer>
 
     <app-chat-drawer></app-chat-drawer>
-     <app-chat-bot></app-chat-bot>
+     <!-- <app-chat-bot></app-chat-bot> -->
   `,
   styles: [`
     .global-loader {

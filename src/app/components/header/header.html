@@ -12,7 +12,7 @@
       <a routerLink="/flatmates">Flatmates</a>
       <a routerLink="/list-property">List Property</a>
       <a routerLink="/about">About</a>
-      <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
+      <a routerLink="/blog">Blog</a> <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
       
      
     </nav>
@@ -121,9 +121,10 @@
         </a>
       </ng-container>
 
-      <a routerLink="/about" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
-        <mat-icon>info</mat-icon> About RoomZo
-      </a>
+    
+      <!-- <a routerLink="/blog" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>article</mat-icon> Blog
+      </a> -->
       <div class="divider"></div>
       <button class="menu-item logout" (click)="logout()" style="padding: 16px; width: 100%;">
         <mat-icon>logout</mat-icon> Logout
@@ -138,6 +139,13 @@
           <button class="btn-primary" routerLink="/owner-auth" (click)="closeMenu()" style="width: 100%; margin-top: 20px;">
             Login / Sign Up
           </button>
+          <div class="divider"></div>
+      <a routerLink="/about" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>info</mat-icon> About RoomZo
+      </a>
+      <a routerLink="/blog" class="menu-item" (click)="closeMenu()" style="padding: 16px;">
+        <mat-icon>article</mat-icon> Blog
+      </a>
       </div>
     </ng-container>
 

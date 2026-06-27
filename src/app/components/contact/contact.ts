@@ -20,18 +20,29 @@ export class ContactComponent {
   isSubmitting = false;
 
   // Contact Info Data
-  contactInfo = [
-    { 
-      icon: 'phone', 
-      title: 'Phone', 
-      content: '+91 9250 782268', 
-      sub: '' 
-    },
+ contactInfo = [
     { 
       icon: 'email', 
       title: 'Email', 
-      content: 'support@roomzo.in', 
-      sub: '' 
+      content: 'support@roomzo.in',
+      isLink: false,
+      isBrand: false 
+    },
+    { 
+      icon: 'instagram', 
+      title: 'Instagram', 
+      content: 'Connect with us via DM', 
+      isLink: true,
+      url: 'https://ig.me/m/roomzoofficial',
+      isBrand: true 
+    },
+    { 
+      icon: 'facebook', 
+      title: 'Facebook', 
+      content: 'Follow us on Facebook', 
+      isLink: true,
+      url: 'https://www.facebook.com/profile.php?id=61590384909028',
+      isBrand: true 
     }
   ];
 

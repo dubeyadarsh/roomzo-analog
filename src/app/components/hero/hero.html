@@ -1,29 +1,63 @@
 <section class="hero-full">
   <div class="hero-overlay"></div>
   <div class="container hero-content-center">
-    
-<h1 #heroText>Find Your Perfect Room & PG</h1>    
-    <div class="hero-features hide-mobile">
-      <span><mat-icon>check</mat-icon> Verified Listings</span>
-      <span class="divider">|</span>
-      <span><mat-icon>check</mat-icon> No Broker Fees</span>
-      <span class="divider">|</span>
-      <span><mat-icon>check</mat-icon> Connect Directly with Owners</span>
-    </div>
 
-    <div class="feature-slider-container show-mobile">
-      <mat-icon class="check-icon">check</mat-icon>
-      <div class="feature-slider-viewport">
-        <div class="feature-slider-track">
-          <div class="feature-slide">Verified Listings</div>
-          <div class="feature-slide">No Broker Fees</div>
-          <div class="feature-slide">Connect with Owners</div>
-          <div class="feature-slide">Verified Listings</div> 
-        </div>
+    <!-- Heading -->
+    <h1 #heroText>
+      Find Rooms, PGs &amp; Flats<br>
+      <span class="hero-accent">Without Brokerage</span>
+    </h1>
+
+    <!-- Sub-headline -->
+    <p class="hero-sub">Direct Owner Contact. No Brokerage.</p>
+
+    <!-- Trust badges -->
+    <div class="hero-badges">
+      <div class="badge-pill">
+        <mat-icon>verified_user</mat-icon>
+        <span>Verified Listings</span>
+      </div>
+      <span class="badge-sep">|</span>
+      <div class="badge-pill">
+        <mat-icon>security</mat-icon>
+        <span>100% Safe</span>
       </div>
     </div>
 
+    <!-- Search bar -->
     <app-search-bar></app-search-bar>
 
   </div>
 </section>
+
+<!-- Stats strip — sits just below hero -->
+<div class="hero-stats-strip">
+  <div class="stat-item">
+    <mat-icon class="stat-icon">home</mat-icon>
+    <div class="stat-text">
+      <span class="stat-number">200+</span>
+      <span class="stat-label">Listings</span>
+    </div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <mat-icon class="stat-icon">group</mat-icon>
+    <div class="stat-text">
+      <span class="stat-number">500+</span>
+      <span class="stat-label">Users</span>
+    </div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <mat-icon class="stat-icon">location_on</mat-icon>
+    <div class="stat-text">
+      <span class="stat-number stat-city">
+        <span class="city-item">Prayagraj</span>
+        <span class="city-item">Varanasi</span>
+        <span class="city-item">Pune</span>
+      </span>
+      <span class="stat-label">Your City</span>
+     
+    </div>
+  </div>
+</div>

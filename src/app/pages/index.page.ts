@@ -1,13 +1,18 @@
-import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { afterNextRender, Component, Inject, PLATFORM_ID, OnInit, ViewChild, ElementRef, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core'; 
+import { ToastrService } from 'ngx-toastr'; // Added for contact error messages
+
 import { HeroComponent } from '../components/hero/hero';
 import { ContactComponent } from '../components/contact/contact';
 import { PropertyService } from '../services/property.service';
 import { mapBackendListingsToUi } from '../services/Utility';
+
+// Added Safety Consent Imports (Adjust path if needed based on your folder structure)
+import { SafetyConsentBottomSheetComponent, PendingAction } from '../components/safety-consent/safety-consent';
 
 interface Listing {
   id: number;
@@ -21,18 +26,22 @@ interface Listing {
   rating?: number;
   isFavorite: boolean;
   postedDate?: string; 
+  contactNo?: string;     // Added to support contact logic
+  tempContactNo?: string; // Added to support contact logic
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, HeroComponent, MatIconModule, MatButtonModule, ContactComponent, RouterModule],
+  // Added SafetyConsentBottomSheetComponent to imports
+  imports: [CommonModule, HeroComponent, MatIconModule, MatButtonModule, ContactComponent, RouterModule, SafetyConsentBottomSheetComponent],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
 export default class HomeComponent implements OnInit {
   @ViewChild('carouselGrid') carouselGrid!: ElementRef;
   @ViewChild('nearbyCarouselGrid', { static: false }) nearbyCarouselGrid!: ElementRef;
+  
   listings: Listing[] = [];
   isLoading: boolean = true;
   nearbyListings: Listing[] = [];
@@ -46,33 +55,40 @@ export default class HomeComponent implements OnInit {
   
   Math = Math; 
 
+  // --- Safety Consent State Signals ---
+  userHasGivenConsent = signal(false); 
+  isConsentModalOpen = signal(false);
+  pendingAction = signal<PendingAction | any>(null);
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private propertyService: PropertyService, 
     private cd: ChangeDetectorRef,
+    private toastr: ToastrService, // Added Toastr for feedback
     @Inject(PLATFORM_ID) private platformId: Object 
   ) {
     afterNextRender(() => {
       this.calculateItemsToShow();
       this.fetchRecentListings();
-      this.fetchNearbyProperties(); // NEW: Trigger location request
+      this.fetchNearbyProperties(); 
       if (isPlatformBrowser(this.platformId)) {
         window.addEventListener('resize', () => this.calculateItemsToShow());
       }
     });
   }
-popularCities = [
+
+  popularCities = [
     { 
       name: 'Prayagraj', 
       state: 'Uttar Pradesh', 
-      image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=400&q=80',
+      image: 'prayagraj.jpeg',
       active: true
     },
     { 
       name: 'Varanasi', 
       state: 'Uttar Pradesh', 
-      image: 'https://images.unsplash.com/photo-1600093463592-8e36ae95ef56?w=400&q=80',
+      image: 'banaras.jpg',
       active: true
     },
     { 
@@ -100,6 +116,7 @@ popularCities = [
       active: false
     }
   ];
+
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {
       if (fragment === 'contact' && isPlatformBrowser(this.platformId)) {
@@ -111,6 +128,9 @@ popularCities = [
         }, 300);
       }
     });
+
+    // Added: Check if returning from Login for Call/WhatsApp
+    this.checkReturnFromLogin();
   }
 
   calculateItemsToShow(): void {
@@ -125,7 +145,6 @@ popularCities = [
       this.carouselItemsToShow = 3; // Desktop
     }
     
-    // Check scroll state on resize
     this.onScroll();
     this.cd.detectChanges();
   }
@@ -140,11 +159,9 @@ popularCities = [
           this.calculateItemsToShow();
         }
         this.isLoading = false;
-
         
         this.cd.detectChanges();
         
-        // Wait for DOM to render then check bounds
         setTimeout(() => this.onScroll(), 100);
       },
       (error) => {
@@ -155,17 +172,14 @@ popularCities = [
     );
   }
 
-  // Native Scroll Event Handler
   onScroll(): void {
     if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
     
     const el = this.carouselGrid.nativeElement;
     
-    // Update button states
     this.isAtStart = el.scrollLeft <= 0;
     this.isAtEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
 
-    // Update index for active dots
     const card = el.querySelector('.listing-card');
     if (card) {
       const cardWidth = card.offsetWidth;
@@ -214,38 +228,31 @@ popularCities = [
       : '₹' + price.toLocaleString();
   }
 
-formatPostedDate(dateString?: string): string {
-  if (!dateString) return 'Recently posted';
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  
-  // Guard against future dates caused by slight client/server clock desyncs
-  if (diffInMs < 0) return 'Just now';
+  formatPostedDate(dateString?: string): string {
+    if (!dateString) return 'Recently posted';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    
+    if (diffInMs < 0) return 'Just now';
 
-  // Calculate base units
-  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInMinutes < 1) {
-    return 'Just now';
-  } else if (diffInMinutes < 60) {
-    return `${diffInMinutes}m ago`;
-  } else if (diffInHours < 24) {
-    return `${diffInHours}h ago`;
-  } else if (diffInDays < 7) {
-    return `${diffInDays}d ago`;
-  } else {
-    // Fallback to absolute date
-    return date.toLocaleDateString('en-IN', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    });
+    if (diffInMinutes < 1) {
+      return 'Just now';
+    } else if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}d ago`;
+    } else {
+      return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
   }
-}
 
   viewDetails(id: any): void {
     this.router.navigate(['/property-details', id]);
@@ -256,18 +263,17 @@ formatPostedDate(dateString?: string): string {
       queryParams: { focusContact: 'true' } 
     });
   }
+
   fetchNearbyProperties(): void {
     if (!isPlatformBrowser(this.platformId) || !('geolocation' in navigator)) return;
 
     this.isLoadingNearby = true;
     
-    // Request User Location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        // Call our backend with the coordinates and 'nearest' sort
         this.propertyService.searchListingsWithFilters(0, 5, { lat, lng, sortBy: 'nearest' }).subscribe(
           (res: any) => {
             if (res.listings && res.listings.length > 0) {
@@ -285,7 +291,6 @@ formatPostedDate(dateString?: string): string {
         );
       },
       (error) => {
-        // If user denies location, it fails silently and section remains hidden
         console.warn('Geolocation denied or failed', error);
         this.isLoadingNearby = false;
         this.cd.detectChanges();
@@ -316,13 +321,183 @@ formatPostedDate(dateString?: string): string {
     const gap = parseInt(window.getComputedStyle(el).gap) || 0;
     el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
   }
+
   exploreCity(cityName: string, stateName: string) {
-    // Navigates to the brand new page!
     this.router.navigate(['/explore-city'], { 
-      queryParams: { 
-        city: cityName,
-        state: stateName
-      } 
+      queryParams: { city: cityName, state: stateName } 
     });
   }
+
+  // ==========================================
+  // --- SAFETY CONSENT & CONTACT LOGIC ---
+  // ==========================================
+
+  checkReturnFromLogin() {
+    if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      const pending = localStorage.getItem('pendingAction');
+      
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          localStorage.removeItem('pendingAction'); 
+
+          this.propertyService.getListingById(parsed.propertyId).subscribe({
+            next: (res: any) => {
+              if (res.status === 1 && res.data) {
+                this.handleCardContactAction(res.data, parsed.action);
+              }
+            }
+          });
+        } catch (e) {
+          localStorage.removeItem('pendingAction');
+        }
+      }
+    }
+  }
+
+  handleCardContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      const actionPayload = { prop: item, actionType };
+      
+      this.checkAndExecuteConsent(actionPayload, () => {
+        this.executeContactAction(item, actionType);
+      });
+      
+    } else {
+      const returnUrl = this.router.url;
+      localStorage.setItem('pendingAction', JSON.stringify({ action: actionType, propertyId: item.id }));
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  private executeContactAction(item: Listing, actionType: 'call' | 'whatsapp') {
+    const phone = item.contactNo || item.tempContactNo;
+    
+    if (!phone) {
+      // Fetch full object if phone is missing from mapped UI model
+      this.propertyService.getListingById(item.id.toString()).subscribe((res: any) => {
+          const p = res.data;
+          const phoneNum = p.contactNo || p.tempContactNo;
+          if (phoneNum) {
+            this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
+          } else {
+            this.toastr.error('Contact number not available');
+          }
+      });
+      return;
+    }
+    
+    this.propertyService.triggerPhoneAndWP(phone, actionType, item);
+  }
+
+  private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
+    if (this.userHasGivenConsent() || (isPlatformBrowser(this.platformId) && localStorage.getItem('safetyConsentGiven') === 'true')) {
+      this.userHasGivenConsent.set(true);
+      successCallback();
+      return;
+    }
+
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    if (userId) {
+      this.propertyService.checkSafetyConsent(userId).subscribe({
+        next: (res: any) => {
+          if (res.status === 1 && res.hasConsent) {
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            this.userHasGivenConsent.set(true);
+            successCallback();
+          } else {
+            this.pendingAction.set(actionData);
+            this.isConsentModalOpen.set(true);
+            this.cd.detectChanges(); 
+          }
+        },
+        error: () => {
+          this.pendingAction.set(actionData);
+          this.isConsentModalOpen.set(true);
+          this.cd.detectChanges();
+        }
+      });
+    } else {
+      this.pendingAction.set(actionData);
+      this.isConsentModalOpen.set(true);
+      this.cd.detectChanges();
+    }
+  }
+
+  onConsentAccepted(action: any) {
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    const proceedWithAction = () => {
+      this.executeContactAction(action.prop, action.actionType);
+    };
+
+    if (userId) {
+      this.propertyService.updateSafetyConsent(userId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 1) {
+            this.userHasGivenConsent.set(true);
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            proceedWithAction();
+          } else {
+            this.toastr.error('Failed to record consent. Please try again.');
+          }
+        },
+        error: (err) => {
+          console.error('Consent save error:', err);
+          this.toastr.error('Server error while recording consent.');
+        }
+      });
+    } else {
+      this.userHasGivenConsent.set(true);
+      if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+      proceedWithAction();
+    }
+  }
+
+  isUserLoggedIn(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    return !!(localStorage.getItem('token') || localStorage.getItem('user'));
+  }
+
+  isOwnerLoggedIn(): boolean {
+    return this.isUserLoggedIn(); 
+  }
+
+  navigateToCategory(type: string): void {
+  switch (type) {
+    case 'flatmate':
+      // Isolated view routing target for flatmates matching
+      this.router.navigate(['/flatmates']);
+      break;
+      
+    case 'room':
+      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Room' } });
+      break;
+      
+    case 'pg':
+      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'PG' } });
+      break;
+      
+    case 'flat':
+      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Flat' } });
+      break;
+      
+    default:
+      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Any' } });
+      break;
+  }
+}
 }

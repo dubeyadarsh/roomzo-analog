@@ -247,6 +247,34 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
     // Ensure the endpoint matches your ListingController route (e.g., /listings/exploreCity)
     return this.http.get(`${this.baseUrl}/listings/exploreCity`, { params });
   }
+
+  triggerPhoneAndWP(phone: any, actionType: string, prop: any) {
+  const phoneStr = String(phone);
+  if (actionType === 'call') {
+    window.open(`tel:${phoneStr}`, '_self');
+  } else {
+    const cleanPhone = phoneStr.replace(/[^0-9]/g, '');
+    const propertyUrl = `https://roomzo.in/property-details/${prop.id}`;
+    const message = encodeURIComponent(`Hi,\n\nI found your property listing on Roomzo. I’m interested in this property and would like to know more about the rent, availability, and facilities.\n\nLooking forward to your response.\n\nRegards,\nRoomzo User\n\nProperty URL: ${propertyUrl}`);
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+  }
+}
+
+
+updateSafetyConsent(userId: number | string, consentGiven: boolean): Observable<any> {
+    // The keys MUST match the properties in your UserConsent.java Entity exactly
+    const payload = { 
+      userId: userId, 
+      safetyConsentGiven: consentGiven 
+    };
+    
+    return this.http.post(`${this.baseUrl}/api/consents/save`, payload);
+  }
+
+  // Add this inside property.service.ts
+  checkSafetyConsent(userId: number | string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/consents/check/${userId}`);
+  }
 }
 
 export interface ListingFilter {

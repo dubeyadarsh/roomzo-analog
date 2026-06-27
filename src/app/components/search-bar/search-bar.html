@@ -2,19 +2,20 @@
   
   <div class="input-group">
     <mat-icon class="search-icon">search</mat-icon>
-    <input type="search" 
-         [formControl]="searchControl" 
-         [matAutocomplete]="auto" 
-         [placeholder]="currentPlaceholder" 
-         aria-label="Search">
-           
-    <mat-autocomplete #auto="matAutocomplete" 
-                      [displayWith]="displayCity" 
+    <input
+      type="search"
+      [formControl]="searchControl"
+      [matAutocomplete]="auto"
+      [placeholder]="currentPlaceholder"
+      aria-label="Search for PG, Room, Flat or Locality">
+
+    <mat-autocomplete #auto="matAutocomplete"
+                      [displayWith]="displayCity"
                       (optionSelected)="onCitySelected($event)"
                       class="custom-autocomplete-panel">
       <mat-option *ngFor="let loc of filteredCities" [value]="loc">
-         <mat-icon style="font-size: 18px; color: #94a3b8; vertical-align: middle; margin-right: 4px;">place</mat-icon>
-         {{ displayCity(loc) }}
+        <mat-icon style="font-size:17px;color:#94a3b8;vertical-align:-2px;margin-right:4px">place</mat-icon>
+        {{ displayCity(loc) }}
       </mat-option>
     </mat-autocomplete>
   </div>
@@ -22,7 +23,8 @@
   <div class="divider hide-mobile"></div>
 
   <div class="filter-group hide-mobile">
-    <mat-select class="custom-mat-select" [formControl]="propertyTypeControl" placeholder="Property Type" panelClass="custom-select-panel">
+    <mat-select class="custom-mat-select" [formControl]="propertyTypeControl"
+                placeholder="Property Type" panelClass="custom-select-panel">
       <mat-option value="Any">Any Type</mat-option>
       <mat-option value="Flat">Flat</mat-option>
       <mat-option value="PG">PG</mat-option>
@@ -33,7 +35,8 @@
   <div class="divider hide-mobile"></div>
 
   <div class="filter-group hide-mobile">
-    <mat-select class="custom-mat-select" [formControl]="budgetControl" placeholder="Budget" panelClass="custom-select-panel">
+    <mat-select class="custom-mat-select" [formControl]="budgetControl"
+                placeholder="Budget" panelClass="custom-select-panel">
       <mat-option [value]="50000">Any (Up to ₹50k)</mat-option>
       <mat-option [value]="5000">Up to ₹5k</mat-option>
       <mat-option [value]="10000">Up to ₹10k</mat-option>
@@ -41,5 +44,10 @@
     </mat-select>
   </div>
 
-  <button type="submit" class="btn-primary search-btn hide-mobile">Search</button>
+  <!-- REMOVED btn-primary class — it was overriding search-btn styles -->
+  <button type="submit" class="search-btn">
+    <mat-icon>search</mat-icon>
+    <span>Search</span>
+  </button>
+
 </form>

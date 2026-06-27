@@ -113,16 +113,19 @@
               </div>
             </div>
 
-            <div class="card-action-button-tray">
-              <button class="tray-action-btn secondary-pill" (click)="viewDetails(prop.id); $event.stopPropagation()">
-                <mat-icon>info</mat-icon>
-                <span>Details</span>
-              </button>
-              <button class="tray-action-btn primary-pill" (click)="scrollToContact(prop.id); $event.stopPropagation()">
-                <mat-icon>chat_bubble</mat-icon>
-                <span>Contact</span>
-              </button>
-            </div>
+           <div class="action-buttons-container">
+  <button class="contact-btn" (click)="handleCardContactAction(prop, 'call')">
+    <mat-icon>call</mat-icon> Call
+  </button>
+  
+  <button class="contact-btn wa-btn" (click)="handleCardContactAction(prop, 'whatsapp')">
+    <mat-icon>chat</mat-icon> WhatsApp
+  </button>
+  
+  <button class="view-btn" (click)="viewDetails(prop.id)">
+    <mat-icon>info</mat-icon> View
+  </button>
+</div>
           </div>
         </div>
 
@@ -140,3 +143,10 @@
 </div>
 
 <div class="dropdown-backdrop-shield" *ngIf="isSortMenuOpen" (click)="isSortMenuOpen = false"></div>
+
+<app-safety-consent-bottom-sheet
+  [isOpen]="isConsentModalOpen()"
+  [pendingAction]="pendingAction()"
+  (accept)="onConsentAccepted($event)"
+  (closeModal)="isConsentModalOpen.set(false)"
+/>

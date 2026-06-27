@@ -145,14 +145,19 @@
                 <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize | number }} sqft</span>
               </div>
 
-              <div class="action-buttons-container">
-                <button class="contact-btn" (click)="scrollToContact(prop.id)">
-                  <mat-icon>message</mat-icon> Contact
-                </button>
-                <button class="view-btn" (click)="viewDetails(prop.id)">
-                  <mat-icon>info</mat-icon> View Details
-                </button>
-              </div>
+         <div class="action-buttons-container">
+  <button class="contact-btn" (click)="handleCardContactAction(prop, 'call')">
+    <mat-icon>call</mat-icon> Call
+  </button>
+  
+  <button class="contact-btn wa-btn" (click)="handleCardContactAction(prop, 'whatsapp')">
+    <mat-icon>chat</mat-icon> WhatsApp
+  </button>
+  
+  <button class="view-btn" (click)="viewDetails(prop.id)">
+    <mat-icon>info</mat-icon> View
+  </button>
+</div>
             </div>
             
           </div>
@@ -181,3 +186,11 @@
     </div>
   </main>
 </div>
+
+<!-- Add this at the very bottom of your explore html -->
+<app-safety-consent-bottom-sheet
+  [isOpen]="isConsentModalOpen()"
+  [pendingAction]="pendingAction()"
+  (accept)="onConsentAccepted($event)"
+  (closeModal)="isConsentModalOpen.set(false)"
+/>

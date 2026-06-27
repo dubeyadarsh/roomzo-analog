@@ -94,6 +94,37 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   box-shadow: var(--rz-shadow-sm);
   border: 1px solid var(--rz-border);
 }
+/* --- Social DM Link Styling --- */
+.info-content { 
+  display: flex; 
+  flex-direction: column; 
+  word-break: break-word; /* Prevents long emails from breaking mobile layout */
+}
+
+.social-dm-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--rz-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-top: 2px;
+}
+
+.social-dm-link:hover {
+  color: var(--rz-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.social-dm-link .external-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 2px; /* Aligns the icon perfectly with the text baseline */
+}
 .info-card h3 { font-size: 1.25rem; margin: 0 0 24px 0; }
 
 .info-item { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }

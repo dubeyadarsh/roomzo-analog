@@ -431,15 +431,15 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
           this.isSubmitting = false;
           
           // Assuming your backend returns the new object in response.data or directly in response
-          // const newListingId = response?.data?.listingId || response?.listingId;
+          const newListingId = response?.data?.listingId || response?.listingId;
 
-          // if (newListingId) {
-          //   // Navigate directly to the new property details page
-          //   this.router.navigate(['/property-details', newListingId]);
-          // } else {
-          //   // Fallback just in case the ID isn't returned
-          //   this.router.navigate(['/explore-listing']);
-          // }
+          if (newListingId) {
+            // Navigate directly to the new property details page
+            this.router.navigate(['/property-details', newListingId]);
+          } else {
+            // Fallback just in case the ID isn't returned
+            this.router.navigate(['/explore-listing']);
+          }
         },
         error: (error) => {
           console.error('Error:', error);

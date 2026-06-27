@@ -37,8 +37,9 @@ hasUnreadMessages = false;
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
-      this.isHomePage = event.urlAfterRedirects === '/' || event.urlAfterRedirects.startsWith('/#');
-    });
+setTimeout(() => {
+        this.isHomePage = event.urlAfterRedirects === '/' || event.urlAfterRedirects.startsWith('/#');
+      })    });
   }
 
   @HostListener('window:scroll', [])

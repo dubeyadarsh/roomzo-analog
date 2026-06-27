@@ -320,7 +320,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 60px;
+  margin-top: 20px;
   background: white;
   padding: 24px 40px;
   border-radius: var(--rz-radius);
@@ -666,4 +666,373 @@
   
   /* Shrink the coming soon badge for mobile */
   .coming-soon-overlay span { font-size: 0.6rem; padding: 4px 8px; }
+}
+
+/* --- Action Buttons Grid Layout --- */
+.action-buttons-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px;
+  margin-top: auto;
+}
+
+.contact-btn {
+  background: white;
+  color: var(--rz-primary);
+  border: 1px solid var(--rz-primary);
+  padding: 10px 4px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.contact-btn:hover {
+  background: var(--rz-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.contact-btn:active {
+  transform: scale(0.98);
+}
+
+.contact-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* WhatsApp Specific Button */
+.contact-btn.wa-btn {
+  border-color: #25d366;
+  color: #25d366;
+}
+.contact-btn.wa-btn:hover {
+  background: #25d366;
+  color: white;
+}
+
+.view-btn {
+  grid-column: span 2; 
+  background: var(--rz-primary);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.view-btn:hover {
+  background: var(--rz-primary-hover);
+  transform: translateY(-2px);
+}
+.view-btn:active {
+  transform: scale(0.98);
+}
+.view-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* Mobile Adjustments */
+@media (max-width: 900px) {
+  .action-buttons-container {
+    gap: 8px;
+  }
+  
+  .contact-btn {
+    padding: 12px 4px;
+    font-size: 0.85rem; 
+  }
+  
+  .view-btn {
+    padding: 12px;
+  }
+}
+
+/* ========================================================
+   EXPLORE BY CATEGORY SECTION
+======================================================== */
+/* ========================================================
+   EXPLORE BY CATEGORY SECTION (Streamlined Size)
+======================================================== */
+.explore-category-section {
+  padding: 20px 20px 10px;
+  background-color: var(--rz-bg);
+}
+
+.categories-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Tighter gap for smaller footprint */
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.category-card {
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 14px;
+  padding: 16px; /* Reduced from 24px */
+  width: 175px;  /* Reduced from 210px to look sleeker */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(25, 97, 83, 0.08);
+}
+
+/* Scaled down Icon Box Frame */
+.category-icon-wrapper {
+  width: 46px;   /* Reduced from 56px */
+  height: 46px;  /* Reduced from 56px */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.category-icon-wrapper mat-icon {
+  font-size: 22px; /* Sleeker icon sizing */
+  width: 22px;
+  height: 22px;
+}
+
+/* Brand Palette Mappings */
+.icon-blue { background-color: #eff6ff; color: #2563eb; }
+.icon-green { background-color: #f0fdf4; color: #16a34a; }
+.icon-purple { background-color: #f3e8ff; color: #7c3aed; }
+.icon-orange { background-color: #fff7ed; color: #ea580c; }
+
+.category-title {
+  color: var(--rz-text-main);
+  font-weight: 700;
+  font-size: 0.95rem; /* Slightly smaller text weight */
+  margin-bottom: 2px;
+}
+
+.category-subtitle {
+  color: var(--rz-text-muted);
+  font-size: 0.8rem;
+}
+
+/* ========================================================
+   MOBILE RESPONSIvENESS (MINI ULTRA-COMPACT CARDS)
+======================================================== */
+@media (max-width: 768px) {
+  .explore-category-section {
+    padding: 4px 0 0 !important; /* Extremely tight spacing right below locations */
+  }
+
+  .explore-category-section .section-header-mobile {
+    padding: 0 20px;
+    margin-bottom: 10px;
+  }
+
+  .explore-category-section .section-header-mobile h3 {
+    font-size: 0.9rem; /* Matches exactly with explore cities layout */
+  }
+
+  .categories-container {
+    gap: 10px; /* Reduced gap from 12px for better horizontal flow */
+    padding: 0 20px 14px;
+    margin-top: 0;
+    flex-wrap: nowrap; 
+    overflow-x: auto;
+    justify-content: flex-start;
+    scroll-snap-type: x mandatory; 
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; 
+  }
+
+  .categories-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-card {
+    width: 125px; /* Shrunk from 145px to scale perfectly with 80px city circles */
+    padding: 12px 10px;
+    flex-shrink: 0; 
+    scroll-snap-align: start;
+    border-radius: 10px;
+  }
+
+  .category-icon-wrapper {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .category-icon-wrapper mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .category-title { font-size: 0.85rem; }
+  .category-subtitle { font-size: 0.7rem; }
+}
+/* ========================================================
+   WHY CHOOSE ROOMZO SECTION
+======================================================== */
+.trust-features-section {
+  padding: 30px 20px;
+  background-color: var(--rz-bg);
+}
+
+.trust-features-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.trust-feature-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 220px;
+  padding: 12px;
+}
+
+/* Rounded Soft Icon Shapes */
+.trust-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.trust-icon-wrapper mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Soft Color Backgrounds */
+.trust-icon-green  { background-color: #f0fdf4; color: #16a34a; }
+.trust-icon-blue   { background-color: #eff6ff; color: #2563eb; }
+.trust-icon-yellow { background-color: #fefce8; color: #eab308; }
+.trust-icon-purple { background-color: #f3e8ff; color: #7c3aed; }
+
+.trust-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.trust-title {
+  color: var(--rz-text-main);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.trust-subtitle {
+  color: var(--rz-text-muted);
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+/* ========================================================
+   MOBILE VIEW: SLICK VERTICAL 4-COLUMN ROW (≤ 768px)
+======================================================== */
+/* ========================================================
+   MOBILE VIEW: SPACIOUS VERTICAL 2x2 GRID (≤ 768px)
+======================================================== */
+@media (max-width: 768px) {
+  .trust-features-section {
+    padding: 24px 16px 28px !important; /* Balanced side margins */
+    background-color: var(--rz-bg);
+  }
+
+  .trust-features-section .section-header-mobile {
+    padding: 0 2px;
+    margin-bottom: 16px;
+  }
+
+  .trust-features-section .section-header-mobile h3 {
+    font-size: 0.85rem;
+    letter-spacing: 0.6px;
+  }
+
+  .trust-features-container {
+    display: grid;
+    /* 2 columns on top, 2 on the bottom */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px; /* Generous breathing room between cards */
+    margin-top: 0;
+    padding: 0;
+  }
+
+  .trust-feature-card {
+    background: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 16px 12px; /* Extra padding since we have more room now */
+    display: flex;
+    flex-direction: column; /* Icon stays stacked vertically on top */
+    align-items: center;    /* Centered content */
+    text-align: center;     /* Centered typography */
+    gap: 10px;
+    min-width: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.015);
+  }
+
+  /* Elegant, clean icon boxes */
+  .trust-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    margin-bottom: 0;
+  }
+
+  .trust-icon-wrapper mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .trust-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1.25;
+    width: 100%;
+  }
+
+  .trust-title {
+    color: var(--rz-text-main);
+    font-weight: 700;
+    font-size: 0.88rem; /* Scaled back up to a highly readable size */
+    letter-spacing: -0.1px;
+  }
+
+  .trust-subtitle {
+    color: var(--rz-text-muted);
+    font-size: 0.75rem; /* Easy to read subtitle */
+    font-weight: 400;
+    opacity: 0.85;
+  }
 }

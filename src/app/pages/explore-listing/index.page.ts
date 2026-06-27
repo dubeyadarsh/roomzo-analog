@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone, HostListener, Renderer2 } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone, HostListener, Renderer2, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,31 +7,32 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute, Router } from '@angular/router'; 
 import { HttpClient } from '@angular/common/http'; 
-
+import { AuthService } from '../../services/auth.service';
 import { Subscription, of, forkJoin } from 'rxjs';
 import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, filter, map } from 'rxjs/operators'; 
+import { ToastrService } from 'ngx-toastr';
 
 import { PropertyService, ListingFilter } from '../../services/property.service';
 import { RouteMeta } from '@analogjs/router';
+
+// Safety Consent Import
+import { SafetyConsentBottomSheetComponent, PendingAction } from '../../components/safety-consent/safety-consent';
 
 export const routeMeta: RouteMeta = {
   title: 'Roomzo : Trusted Rooms, PG & Flats Near You | No Broker | No Fake Listing',
   meta: [
     { 
-      // Keep under 160 characters! Highlighting top hubs only for readability.
       name: 'description', 
       content: 'Find 100% broker-free rooms, PGs, and flats for rent in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Pune. Connect directly with owners.' 
     },
     { 
-      // You can go heavier here with famous and non-famous localities.
       name: 'keywords', 
       content: 'room rent in prayagraj, pg in varanasi, flat for rent in pune, brokerless pg, katra room rent, civil lines flats, allahpur pg, mumfordganj, teliyarganj, naini, jhunsi, dhoomanganj, lanka varanasi pg, bhu rooms, assi ghat, sigra, mahmoorganj, pandeypur, sarnath, hinjewadi pg, viman nagar flats, kothrud rooms, wakad, baner, zero brokerage roomzo, agentless rental platform' 
     },
-    // Open Graph for WhatsApp/Facebook link previews
     { property: 'og:title', content: '100% Brokerless Rooms & PG in UP & Pune | Roomzo' },
     { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats in Prayagraj, Varanasi, and Pune.' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:image', content: 'https://www.roomzo.in/favicon.ico' }, // Ensure this URL points to a real, attractive banner image
+    { property: 'og:image', content: 'https://www.roomzo.in/favicon.ico' },
   ]
 };
 
@@ -41,7 +42,8 @@ export const routeMeta: RouteMeta = {
   imports: [
     CommonModule, MatIconModule, MatButtonModule, 
     FormsModule, ReactiveFormsModule, 
-    MatAutocompleteModule, MatInputModule
+    MatAutocompleteModule, MatInputModule,
+    SafetyConsentBottomSheetComponent
   ],
   templateUrl: './explore-listing.html',
   styleUrls: ['./explore-listing.css']
@@ -64,7 +66,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     maxPrice: 50000,
     propertyType: 'Any',
     bedrooms: 'Any',
-    sortBy: 'nearest' // NEW Default
+    sortBy: 'nearest'
   };
 
   availabilityFilter: 'available' | 'all' = 'all';
@@ -83,9 +85,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     'Search "Civil lines, Prayagraj"',
     'Search "Mumfordganj, Prayagraj"',
     'Search "Teliyarganj, Prayagraj"',
-    'Search "Viman Nagar, Pune"', // Pune context
+    'Search "Viman Nagar, Pune"',
     'Search "Katra, Prayagraj"',
-    'Search "Lanka, Varanasi"',  // Varanasi context
+    'Search "Lanka, Varanasi"',
     'Search "Kydganj, Prayagraj"',
     'Search "Naini, Prayagraj"',
   ];
@@ -98,6 +100,11 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   
   isDropdownOpen = false;
 
+  // --- Safety Consent State Signals ---
+  userHasGivenConsent = signal(false); 
+  isConsentModalOpen = signal(false);
+  pendingAction = signal<PendingAction | any>(null);
+
   constructor(
     private propertyService: PropertyService,
     private cd: ChangeDetectorRef,
@@ -106,7 +113,8 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -119,28 +127,21 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       filter((val): val is string => typeof val === 'string' && val.trim().length > 2), 
       switchMap(val => {
         const text = val as string;
-
-        // 1. Prepare queries for both target states
         const upQuery = `${text}, Uttar Pradesh`;
         const mhQuery = `${text}, Maharashtra`;
 
-        // 2. Build the Nominatim URLs
         const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         
-        // 3. Execute both calls in parallel using forkJoin
         return forkJoin({
           up: this.http.get<any[]>(upUrl).pipe(catchError(() => of([]))),
           mh: this.http.get<any[]>(mhUrl).pipe(catchError(() => of([])))
         }).pipe(
           map(({ up, mh }) => {
-            // Combine results from both states
             const combined = [...up, ...mh];
-            
-            // Sort by OpenStreetMap's relevance 'importance' score
             return combined
               .sort((a, b) => (b.importance || 0) - (a.importance || 0))
-              .slice(0, 6); // Keep the top 6 most relevant results overall
+              .slice(0, 6); 
           })
         );
       })
@@ -149,39 +150,37 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       this.cd.detectChanges();
     });
 
-    this.route.queryParams.subscribe(params => {
-      if (Object.keys(params).length > 0) {
-        if (params['city'] && params['state']) {
-          const city = params['city'];
-          const state = params['state'];
-          const street = params['street'] ?? '';
-          this.selectedLocation = { city, state };
-          
-          // Only show the street and city in the bar if possible to keep it clean
-          const displayVal = street ? `${street}, ${city}` : city;
-          this.searchControl.setValue(displayVal, { emitEvent: false });
-          
-          this.filters.city = city;
-          this.filters.state = state;
-        }
+  this.route.queryParams.subscribe(params => {
+  // Reset type filter to default 'Any' if not specifically provided in query params
+  this.filters.propertyType = params['propertyType'] ? params['propertyType'] : 'Any';
 
-        if (params['lat'] && params['lng']) {
-          this.filters.lat = Number(params['lat']);
-          this.filters.lng = Number(params['lng']);
-        }
+  if (Object.keys(params).length > 0) {
+    if (params['city'] && params['state']) {
+      const city = params['city'];
+      const state = params['state'];
+      const street = params['street'] ?? '';
+      this.selectedLocation = { city, state };
+      
+      const displayVal = street ? `${street}, ${city}` : city;
+      this.searchControl.setValue(displayVal, { emitEvent: false });
+      
+      this.filters.city = city;
+      this.filters.state = state;
+    }
 
-        if (params['propertyType']) {
-          this.filters.propertyType = params['propertyType'];
-        }
+    if (params['lat'] && params['lng']) {
+      this.filters.lat = Number(params['lat']);
+      this.filters.lng = Number(params['lng']);
+    }
 
-        if (params['maxPrice']) {
-          this.filters.maxPrice = Number(params['maxPrice']);
-        }
-      }
+    if (params['maxPrice']) {
+      this.filters.maxPrice = Number(params['maxPrice']);
+    }
+  }
 
-      this.loadListings();
-    });
-
+  // Reloads listings based on the newly captured parameter filter criteria
+  this.loadListings();
+});
     if (isPlatformBrowser(this.platformId)) {
       this.documentClickListener = this.renderer.listen('document', 'click', (event: Event) => {
         const target = event.target as HTMLElement;
@@ -192,6 +191,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
         }
       });
     }
+
+    // Check if the user is returning from a login screen to complete an action
+    this.checkReturnFromLogin();
   }
 
   ngOnDestroy(): void {
@@ -204,6 +206,30 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
     if (this.documentClickListener) {
       this.documentClickListener();
+    }
+  }
+
+  // Check LocalStorage to see if we need to auto-trigger a WhatsApp/Call click
+  checkReturnFromLogin() {
+    if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      const pending = localStorage.getItem('pendingAction');
+      
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          localStorage.removeItem('pendingAction'); 
+
+          this.propertyService.getListingById(parsed.propertyId).subscribe({
+            next: (res: any) => {
+              if (res.status === 1 && res.data) {
+                this.handleCardContactAction(res.data, parsed.action);
+              }
+            }
+          });
+        } catch (e) {
+          localStorage.removeItem('pendingAction');
+        }
+      }
     }
   }
 
@@ -309,7 +335,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   calculatePagination(): void {
-    // Generate a simple array of all pages so CSS can force them to scroll horizontally
     this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i);
   }
 
@@ -385,12 +410,10 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Helper for template type checking
   typeof(val: any): string {
     return typeof val;
   }
 
-  // Mouse wheel horizontal scroll logic
   onScroll(event: WheelEvent, element: HTMLElement): void {
     const canScrollHorizontally = element.scrollWidth > element.clientWidth;
     
@@ -400,7 +423,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
   }
   
-  // Button click horizontal scroll logic
   scrollPagination(element: HTMLElement, direction: 'left' | 'right'): void {
     const scrollAmount = 144; 
     
@@ -411,10 +433,9 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Simple toggle – no stopPropagation needed
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
-    this.cd.detectChanges();  // Force view update
+    this.cd.detectChanges();  
   }
 
   selectSort(value: string) {
@@ -430,5 +451,126 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       case 'oldest': return 'Oldest First';
       default: return 'Nearest First';
     }
+  }
+
+  // --- Contact & Consent Logic ---
+  handleCardContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      const actionPayload = { prop, actionType };
+      
+      this.checkAndExecuteConsent(actionPayload, () => {
+        this.executeContactAction(prop, actionType);
+      });
+      
+    } else {
+      const returnUrl = this.router.url; 
+      localStorage.setItem('pendingAction', JSON.stringify({ action: actionType, propertyId: prop.id }));
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
+    }
+  }
+
+  private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
+    const phone = prop.contactNo || prop.tempContactNo;
+    
+    if (!phone) {
+      this.propertyService.getListingById(prop.id).subscribe((res: any) => {
+          const p = res.data;
+          const phoneNum = p.contactNo || p.tempContactNo;
+          if(phoneNum) {
+            this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
+          } else {
+            this.toastr.error('Contact number not available');
+          }
+      });
+      return;
+    }
+    
+    this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
+  }
+
+  private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
+    if (this.userHasGivenConsent() || (isPlatformBrowser(this.platformId) && localStorage.getItem('safetyConsentGiven') === 'true')) {
+      this.userHasGivenConsent.set(true);
+      successCallback();
+      return;
+    }
+
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    if (userId) {
+      this.propertyService.checkSafetyConsent(userId).subscribe({
+        next: (res: any) => {
+          if (res.status === 1 && res.hasConsent) {
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            this.userHasGivenConsent.set(true);
+            successCallback();
+          } else {
+            this.pendingAction.set(actionData);
+            this.isConsentModalOpen.set(true);
+            this.cd.detectChanges(); 
+          }
+        },
+        error: () => {
+          this.pendingAction.set(actionData);
+          this.isConsentModalOpen.set(true);
+          this.cd.detectChanges();
+        }
+      });
+    } else {
+      this.pendingAction.set(actionData);
+      this.isConsentModalOpen.set(true);
+      this.cd.detectChanges();
+    }
+  }
+
+  onConsentAccepted(action: any) {
+    let userId = null;
+    if (isPlatformBrowser(this.platformId)) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try { userId = JSON.parse(storedUser).id; } catch (e) {}
+      }
+    }
+
+    const proceedWithAction = () => {
+      this.executeContactAction(action.prop, action.actionType);
+    };
+
+    if (userId) {
+      this.propertyService.updateSafetyConsent(userId, true).subscribe({
+        next: (res: any) => {
+          if (res.status === 1) {
+            this.userHasGivenConsent.set(true);
+            if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+            proceedWithAction();
+          } else {
+            this.toastr.error('Failed to record consent. Please try again.');
+          }
+        },
+        error: (err) => {
+          console.error('Consent save error:', err);
+          this.toastr.error('Server error while recording consent.');
+        }
+      });
+    } else {
+      this.userHasGivenConsent.set(true);
+      if (isPlatformBrowser(this.platformId)) localStorage.setItem('safetyConsentGiven', 'true');
+      proceedWithAction();
+    }
+  }
+
+  isUserLoggedIn(): boolean {
+    if (!isPlatformBrowser(this.platformId)) return false;
+    return !!(localStorage.getItem('token') || localStorage.getItem('user'));
+  }
+
+  isOwnerLoggedIn(): boolean {
+    return this.isUserLoggedIn(); 
   }
 }

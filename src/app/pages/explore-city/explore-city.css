@@ -314,3 +314,93 @@ h1, h2, h3, p { margin: 0; }
   
   .premium-load-more-action { width: 100%; }
 }
+
+/* --- Action Buttons Grid Layout --- */
+.action-buttons-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px;
+  margin-top: auto;
+}
+
+.contact-btn {
+  background: white;
+  color: var(--rz-primary);
+  border: 1px solid var(--rz-primary);
+  padding: 10px 4px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.contact-btn:hover {
+  background: var(--rz-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.contact-btn:active {
+  transform: scale(0.98);
+}
+
+.contact-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* WhatsApp Specific Button */
+.contact-btn.wa-btn {
+  border-color: #25d366;
+  color: #25d366;
+}
+.contact-btn.wa-btn:hover {
+  background: #25d366;
+  color: white;
+}
+
+.view-btn {
+  grid-column: span 2; 
+  background: var(--rz-primary);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: var(--rz-radius-sm, 8px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.view-btn:hover {
+  background: var(--rz-primary-hover);
+  transform: translateY(-2px);
+}
+.view-btn:active {
+  transform: scale(0.98);
+}
+.view-btn mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+/* Mobile Adjustments */
+@media (max-width: 900px) {
+  .action-buttons-container {
+    gap: 8px;
+  }
+  
+  .contact-btn {
+    padding: 12px 4px;
+    font-size: 0.85rem; 
+  }
+  
+  .view-btn {
+    padding: 12px;
+  }
+}
