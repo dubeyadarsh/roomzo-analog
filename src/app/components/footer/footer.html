@@ -7,40 +7,59 @@
         <a routerLink="/" class="logo">
           <mat-icon>home</mat-icon> RoomZo
         </a>
-        <p>Find your perfect room or PG. Verified listings, no broker fees, and direct owner contact.</p>
+        <p>
+          Find your perfect room or PG. Verified listings, no broker fees, and direct owner contact.
+          Roomzo is a trusted alternative to broker-heavy platforms like 99acres and Housing.com for
+          student housing and family rentals across India.
+        </p>
       </div>
 
       <div class="links-col">
         <h4>Company</h4>
         <a routerLink="/about">About Us</a>
-        <a routerLink="/blog">Blog</a> <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
+        <a routerLink="/blog">Blog</a>
+        <a [routerLink]="['/']" fragment="contactUs">Contact Us</a>
         <a routerLink="/faq">FAQ & Support</a>
         <a routerLink="/privacy-policy">Privacy Policy</a>
         <a routerLink="/terms">Terms & Conditions</a>
       </div>
 
-      <div class="subscribe-col">
+      <nav class="links-col" aria-label="Popular rental cities">
+        <h4>Rent by City</h4>
+        <a *ngFor="let city of activeCities" [routerLink]="buildCityPath(city)">
+          {{ city.name }} Rooms & PG
+        </a>
+      </nav>
+
+      <nav class="links-col" aria-label="Rental categories">
+        <h4>Browse Categories</h4>
+        <a *ngFor="let cat of categories" [routerLink]="buildCategoryPath(cat)">{{ cat.label }}</a>
+      </nav>
+
+      <!-- <div class="subscribe-col">
         <h4>Newsletter</h4>
-        <p class="subscribe-desc">Get the latest property updates directly to your inbox.</p>
+        <p class="subscribe-desc">Get the latest broker-free property updates directly to your inbox.</p>
         <form class="subscribe-form">
           <input type="email" placeholder="Email address" aria-label="Email" required>
           <button type="submit" class="subscribe-btn">Subscribe</button>
         </form>
-      </div>
+      </div> -->
 
     </div>
+
+    <app-related-searches [compact]="true"></app-related-searches>
 
     <div class="bottom-bar">
       <small>© {{ currentYear }} RoomZo — All rights reserved.</small>
       
       <div class="social-links">
-        <a href="https://www.facebook.com/share/1GL4JufcfT/?mibextid=wwXIfr" target="_blank" aria-label="Facebook" class="social-link">
+        <a href="https://www.facebook.com/share/1GL4JufcfT/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="social-link">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
           </svg>
         </a>
 
-        <a href="https://www.instagram.com/roomzoofficial?igsh=ZnUxajlma3R5bGFm&utm_source=qr" target="_blank" aria-label="Instagram" class="social-link">
+        <a href="https://www.instagram.com/roomzoofficial?igsh=ZnUxajlma3R5bGFm&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="social-link">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
             <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
@@ -48,7 +67,7 @@
           </svg>
         </a>
 
-        <a href="https://twitter.com" target="_blank" aria-label="Twitter" class="social-link">
+        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" class="social-link">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>

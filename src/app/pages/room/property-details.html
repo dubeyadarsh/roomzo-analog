@@ -26,9 +26,13 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <img [src]="property.photos && property.photos.length > 0 ? property.photos[activePhotoIndex].photoUrl : 'assets/placeholder.jpg'" 
-           alt="Property View" 
+      <img [src]="optimizeImageUrl(property.photos && property.photos.length > 0 ? property.photos[activePhotoIndex].photoUrl : 'assets/placeholder.jpg')" 
+           [alt]="generatePropertyAltText(property, activePhotoIndex)" 
            class="main-image fade-in" 
+           width="800"
+           height="600"
+           [attr.loading]="activePhotoIndex === 0 ? 'eager' : 'lazy'"
+           decoding="async"
            (click)="openImage(property.photos[activePhotoIndex]?.photoUrl)" />
 
       <button class="nav-arrow next-arrow" (click)="nextPhoto($event)" *ngIf="property.photos?.length > 1">
@@ -41,7 +45,7 @@
               *ngFor="let photo of property.photos; let i = index" 
               [class.active]="i === activePhotoIndex" 
               (click)="setActivePhoto(i)">
-        <img [src]="photo.photoUrl" alt="Thumbnail" loading="lazy" />
+        <img [src]="photo.photoUrl" [alt]="generatePropertyAltText(property, i)" loading="lazy" decoding="async" width="80" height="60" />
       </button>
     </div>
   </section>
@@ -60,10 +64,10 @@
           </div>
         </div>
 
-        <img [src]="(property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Main" (click)="openImage(property.photos[0]?.photoUrl)">
+        <img [src]="optimizeImageUrl((property.photos && property.photos.length > 0) ? property.photos[0].photoUrl : 'assets/placeholder.jpg')" [alt]="generatePropertyAltText(property, 0)" loading="eager" decoding="async" width="800" height="600" (click)="openImage(property.photos[0]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 1">
-        <img [src]="property.photos[1].photoUrl" alt="Side 1" (click)="openImage(property.photos[1]?.photoUrl)">
+        <img [src]="optimizeImageUrl(property.photos[1].photoUrl)" [alt]="generatePropertyAltText(property, 1)" loading="lazy" decoding="async" (click)="openImage(property.photos[1]?.photoUrl)">
       </div>
       <div class="side-img" *ngIf="property.photos?.length > 2">
         <img [src]="property.photos[2].photoUrl" alt="Side 2" (click)="openImage(property.photos[2]?.photoUrl)">
@@ -83,9 +87,7 @@
     <header class="property-header">
       <div class="header-content">
         <div class="title-section" style="width: 100%;">
-          <div class="breadcrumbs desktop-only">
-            <a routerLink="/explore-listing">Explore</a> &gt; {{ property.city }}
-          </div>
+          <app-seo-breadcrumb [items]="breadcrumbItems"></app-seo-breadcrumb>
           <h1>{{ property.propertyType }} in {{ property.street }}</h1>
           <p class="address">
             <mat-icon>location_on</mat-icon>
@@ -319,8 +321,8 @@
     <section class="similar-section" *ngIf="similarProperties.length > 0">
       <h2>Similar homes you might like</h2>
       <div class="similar-grid">
-        <a [routerLink]="['/property-details', home.id]" class="similar-card" *ngFor="let home of similarProperties">
-          <img [src]="(home.photos && home.photos.length > 0) ? home.photos[0].photoUrl : 'assets/placeholder.jpg'" alt="Home">
+        <a [routerLink]="['/room', home.id]" class="similar-card" *ngFor="let home of similarProperties">
+          <img [src]="(home.photos && home.photos.length > 0) ? home.photos[0].photoUrl : 'assets/placeholder.jpg'" [alt]="generatePropertyAltText(home)" loading="lazy" decoding="async" width="300" height="225">
           <div class="sim-details">
             <div class="sim-price">{{ formatPrice(home.rentAmount) }}<span>/mo</span></div>
             <h4>{{ home.propertyType }} in {{ home.street  }}</h4>
@@ -329,6 +331,8 @@
         </a>
       </div>
     </section>
+
+    <app-related-searches [cityName]="property.city"></app-related-searches>
 
   </div> 
 </div>

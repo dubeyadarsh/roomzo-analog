@@ -14,6 +14,7 @@ import { RouteMeta } from '@analogjs/router';
 import { MatDividerModule } from '@angular/material/divider';
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 };
 
 // --- NEW: Standalone Confirmation Dialog Component ---

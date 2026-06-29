@@ -14,6 +14,7 @@ import { of, forkJoin } from 'rxjs';
 import { Router } from '@angular/router'; // <-- Add this import
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 };
 
 // TYPE-ONLY IMPORT: Prevents Leaflet from crashing the Node.js server build
@@ -435,7 +436,7 @@ export default class ListPropertyComponent implements OnInit, AfterViewInit {
 
           if (newListingId) {
             // Navigate directly to the new property details page
-            this.router.navigate(['/property-details', newListingId]);
+            this.router.navigate(['/room', newListingId]);
           } else {
             // Fallback just in case the ID isn't returned
             this.router.navigate(['/explore-listing']);

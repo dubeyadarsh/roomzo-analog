@@ -49,6 +49,7 @@
 
   <main class="feed-layout-area">
     <div class="container">
+      <app-seo-breadcrumb *ngIf="breadcrumbItems?.length" [items]="breadcrumbItems"></app-seo-breadcrumb>
       
       <div class="feed-loader-box" *ngIf="isLoading">
         <div class="premium-pulse-spinner"></div>
@@ -65,9 +66,16 @@
 
       <div class="listings-grid-layout" *ngIf="!isLoading && listings.length > 0">
         
-        <div class="refined-property-card" *ngFor="let prop of listings">
+        <article class="refined-property-card" *ngFor="let prop of listings">
           <div class="media-frame" (click)="viewDetails(prop.id)">
-            <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Property Space">
+            <img
+              [src]="optimizeImageUrl(getListingImageUrl(prop.photos))"
+              [alt]="generatePropertyAltText(prop)"
+              loading="lazy"
+              decoding="async"
+              width="400"
+              height="300"
+            />
             
             <div class="floating-badge-cluster">
               <span class="feed-status-badge" [class.badge-rented]="prop.isRented === 1">
@@ -127,7 +135,7 @@
   </button>
 </div>
           </div>
-        </div>
+        </article>
 
       </div>
 
@@ -137,6 +145,8 @@
           <div class="premium-pulse-spinner mini" *ngIf="isLoadingMore"></div>
         </button>
       </div>
+
+      <app-related-searches [cityName]="city"></app-related-searches>
 
     </div>
   </main>

@@ -10,6 +10,31 @@ import { HeroComponent } from '../components/hero/hero';
 import { ContactComponent } from '../components/contact/contact';
 import { PropertyService } from '../services/property.service';
 import { mapBackendListingsToUi } from '../services/Utility';
+import { RouteMeta } from '@analogjs/router';
+import { ROOMZO_CITIES, buildCityPath, slugifyCity } from '../config/cities.config';
+
+export const routeMeta: RouteMeta = {
+  title: 'Roomzo — Rooms, PG & Flats for Rent | No Broker | Verified Listings',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Find verified rooms, PGs, and flats for rent across India. 100% broker-free student housing with direct owner contact on Roomzo.',
+    },
+    {
+      name: 'keywords',
+      content:
+        'room for rent, student housing, brokerless property, pg for rent, flat for rent, no broker, roomzo',
+    },
+    { property: 'og:title', content: 'Roomzo | Brokerless Rooms & PG Across India' },
+    {
+      property: 'og:description',
+      content: 'Zero broker fees. Connect directly with owners for verified rooms, PGs, and flats.',
+    },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:image', content: 'https://www.roomzo.in/assets/og-roomzo-share.jpg' },
+  ],
+};
 
 // Added Safety Consent Imports (Adjust path if needed based on your folder structure)
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../components/safety-consent/safety-consent';
@@ -78,44 +103,13 @@ export default class HomeComponent implements OnInit {
     });
   }
 
-  popularCities = [
-    { 
-      name: 'Prayagraj', 
-      state: 'Uttar Pradesh', 
-      image: 'prayagraj.jpeg',
-      active: true
-    },
-    { 
-      name: 'Varanasi', 
-      state: 'Uttar Pradesh', 
-      image: 'banaras.jpg',
-      active: true
-    },
-    { 
-      name: 'Pune', 
-      state: 'Maharashtra', 
-      image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&q=80',
-      active: true
-    },
-    { 
-      name: 'Mumbai', 
-      state: 'Maharashtra', 
-      image: 'https://images.unsplash.com/photo-1522256658092-1279a04a6fc6?w=400&q=80',
-      active: false
-    },
-    { 
-      name: 'Jaipur', 
-      state: 'Rajasthan', 
-      image: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?w=400&q=80',
-      active: false
-    },
-    { 
-      name: 'Kota', 
-      state: 'Rajasthan', 
-      image: 'https://images.unsplash.com/photo-1565019018445-560b435af769?w=400&q=80',
-      active: false
-    }
-  ];
+  popularCities = ROOMZO_CITIES.map((city) => ({
+    name: city.name,
+    state: city.state,
+    image: city.heroImage,
+    active: city.active,
+    slug: city.slug,
+  }));
 
   ngOnInit(): void {
     this.route.fragment.subscribe(fragment => {
@@ -255,11 +249,11 @@ export default class HomeComponent implements OnInit {
   }
 
   viewDetails(id: any): void {
-    this.router.navigate(['/property-details', id]);
+    this.router.navigate(['/room', id]);
   }
 
   scrollToContact(id: number): void {
-    this.router.navigate(['/property-details', id], { 
+    this.router.navigate(['/room', id], {
       queryParams: { focusContact: 'true' } 
     });
   }
@@ -322,10 +316,8 @@ export default class HomeComponent implements OnInit {
     el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
   }
 
-  exploreCity(cityName: string, stateName: string) {
-    this.router.navigate(['/explore-city'], { 
-      queryParams: { city: cityName, state: stateName } 
-    });
+  exploreCity(cityName: string, _stateName: string) {
+    this.router.navigate(['/city', slugifyCity(cityName)]);
   }
 
   // ==========================================
@@ -479,22 +471,17 @@ export default class HomeComponent implements OnInit {
   navigateToCategory(type: string): void {
   switch (type) {
     case 'flatmate':
-      // Isolated view routing target for flatmates matching
       this.router.navigate(['/flatmates']);
       break;
-      
     case 'room':
-      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Room' } });
+      this.router.navigate(['/category/rooms-for-rent']);
       break;
-      
     case 'pg':
-      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'PG' } });
+      this.router.navigate(['/category/pg-for-rent']);
       break;
-      
     case 'flat':
-      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Flat' } });
+      this.router.navigate(['/category/flats-for-rent']);
       break;
-      
     default:
       this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Any' } });
       break;

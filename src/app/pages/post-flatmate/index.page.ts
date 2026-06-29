@@ -13,7 +13,7 @@ import { FlatmateService } from '../../services/flatmate.service';
   templateUrl: './post-flatmate.html',
   styleUrls: ['./post-flatmate.css']
 }) 
-export default class PostFlatmateComponent   {
+export default class PostFlatmateComponent {
   postForm: FormGroup;
   isSubmitting = false;
   isDetectingLocation = false;
@@ -22,19 +22,28 @@ export default class PostFlatmateComponent   {
   selectedFiles: File[] = [];
   previewUrls: string[] = [];
   preferences: string[] = [];
-    locationDetected: boolean = false;
-ngOnInit() {
-    this.checkUserStatus();
+  locationDetected: boolean = false;
+
+  predefinedHabits: string[] = [
+    'UPSC/SSC Aspirant', 'Pure Veg', 'Non-Veg Allowed', 'Quiet/Study Vibe', 
+    'Early Riser', 'Night Owl', 'Non-Smoker', 'Fitness Enthusiast', 'Working Professional'
+  ];
+
+  ngOnInit() {
+    // this.checkUserStatus();
   }
+
   constructor(
     private fb: FormBuilder,
     private flatmateService: FlatmateService,
     private toastr: ToastrService,
     private router: Router,
-private zone: NgZone // <-- Inject NgZone here
+    private zone: NgZone 
   ) {
     this.postForm = this.fb.group({
       name: ['', Validators.required],
+      // NEW: Added phone number with 10-digit validation
+      phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]], 
       age: ['', [Validators.required, Validators.min(18), Validators.max(99)]],
       gender: ['', Validators.required],
       profession: ['', Validators.required],
@@ -43,24 +52,24 @@ private zone: NgZone // <-- Inject NgZone here
       latitude: [''],
       longitude: [''],
       bio: ['', [Validators.required, Validators.maxLength(1000)]],
-      tempPreference: [''] // Temporary field for the input box
+      tempPreference: ['']
     });
   }
-private updateState(key: string, value: any) {
+
+  private updateState(key: string, value: any) {
     setTimeout(() => {
       this.zone.run(() => {
         (this as any)[key] = value;
       });
     });
   }
-// 2. Updated detectLocation with safe async execution
+
   detectLocation() {
     if (!navigator.geolocation) {
       this.toastr.error('Geolocation not supported');
       return;
     }
 
-    // Set loading state safely
     this.updateState('isDetectingLocation', true);
 
     navigator.geolocation.getCurrentPosition(
@@ -74,7 +83,6 @@ private updateState(key: string, value: any) {
           
           const exactAddress = data.display_name;
 
-          // Patch form and update UI flags in the next tick
           setTimeout(() => {
             this.zone.run(() => {
               this.postForm.patchValue({
@@ -116,6 +124,19 @@ private updateState(key: string, value: any) {
     this.preferences.splice(index, 1);
   }
 
+  togglePreference(habit: string) {
+    const index = this.preferences.indexOf(habit);
+    if (index > -1) {
+      this.preferences.splice(index, 1);
+    } else {
+      if (this.preferences.length < 5) {
+        this.preferences.push(habit);
+      } else {
+        this.toastr.warning('You can select a maximum of 5 habits', 'Limit Reached');
+      }
+    }
+  }
+
   // --- Photos ---
   onFileSelected(event: any) {
     const files = event.target.files;
@@ -137,7 +158,8 @@ private updateState(key: string, value: any) {
     this.selectedFiles.splice(index, 1);
     this.previewUrls.splice(index, 1);
   }
-// --- Submission ---
+
+  // --- Submission ---
   onSubmit() {
     if (this.postForm.invalid) {
       this.postForm.markAllAsTouched();
@@ -147,12 +169,9 @@ private updateState(key: string, value: any) {
 
     this.isSubmitting = true;
 
-    // Step 1: Upload images to Hostinger FIRST
     if (this.selectedFiles.length > 0) {
       this.flatmateService.uploadImagesToHostinger(this.selectedFiles).subscribe({
         next: (uploadRes: any) => {
-          // Adapt this based on exactly what your upload.php returns. 
-          // Assuming it returns an array of URLs or an object containing them.
           const imageUrls = uploadRes.urls || uploadRes; 
           this.submitFinalData(imageUrls);
         },
@@ -162,34 +181,29 @@ private updateState(key: string, value: any) {
         }
       });
     } else {
-      // If no images were selected, just submit with an empty array
       this.submitFinalData([]);
     }
   }
 
-  // Step 2: Send the final JSON to Spring Boot
   private submitFinalData(imageUrls: string[]) {
     const raw = this.postForm.value;
 
     const payload = {
       name: raw.name,
+      phoneNumber: raw.phoneNumber, // NEW: Added to payload
       age: raw.age,
       gender: raw.gender,
       profession: raw.profession,
-      budget: String(raw.budget), // Ensure it's a string
+      budget: String(raw.budget), 
       bio: raw.bio,
-      
       flatAddress: raw.flatAddress,
       city: raw.city,
-      // state: raw.state, // Only uncomment if you added 'state' to your FlatmatePost.java
       latitude: raw.latitude || null,
       longitude: raw.longitude || null,
-      
       preferences: this.preferences,
-      images: imageUrls // Automatically attaches the Hostinger URLs!
+      images: imageUrls 
     };
 
-    // Notice we only pass ONE argument now: the payload
     this.flatmateService.createPost(payload).subscribe({
       next: (res: any) => {
         this.isSubmitting = false;
@@ -206,37 +220,16 @@ private updateState(key: string, value: any) {
       }
     });
   }
-  // Predefined habits optimized for your target demographic
-  predefinedHabits: string[] = [
-    'UPSC/SSC Aspirant', 'Pure Veg', 'Non-Veg Allowed', 'Quiet/Study Vibe', 
-    'Early Riser', 'Night Owl', 'Non-Smoker', 'Fitness Enthusiast', 'Working Professional'
-  ];
 
-  // Toggle selection (Limit to 5 choices so the profile doesn't get cluttered)
-  togglePreference(habit: string) {
-    const index = this.preferences.indexOf(habit);
-    
-    if (index > -1) {
-      // If already selected, remove it
-      this.preferences.splice(index, 1);
-    } else {
-      // If not selected, add it (with a max limit of 5)
-      if (this.preferences.length < 5) {
-        this.preferences.push(habit);
-      } else {
-        this.toastr.warning('You can select a maximum of 5 habits', 'Limit Reached');
-      }
-    }
+  isInvalid(field: string): boolean {
+    const control = this.postForm.get(field);
+    return !!(control && control.invalid && (control.touched || control.dirty));
   }
-  // Make sure this is in your index.page.ts
-isInvalid(field: string): boolean {
-  const control = this.postForm.get(field);
-  return !!(control && control.invalid && (control.touched || control.dirty));
-}
-checkUserStatus() {
+
+  checkUserStatus() {
     this.flatmateService.checkUserPostStatus().subscribe({
       next: (res: any) => {
-        if (res.data === true) { // If user already has a post
+        if (res.data === true) {
           this.toastr.warning('You already have an active flatmate listing.');
           this.router.navigate(['/flatmates']);
         }

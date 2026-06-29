@@ -4,6 +4,7 @@
 import { defineConfig } from 'vite';
 import analog from '@analogjs/platform';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { buildPrerenderRoutes } from './scripts/sitemap-routes';
 
 export default defineConfig(({ mode }) => ({
   build: {
@@ -22,7 +23,15 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     analog({
       prerender: {
-        routes: ['/', '/about', '/faq', '/explore-listing', '/login', '/owner-auth'],
+        routes: buildPrerenderRoutes,
+        sitemap: {
+          host: 'https://www.roomzo.in',
+        },
+      },
+      nitro: {
+        prerender: {
+          routes: ['/sitemap.xml'],
+        },
       },
     }),
     nodePolyfills({

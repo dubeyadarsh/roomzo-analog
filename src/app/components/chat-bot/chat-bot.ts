@@ -231,6 +231,6 @@ export class ChatBotComponent implements OnInit, AfterViewChecked {
 
   viewDetails(id: string) {
     this.toggleChat();
-    this.router.navigate(['/property-details', id]);
+    this.router.navigate(['/room', id]);
   }
 }

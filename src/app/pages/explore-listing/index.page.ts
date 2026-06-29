@@ -364,7 +364,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
   
   viewDetails(id: string) {
-      this.router.navigate(['/property-details', id]);
+      this.router.navigate(['/room', id]);
   }
   
   toggleMobileFilters(): void {
@@ -372,7 +372,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   scrollToContact(id: string): void {
-    this.router.navigate(['/property-details', id], { 
+    this.router.navigate(['/room', id], {
       queryParams: { focusContact: 'true' } 
     });
   }

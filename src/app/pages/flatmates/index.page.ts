@@ -25,7 +25,15 @@ export default class FlatmatesComponent implements OnInit {
   latitude?: number;
   longitude?: number;
   isLoggedIn = false;
-  currentUserId: number | null = null; // Storing Current User
+  currentUserId: number | null = null; 
+
+  // Modal State
+  showDeleteModal = false;
+  postToDeleteId: number | null = null;
+
+  // NEW: UI States for Read More logic
+  expandedBios: Record<number, boolean> = {};
+  expandedLocations: Record<number, boolean> = {};
 
   private readonly CACHE_KEY = 'flatmate_feed_cache_v1';
 
@@ -35,7 +43,6 @@ export default class FlatmatesComponent implements OnInit {
     private router: Router,
     private chatService: ChatService, 
     private toastr : ToastrService,
-
     @Inject(PLATFORM_ID) private platformId: Object,
   ) { }
 
@@ -171,6 +178,16 @@ export default class FlatmatesComponent implements OnInit {
     });
   }
 
+  // --- UI Toggle Handlers ---
+
+  toggleBio(postId: number) {
+    this.expandedBios[postId] = !this.expandedBios[postId];
+  }
+
+  toggleLocation(postId: number) {
+    this.expandedLocations[postId] = !this.expandedLocations[postId];
+  }
+
   getFullLocation(mate: any): string {
     return mate.flatAddress || mate.address || mate.location || mate.city || 'Location not specified';
   }
@@ -180,20 +197,51 @@ export default class FlatmatesComponent implements OnInit {
     return full.length > 28 ? full.substring(0, 28) + '...' : full;
   }
 
+  // --- WhatsApp Formatting ---
+  getWhatsAppLink(phone: string): string {
+    const cleanPhone = phone?.replace(/\D/g, '') || '';
+    const finalPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    return `https://wa.me/${finalPhone}`;
+  }
+
+  // --- Action Handlers with Login Checks ---
+
+  initiateCall(phone: string, event: Event) {
+    event.preventDefault();
+    if (!this.isLoggedIn) {
+      this.toastr.warning('Please log in to contact the flatmate.', 'Authentication Required');
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/flatmates' }});
+      return;
+    }
+    window.location.href = `tel:${phone}`;
+  }
+
+  initiateWhatsApp(phone: string, event: Event) {
+    event.preventDefault();
+    if (!this.isLoggedIn) {
+      this.toastr.warning('Please log in to contact the flatmate.', 'Authentication Required');
+      this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/flatmates' }});
+      return;
+    }
+    const link = this.getWhatsAppLink(phone);
+    window.open(link, '_blank');
+  }
+
   messageOwner(ownerId: number, ownerName: string) {
     if (!this.isLoggedIn) {
+      this.toastr.warning('Please log in to contact the flatmate.', 'Authentication Required');
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/flatmates' }});
       return;
     }
 
     if (this.currentUserId === ownerId) {
-      return; // Safety guard just in case
+      return; 
     }
 
     this.chatService.openChatWith(ownerId, ownerName);
   }
-   handleListFlatmate() {
-    
+
+  handleListFlatmate() {
     if (!this.isLoggedIn) {
       this.toastr.warning('Please log in to post a flatmate requirement.', 'Authentication Required');
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: '/post-flatmate' }});
@@ -201,9 +249,6 @@ export default class FlatmatesComponent implements OnInit {
     }
     this.router.navigate(['/post-flatmate']); 
   }
-  // Add these state variables near your other variables at the top of the class
-  showDeleteModal = false;
-  postToDeleteId: number | null = null;
 
   // =========================================
   // DELETE MODAL LOGIC
@@ -226,17 +271,16 @@ export default class FlatmatesComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 1) {
           this.toastr.success('Post deleted successfully');
-          // Instantly remove the post from the UI
           this.flatmates = this.flatmates.filter(mate => mate.id !== this.postToDeleteId);
-          this.saveCache(); // Update local cache
+          this.saveCache(); 
         } else {
           this.toastr.error(res.message || 'Failed to delete post');
         }
-        this.cancelDelete(); // Close modal and reset state
+        this.cancelDelete(); 
       },
       error: () => {
         this.toastr.error('Error deleting post. Please try again.');
-        this.cancelDelete(); // Close modal and reset state
+        this.cancelDelete(); 
       }
     });
   }

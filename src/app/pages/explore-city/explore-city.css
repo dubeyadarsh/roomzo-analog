@@ -195,8 +195,8 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
 }
 
-.media-frame { position: relative; height: 240px; background: #f1f5f9; cursor: pointer; }
-.media-frame img { width: 100%; height: 100%; object-fit: cover; }
+.media-frame { position: relative; aspect-ratio: 4 / 3; min-height: 240px; background: #f1f5f9; cursor: pointer; }
+.media-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* Embedded Card Badge Layers */
 .floating-badge-cluster { position: absolute; top: 14px; left: 14px; display: flex; gap: 6px; }

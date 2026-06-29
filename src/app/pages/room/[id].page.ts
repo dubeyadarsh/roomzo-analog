@@ -10,13 +10,21 @@ import { ToastrService } from 'ngx-toastr';
 import { getAmenitiesMap } from '../../services/Utility';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { SeoService } from '../../services/seo.service';
+import { RelatedSearchesComponent } from '../../components/related-searches/related-searches';
+import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
+import {
+  generatePropertyAltText,
+  optimizeImageUrl,
+} from '../../utils/image-seo.util';
+import { slugifyCity } from '../../config/cities.config';
 
 import { PendingAction, SafetyConsentBottomSheetComponent } from '../../components/safety-consent/safety-consent';
 
 @Component({
   selector: 'app-property-details',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule, SafetyConsentBottomSheetComponent],
+  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule, SafetyConsentBottomSheetComponent, RelatedSearchesComponent, SeoBreadcrumbComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './property-details.html',
   styleUrls: ['./property-details.css']
@@ -62,6 +70,10 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
   isConsentModalOpen = signal(false);
   pendingAction = signal<PendingAction | any>(null);
 
+  readonly generatePropertyAltText = generatePropertyAltText;
+  readonly optimizeImageUrl = optimizeImageUrl;
+  breadcrumbItems: { label: string; path?: string }[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -70,6 +82,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private toastr: ToastrService,
     private authService: AuthService,
+    private seo: SeoService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document
@@ -98,6 +111,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
             this.toastr.error('Invalid Property ID', 'Error');
             throw new Error('No ID');
         }
+        if (this.isBrowser && this.router.url.includes('/property-details/')) {
+          this.router.navigate(['/room', this.currentId], { replaceUrl: true });
+        }
         return this.propertyService.getListingById(this.currentId);
       })
     ).subscribe({
@@ -112,6 +128,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
             );
           }
           this.mapAmenities(this.property);
+          this.applyPropertySeo(this.property);
           this.checkReturnFromLogin();
           this.checkFocusContact();
           if (this.isBrowser) {
@@ -188,7 +205,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         this.openContactModal();
       });
     } else {
-      const returnUrl = `/property-details/${this.currentId}?showContact=true`;
+      const returnUrl = `/room/${this.currentId}?showContact=true`;
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
@@ -222,7 +239,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
         });
       }
     } else {
-      const returnUrl = `/property-details/${this.currentId}?action=${actionType}`;
+      const returnUrl = `/room/${this.currentId}?action=${actionType}`;
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
@@ -462,6 +479,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   scheduleTour() { this.toastr.info('Tour scheduling feature coming soon!', 'Coming Soon'); }
 
   ngOnDestroy(): void {
+    this.seo.removeJsonLd();
     if (this.isBrowser) {
       this.renderer.removeClass(this.document.body, 'hide-global-bottom-nav');
     }
@@ -543,7 +561,7 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
       this.openReportModal(); 
     } else {
-      const returnUrl = `/property-details/${this.currentId}?action=report`;
+      const returnUrl = `/room/${this.currentId}?action=report`;
       this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: returnUrl } });
     }
   }
@@ -597,6 +615,41 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
       .split('|')
       .map((item: string) => item.trim())
       .filter((item: string) => item.length > 0);
+  }
+
+  private applyPropertySeo(property: any): void {
+    const title = `${property.propertyType} for Rent in ${property.city} — ₹${property.rentAmount?.toLocaleString('en-IN') ?? '0'}/mo | Roomzo`;
+    const description = (
+      property.description?.replace(/\|/g, ' ').slice(0, 155) ||
+      `Verified ${property.propertyType} for rent in ${property.street}, ${property.city}. Broker-free listing with direct owner contact on Roomzo.`
+    );
+    const ogImage = property.photos?.[0]?.photoUrl;
+
+    this.breadcrumbItems = [
+      { label: 'Home', path: '/' },
+      { label: 'Explore', path: '/explore-listing' },
+      { label: property.city, path: `/city/${slugifyCity(property.city)}` },
+      { label: `${property.propertyType} in ${property.street || property.city}` },
+    ];
+
+    this.seo.applyPageSeo({
+      title,
+      description,
+      path: this.seo.buildRoomPath(property.id),
+      keywords: [
+        `${property.propertyType?.toLowerCase()} for rent ${property.city?.toLowerCase()}`,
+        'room for rent',
+        'brokerless property',
+        'student housing',
+        `pg in ${property.city?.toLowerCase()}`,
+      ],
+      ogImage,
+      ogType: 'product',
+      jsonLd: [
+        this.seo.buildListingJsonLd(property),
+        this.seo.buildBreadcrumbJsonLd(this.breadcrumbItems),
+      ],
+    });
   }
   
   highlightContact = false;

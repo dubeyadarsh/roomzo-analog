@@ -6,6 +6,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
+import { RouteMeta } from '@analogjs/router';
+
+export const routeMeta: RouteMeta = {
+  title: 'Owner Login | Roomzo',
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
+};
 
 @Component({
   selector: 'app-owner-auth',

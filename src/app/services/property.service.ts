@@ -254,7 +254,7 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
     window.open(`tel:${phoneStr}`, '_self');
   } else {
     const cleanPhone = phoneStr.replace(/[^0-9]/g, '');
-    const propertyUrl = `https://roomzo.in/property-details/${prop.id}`;
+    const propertyUrl = `https://www.roomzo.in/room/${prop.id}`;
     const message = encodeURIComponent(`Hi,\n\nI found your property listing on Roomzo. I’m interested in this property and would like to know more about the rent, availability, and facilities.\n\nLooking forward to your response.\n\nRegards,\nRoomzo User\n\nProperty URL: ${propertyUrl}`);
     window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
   }

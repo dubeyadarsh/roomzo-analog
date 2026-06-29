@@ -83,7 +83,7 @@ export default class BlogPageComponent implements OnInit, OnDestroy {
       "author": [{
           "@type": "Organization",
           "name": this.post.author,
-          "url": "https://yourwebsite.com"
+          "url": "https://www.roomzo.in"
       }]
     };
 

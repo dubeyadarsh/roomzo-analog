@@ -88,7 +88,7 @@
         <div class="listing-card" *ngFor="let item of listings; let i = index">
           
           <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
-            <img [src]="item.image" [alt]="item.title">
+            <img [src]="item.image" [alt]="item.title + ' for rent on Roomzo'" loading="lazy" decoding="async" width="400" height="300">
             
             <div class="verified-badge">
               <mat-icon>check</mat-icon> Owner Verified
@@ -166,7 +166,7 @@
         <div class="listing-card" *ngFor="let item of nearbyListings">
           
           <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
-            <img [src]="item.image" [alt]="item.title">
+            <img [src]="item.image" [alt]="item.title + ' for rent on Roomzo'" loading="lazy" decoding="async" width="400" height="300">
             
             <div class="verified-badge">
               <mat-icon>check</mat-icon> Owner Verified

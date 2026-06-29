@@ -10,6 +10,7 @@ import { authGuard } from '../../auth.guard';
 import { RouteMeta } from '@analogjs/router';
 export const routeMeta: RouteMeta = {
   canActivate: [authGuard],
+  meta: [{ name: 'robots', content: 'noindex, nofollow' }],
 };
 
 @Component({

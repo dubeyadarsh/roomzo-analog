@@ -88,6 +88,21 @@ export default class FaqComponent implements OnInit, OnDestroy {
     // NEW SEO TARGET: Lucknow
   
     // --- FOR OWNERS ---
+    {
+      question: 'Is Roomzo a good alternative to 99acres or Housing.com for brokerless rentals?',
+      answer: 'Yes. Unlike traditional portals that rely on brokers, Roomzo focuses on verified owner listings with zero brokerage. Tenants in Prayagraj, Varanasi, Pune, and other cities can search rooms, PGs, and flats and contact owners directly — similar convenience to Housing.com or 99acres, but without agent fees.',
+      category: 'General'
+    },
+    {
+      question: 'How does Roomzo compare to NoBroker for student housing?',
+      answer: 'Roomzo offers a student-first experience with city-specific pages, verified PG listings near colleges, and direct WhatsApp or call contact with owners. It is a practical NoBroker alternative for affordable student housing across Uttar Pradesh, Maharashtra, and expanding cities.',
+      category: 'Tenants'
+    },
+    {
+      question: 'Can I find PG for rent in Pune without paying brokerage?',
+      answer: 'Absolutely. Roomzo lists broker-free PGs in Hinjewadi, Viman Nagar, Kothrud, Wakad, and Baner. Filter by PG type on our explore page or visit the Pune city page for curated listings.',
+      category: 'Tenants'
+    },
     // NEW SEO TARGET: Owners in UP
     {
       question: 'How do I list my property in Prayagraj or Varanasi without an agent?',
