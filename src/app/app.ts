@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef,PLATFORM_ID } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, PLATFORM_ID, OnInit } from '@angular/core';
 import {
   RouterOutlet,
   Router,
@@ -13,6 +13,7 @@ import { FooterComponent } from './components/footer/footer';
 import HeaderComponent from './components/header/header';
 import { ChatDrawerComponent } from './components/chat-drawer/chat-drawer';
 import { AnalyticsService } from './services/analytics.service';
+import { PropertyService } from './services/property.service';
 
 import { MatDialog } from '@angular/material/dialog';
 import { ComingSoonModalComponent } from './components/coming-soon/coming-soon-modal';
@@ -26,8 +27,7 @@ import { ChatBotComponent } from "./components/chat-bot/chat-bot";
     HeaderComponent,
     FooterComponent,
     CommonModule,
-    ChatDrawerComponent,
-    ChatBotComponent
+    ChatDrawerComponent
 ],
   template: `
     <div *ngIf="isRouteLoading" class="global-loader"></div>
@@ -76,17 +76,18 @@ import { ChatBotComponent } from "./components/chat-bot/chat-bot";
     }
   `],
 })
-export class App {
+export class App implements OnInit {
   isRouteLoading = false;
 
   private router = inject(Router);
   private cd = inject(ChangeDetectorRef);
   private analytics = inject(AnalyticsService);
   private dialog = inject(MatDialog);
-private platformId = inject(PLATFORM_ID);
-constructor() {
-  
-  this.router.events.subscribe((event) => {
+  private propertyService = inject(PropertyService);
+  private platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    this.router.events.subscribe((event) => {
     if (event instanceof NavigationStart) {
       this.isRouteLoading = true;
       this.cd.detectChanges();
@@ -102,13 +103,39 @@ constructor() {
     }
   });
 
-  this.analytics.init();
-
-  // Only run in browser
-  if (isPlatformBrowser(this.platformId)) {
-    this.initComingSoonModal();
+    this.analytics.init();
   }
-}
+
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.loadFavoriteState();
+      this.initComingSoonModal();
+    }
+  }
+
+  private loadFavoriteState(): void {
+    const storedUser = this.getStoredUser();
+    if (!storedUser?.id) {
+      return;
+    }
+
+    this.propertyService.getFavoriteProperties().subscribe({
+      next: () => undefined,
+      error: () => undefined,
+    });
+  }
+
+  private getStoredUser(): any {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(window.localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
+  }
 
  private initComingSoonModal(): void {
   const STORAGE_KEY = 'pune-coming-soon-modal';

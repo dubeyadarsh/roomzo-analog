@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone, HostListener, Renderer2, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Inject, PLATFORM_ID, NgZone, Renderer2, signal } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,22 +13,17 @@ import { finalize, debounceTime, distinctUntilChanged, switchMap, catchError, fi
 import { ToastrService } from 'ngx-toastr';
 
 import { PropertyService, ListingFilter } from '../../services/property.service';
+import { ActivityService } from '../../services/activity.service';
 import { RouteMeta } from '@analogjs/router';
 
-// Safety Consent Import
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../../components/safety-consent/safety-consent';
+import { ListingCardComponent } from '../../components/listing-card/listing-card';
 
 export const routeMeta: RouteMeta = {
   title: 'Roomzo : Trusted Rooms, PG & Flats Near You | No Broker | No Fake Listing',
   meta: [
-    { 
-      name: 'description', 
-      content: 'Find 100% broker-free rooms, PGs, and flats for rent in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Pune. Connect directly with owners.' 
-    },
-    { 
-      name: 'keywords', 
-      content: 'room rent in prayagraj, pg in varanasi, flat for rent in pune, brokerless pg, katra room rent, civil lines flats, allahpur pg, mumfordganj, teliyarganj, naini, jhunsi, dhoomanganj, lanka varanasi pg, bhu rooms, assi ghat, sigra, mahmoorganj, pandeypur, sarnath, hinjewadi pg, viman nagar flats, kothrud rooms, wakad, baner, zero brokerage roomzo, agentless rental platform' 
-    },
+    { name: 'description', content: 'Find 100% broker-free rooms, PGs, and flats for rent in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Pune. Connect directly with owners.' },
+    { name: 'keywords', content: 'room rent in prayagraj, pg in varanasi, flat for rent in pune, brokerless pg, katra room rent, civil lines flats' },
     { property: 'og:title', content: '100% Brokerless Rooms & PG in UP & Pune | Roomzo' },
     { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats in Prayagraj, Varanasi, and Pune.' },
     { property: 'og:type', content: 'website' },
@@ -43,35 +38,23 @@ export const routeMeta: RouteMeta = {
     CommonModule, MatIconModule, MatButtonModule, 
     FormsModule, ReactiveFormsModule, 
     MatAutocompleteModule, MatInputModule,
-    SafetyConsentBottomSheetComponent
+    SafetyConsentBottomSheetComponent, ListingCardComponent
   ],
   templateUrl: './explore-listing.html',
   styleUrls: ['./explore-listing.css']
 })
 export default class ExploreListingsComponent implements OnInit, OnDestroy {
-  
-  // Data State
   listings: any[] = [];
   totalItems = 0;
   isLoading = false;
 
-  // Search State
   searchControl = new FormControl('');
   filteredCities: any[] = []; 
   selectedLocation: { city: string, state: string } | null = null;
 
-  // Filter State
-  filters: ListingFilter = {
-    minPrice: 0,
-    maxPrice: 50000,
-    propertyType: 'Any',
-    bedrooms: 'Any',
-    sortBy: 'nearest'
-  };
-
+filters: ListingFilter = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'latest' }; // Changed to latest
   availabilityFilter: 'available' | 'all' = 'all';
 
-  // Pagination
   currentPage = 0;
   pageSize = 15;
   totalPages = 0;
@@ -80,7 +63,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   private searchSubscription: Subscription | null = null;
   isMobileFiltersOpen = false;
 
-  // --- Dynamic Placeholder Properties ---
   placeholders: string[] = [
     'Search "Civil lines, Prayagraj"',
     'Search "Mumfordganj, Prayagraj"',
@@ -88,8 +70,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     'Search "Viman Nagar, Pune"',
     'Search "Katra, Prayagraj"',
     'Search "Lanka, Varanasi"',
-    'Search "Kydganj, Prayagraj"',
-    'Search "Naini, Prayagraj"',
   ];
   currentPlaceholder: string = '';
   private charIndex: number = 0;
@@ -100,13 +80,13 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   
   isDropdownOpen = false;
 
-  // --- Safety Consent State Signals ---
   userHasGivenConsent = signal(false); 
   isConsentModalOpen = signal(false);
   pendingAction = signal<PendingAction | any>(null);
 
   constructor(
     private propertyService: PropertyService,
+    private activityService: ActivityService,
     private cd: ChangeDetectorRef,
     private router: Router,
     private route: ActivatedRoute,
@@ -120,7 +100,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.typeEffect();
     
-    // Real-time OpenStreetMap Locality Search using forkJoin for both UP and MH
     this.searchControl.valueChanges.pipe(
       debounceTime(400),
       distinctUntilChanged(),
@@ -129,7 +108,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
         const text = val as string;
         const upQuery = `${text}, Uttar Pradesh`;
         const mhQuery = `${text}, Maharashtra`;
-
         const upUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(upQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         const mhUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mhQuery)}&addressdetails=1&countrycodes=in&limit=5`;
         
@@ -139,9 +117,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
         }).pipe(
           map(({ up, mh }) => {
             const combined = [...up, ...mh];
-            return combined
-              .sort((a, b) => (b.importance || 0) - (a.importance || 0))
-              .slice(0, 6); 
+            return combined.sort((a, b) => (b.importance || 0) - (a.importance || 0)).slice(0, 6); 
           })
         );
       })
@@ -150,37 +126,36 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       this.cd.detectChanges();
     });
 
-  this.route.queryParams.subscribe(params => {
-  // Reset type filter to default 'Any' if not specifically provided in query params
-  this.filters.propertyType = params['propertyType'] ? params['propertyType'] : 'Any';
+    this.route.queryParams.subscribe(params => {
+      this.filters.propertyType = params['propertyType'] ? params['propertyType'] : 'Any';
+      if (Object.keys(params).length > 0) {
+        if (params['city'] && params['state']) {
+          const city = params['city'];
+          const state = params['state'];
+          const street = params['street'] ?? '';
+          this.selectedLocation = { city, state };
+          const displayVal = street ? `${street}, ${city}` : city;
+          this.searchControl.setValue(displayVal, { emitEvent: false });
+          this.filters.city = city;
+          this.filters.state = state;
+          this.activityService.logSearch({
+            city,
+            state,
+            searchQuery: params['street'] || params['searchQuery'] || city,
+            propertyType: this.filters.propertyType
+          });
+        }
+        if (params['lat'] && params['lng']) {
+          this.filters.lat = Number(params['lat']);
+          this.filters.lng = Number(params['lng']);
+        }
+        if (params['maxPrice']) {
+          this.filters.maxPrice = Number(params['maxPrice']);
+        }
+      }
+      this.loadListings();
+    });
 
-  if (Object.keys(params).length > 0) {
-    if (params['city'] && params['state']) {
-      const city = params['city'];
-      const state = params['state'];
-      const street = params['street'] ?? '';
-      this.selectedLocation = { city, state };
-      
-      const displayVal = street ? `${street}, ${city}` : city;
-      this.searchControl.setValue(displayVal, { emitEvent: false });
-      
-      this.filters.city = city;
-      this.filters.state = state;
-    }
-
-    if (params['lat'] && params['lng']) {
-      this.filters.lat = Number(params['lat']);
-      this.filters.lng = Number(params['lng']);
-    }
-
-    if (params['maxPrice']) {
-      this.filters.maxPrice = Number(params['maxPrice']);
-    }
-  }
-
-  // Reloads listings based on the newly captured parameter filter criteria
-  this.loadListings();
-});
     if (isPlatformBrowser(this.platformId)) {
       this.documentClickListener = this.renderer.listen('document', 'click', (event: Event) => {
         const target = event.target as HTMLElement;
@@ -191,34 +166,39 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
         }
       });
     }
-
-    // Check if the user is returning from a login screen to complete an action
     this.checkReturnFromLogin();
   }
 
   ngOnDestroy(): void {
     this.isDestroyed = true;
-    if (this.typingTimeout) {
-      clearTimeout(this.typingTimeout);
-    }
-    if (this.searchSubscription) {
-      this.searchSubscription.unsubscribe();
-    }
-    if (this.documentClickListener) {
-      this.documentClickListener();
-    }
+    if (this.typingTimeout) clearTimeout(this.typingTimeout);
+    if (this.searchSubscription) this.searchSubscription.unsubscribe();
+    if (this.documentClickListener) this.documentClickListener();
   }
 
-  // Check LocalStorage to see if we need to auto-trigger a WhatsApp/Call click
   checkReturnFromLogin() {
     if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      const pendingFavorite = localStorage.getItem('pendingFavoritePropertyId');
+      if (pendingFavorite) {
+        localStorage.removeItem('pendingFavoritePropertyId');
+        this.propertyService.saveFavoriteProperty(pendingFavorite).subscribe({
+          next: (res: any) => {
+            if (res?.status === 1 || res?.status === '1') {
+              this.toastr.success('Property saved to favorites.');
+              this.loadListings();
+            }
+          },
+          error: () => {
+            this.toastr.error('Could not save your favorite right now.');
+          }
+        });
+      }
+
       const pending = localStorage.getItem('pendingAction');
-      
       if (pending) {
         try {
           const parsed = JSON.parse(pending);
           localStorage.removeItem('pendingAction'); 
-
           this.propertyService.getListingById(parsed.propertyId).subscribe({
             next: (res: any) => {
               if (res.status === 1 && res.data) {
@@ -236,12 +216,10 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   displayCity = (result: any): string => {
     if (!result) return '';
     if (typeof result === 'string') return result;
-    
     const addr = result.address || {};
     const locality = addr.neighbourhood || addr.suburb || addr.village || addr.town || result.name || '';
     const city = addr.city || addr.state_district || addr.county || '';
     const state = addr.state || '';
-
     const parts = [locality, city, state].filter((val, index, arr) => val && arr.indexOf(val) === index);
     return parts.join(', ');
   }
@@ -249,69 +227,77 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   onCitySelected(event: any) {
     const result = event.option.value;
     const addr = result.address || {};
-
     this.filters.lat = parseFloat(result.lat);
     this.filters.lng = parseFloat(result.lon); 
-    
     const city = addr.city || addr.town || addr.village || addr.county || '';
     const state = addr.state || '';
-
     this.filters.city = city;
     this.filters.state = state;
-
     this.selectedLocation = { city, state };
+    this.activityService.logSearch({
+      city,
+      state,
+      searchQuery: this.displayCity(result),
+      propertyType: this.filters.propertyType
+    });
     this.applyFilters();
   }
 
-  loadListings(): void {
-    if (this.searchSubscription) {
-      this.searchSubscription.unsubscribe();
-    }
-
+loadListings(): void {
+    if (this.searchSubscription) this.searchSubscription.unsubscribe();
     this.isLoading = true;
     this.cd.detectChanges();
 
     let isRentedParam = this.availabilityFilter === 'available' ? false : undefined;
 
-    if (!this.filters.city && !this.filters.lat) {
-      if (isPlatformBrowser(this.platformId)) {
-        const storedLocation = localStorage.getItem('user_geo_location');
-        if (storedLocation) {
-          const parsed = JSON.parse(storedLocation);
-          this.filters.lat = parsed.lat;
-          this.filters.lng = parsed.lng;
+    // --- CRITICAL UPDATE: Smart Location Handling ---
+    if (!this.filters.city) {
+      // 1. If the user HAS NOT searched for a specific city...
+      
+      if (this.filters.sortBy === 'nearest') {
+        // ...and they want "Nearest", grab their physical location
+        if (isPlatformBrowser(this.platformId)) {
+          const storedLocation = localStorage.getItem('user_geo_location');
+          if (storedLocation) {
+            try {
+              const parsed = JSON.parse(storedLocation);
+              this.filters.lat = parsed.lat;
+              this.filters.lng = parsed.lng;
+            } catch (e) {}
+          }
         }
+      } else {
+        // ...otherwise (Latest/Oldest), clear lat/lng so they get a pure, unbiased global feed
+        this.filters.lat = undefined;
+        this.filters.lng = undefined;
       }
     }
+    // 2. If this.filters.city IS set (via search or chips), lat/lng are already 
+    // safely populated by your search methods and will be passed through to the API.
+    // ------------------------------------------------
 
-    this.searchSubscription = this.propertyService.searchListingsWithFilters(
-        this.currentPage,
-        this.pageSize,
-        this.filters,
-        isRentedParam
-      ).pipe(
-      finalize(() => {
+    this.searchSubscription = this.propertyService.searchListingsWithFilters(this.currentPage, this.pageSize, this.filters, isRentedParam)
+      .pipe(finalize(() => {
         this.isLoading = false;
         this.cd.detectChanges(); 
-      })
-    ).subscribe({
-      next: (response: any) => {
-        if (!response) {
-            this.listings = [];
-            this.totalItems = 0;
-            return;
+      }))
+      .subscribe({
+        next: (response: any) => {
+          if (!response) {
+              this.listings = [];
+              this.totalItems = 0;
+              return;
+          }
+          this.listings = response.listings || [];
+          this.totalItems = response.totalItems || 0;
+          this.totalPages = response.totalPages || 0;
+          this.calculatePagination();
+        },
+        error: (err: any) => {
+          this.listings = []; 
+          this.totalItems = 0;
         }
-        this.listings = response.listings || [];
-        this.totalItems = response.totalItems || 0;
-        this.totalPages = response.totalPages || 0;
-        this.calculatePagination();
-      },
-      error: (err: any) => {
-        console.error('API Error:', err);
-        this.listings = []; 
-        this.totalItems = 0;
-      }
-    });
+      });
   }
 
   applyFilters(): void {
@@ -320,8 +306,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(): void {
-    this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'nearest' };    
-    this.searchControl.setValue('');
+this.filters = { minPrice: 0, maxPrice: 50000, propertyType: 'Any', bedrooms: 'Any', sortBy: 'latest' };    this.searchControl.setValue('');
     this.selectedLocation = null;
     this.availabilityFilter = 'available';
     this.applyFilters();
@@ -344,7 +329,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   formatPostedDate(dateString?: string): string {
     if (!dateString) return 'Recently posted';
-    
     const date = new Date(dateString);
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
@@ -352,19 +336,52 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
 
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    } else if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    } else if (diffInDays < 7) {
-      return `${diffInDays}d ago`;
-    } else {
-      return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
-    }
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
   }
   
-  viewDetails(id: string) {
+  viewDetails(id: string | number) {
       this.router.navigate(['/room', id]);
+  }
+
+  toggleSavedListing(item: any): void {
+    const isLoggedIn = this.isUserLoggedIn() || this.isOwnerLoggedIn();
+    if (!isLoggedIn) {
+      localStorage.setItem('pendingFavoritePropertyId', String(item.id));
+      const shouldNavigate = window.confirm('Please log in to save this property. Would you like to go to the login page now?');
+      if (shouldNavigate) {
+        this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: this.router.url } });
+      }
+      return;
+    }
+
+    const nextValue = !item.isFavorite;
+    const propertyId = String(item.id);
+
+    item.isFavorite = nextValue;
+
+    const request = nextValue
+      ? this.propertyService.saveFavoriteProperty(propertyId)
+      : this.propertyService.removeFavoriteProperty(propertyId);
+
+    request.subscribe({
+      next: (res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          this.toastr.success(nextValue ? 'Property saved to favorites.' : 'Property removed from favorites.');
+        } else {
+          item.isFavorite = !nextValue;
+          this.toastr.error(res?.message || 'Could not update favorites right now.');
+        }
+        this.cd.detectChanges();
+      },
+      error: () => {
+        item.isFavorite = !nextValue;
+        this.toastr.error('Could not update favorites right now.');
+        this.cd.detectChanges();
+      }
+    });
   }
   
   toggleMobileFilters(): void {
@@ -372,16 +389,12 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   scrollToContact(id: string): void {
-    this.router.navigate(['/room', id], {
-      queryParams: { focusContact: 'true' } 
-    });
+    this.router.navigate(['/room', id], { queryParams: { focusContact: 'true' } });
   }
 
   private typeEffect() {
     if (this.isDestroyed) return;
-
     const currentWord = this.placeholders[this.placeholderIndex];
-    
     if (this.charIndex < currentWord.length) {
       this.ngZone.run(() => {
         this.currentPlaceholder += currentWord.charAt(this.charIndex);
@@ -396,7 +409,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   private eraseEffect() {
     if (this.isDestroyed) return;
-
     if (this.charIndex > 0) {
       this.ngZone.run(() => {
         this.currentPlaceholder = this.currentPlaceholder.substring(0, this.charIndex - 1);
@@ -416,7 +428,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   onScroll(event: WheelEvent, element: HTMLElement): void {
     const canScrollHorizontally = element.scrollWidth > element.clientWidth;
-    
     if (canScrollHorizontally && event.deltaY !== 0) {
       event.preventDefault();
       element.scrollLeft += event.deltaY;
@@ -425,7 +436,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   
   scrollPagination(element: HTMLElement, direction: 'left' | 'right'): void {
     const scrollAmount = 144; 
-    
     if (direction === 'left') {
       element.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     } else {
@@ -453,15 +463,12 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
     }
   }
 
-  // --- Contact & Consent Logic ---
   handleCardContactAction(prop: any, actionType: 'call' | 'whatsapp') {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
       const actionPayload = { prop, actionType };
-      
       this.checkAndExecuteConsent(actionPayload, () => {
         this.executeContactAction(prop, actionType);
       });
-      
     } else {
       const returnUrl = this.router.url; 
       localStorage.setItem('pendingAction', JSON.stringify({ action: actionType, propertyId: prop.id }));
@@ -471,20 +478,15 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   private executeContactAction(prop: any, actionType: 'call' | 'whatsapp') {
     const phone = prop.contactNo || prop.tempContactNo;
-    
     if (!phone) {
       this.propertyService.getListingById(prop.id).subscribe((res: any) => {
           const p = res.data;
           const phoneNum = p.contactNo || p.tempContactNo;
-          if(phoneNum) {
-            this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
-          } else {
-            this.toastr.error('Contact number not available');
-          }
+          if(phoneNum) this.propertyService.triggerPhoneAndWP(phoneNum, actionType, p);
+          else this.toastr.error('Contact number not available');
       });
       return;
     }
-    
     this.propertyService.triggerPhoneAndWP(phone, actionType, prop);
   }
 
@@ -495,7 +497,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let userId = null;
+let userId: string | null = null;
     if (isPlatformBrowser(this.platformId)) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
@@ -530,7 +532,7 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
   }
 
   onConsentAccepted(action: any) {
-    let userId = null;
+let userId: string | null = null;
     if (isPlatformBrowser(this.platformId)) {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
@@ -554,7 +556,6 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
           }
         },
         error: (err) => {
-          console.error('Consent save error:', err);
           this.toastr.error('Server error while recording consent.');
         }
       });
@@ -572,5 +573,56 @@ export default class ExploreListingsComponent implements OnInit, OnDestroy {
 
   isOwnerLoggedIn(): boolean {
     return this.isUserLoggedIn(); 
+  }
+
+  quickSearch(cityName: string, stateName: string): void {
+    // Fill the text input smoothly
+    this.searchControl.setValue(`${cityName}, ${stateName}`, { emitEvent: false });
+    
+    // Set explicit string filters
+    this.filters.city = cityName;
+    this.filters.state = stateName;
+    
+    // Map of specific coordinates for your areas
+    const locationMap: { [key: string]: { lat: number, lng: number } } = {
+      'Civil Lines': { lat: 25.4523026, lng: 81.8329887 },
+      'Stanley Road': { lat: 25.4820127, lng: 81.8511517 },
+      'Allahpur': { lat: 25.4528862, lng: 81.8717626 },
+      'Naini': { lat: 25.3926726, lng: 81.8590806 },
+      'Teliyarganj': { lat: 25.497944, lng: 81.8585747 },
+      'Katra': { lat: 25.4656097, lng: 81.8520114 },
+      'Varanasi': { lat: 25.3719338, lng: 82.9414272 },
+      'Prayagraj': { lat: 25.4358, lng: 81.8463 }, // Default center
+      'Pune': { lat: 18.5204, lng: 73.8567 }
+    };
+
+    // Apply coordinates if found, otherwise clear them
+    const coords = locationMap[cityName];
+    if (coords) {
+      this.filters.lat = coords.lat;
+      this.filters.lng = coords.lng;
+    } else {
+      this.filters.lat = undefined;
+      this.filters.lng = undefined;
+    }
+    
+    this.selectedLocation = { city: cityName, state: stateName };
+    
+    // Trigger the actual query
+    this.applyFilters();
+  }
+
+  // Add this inside your ExploreListingsComponent class
+ // In index.page.ts ExploreListingsComponent
+  trendingZones = [
+    { name: 'Allahpur', city: 'Prayagraj', slug: 'prayagraj', icon: 'location_city', trending: true },
+    { name: 'Stanley Road', city: 'Prayagraj', slug: 'prayagraj', icon: 'business', trending: false },
+    { name: 'Lanka', city: 'Varanasi', slug: 'varanasi', icon: 'account_balance', trending: true },
+    { name: 'Civil Lines', city: 'Prayagraj', slug: 'prayagraj', icon: 'domain', trending: false },
+    { name: 'Mutthiganj', city: 'Prayagraj', slug: 'prayagraj', icon: 'map', trending: false }
+  ];
+
+  navigateToZone(zone: any) {
+    this.router.navigate(['/city', zone.slug], { queryParams: { zone: zone.name } });
   }
 }

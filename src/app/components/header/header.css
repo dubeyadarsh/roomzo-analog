@@ -295,6 +295,32 @@
     z-index: 1001;
     overflow: hidden;
   }
+  /* --- Free Badge Indicator --- */
+  .free-badge {
+    position: absolute;
+    top: -46px; /* Sits right at the top edge of the FAB */
+    left: 50%;
+    margin-left: 12px; /* Pushes it slightly to the right */
+    background: linear-gradient(135deg, #0f766e, #0d9488); /* Matches theme */
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 12px;
+    border: 2px solid #ffffff; /* Gives it a cutout effect against the background */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(15, 118, 110, 0.3);
+    z-index: 1002;
+    pointer-events: none; /* Prevents it from blocking clicks */
+    animation: badgeFloat 2.5s ease-in-out infinite;
+  }
+
+  /* Gentle floating animation to draw attention */
+  @keyframes badgeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
 }
 
 .dropdown-icon {

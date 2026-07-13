@@ -23,6 +23,10 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Hides scrollbar in Firefox */
   padding: 12px 0; /* Safe space to prevent box-shadow clipping */
+  
+  /* CRITICAL FIX: Forces the flex track to make every child 
+     exactly as tall as the tallest card in the row. */
+  align-items: stretch; 
 }
 
 .listings-grid::-webkit-scrollbar {
@@ -43,6 +47,16 @@
   scroll-snap-align: start; 
   
   width: calc((100% - 48px) / 3);
+}
+
+.listings-grid app-listing-card {
+  width: calc((100% - 48px) / 3);
+  flex-shrink: 0;
+  
+  /* CRITICAL FIX: Ensure the Angular component wrapper itself stretches */
+  display: block;
+  align-self: stretch;
+  height: auto; 
 }
 
 .listing-card:hover { 
@@ -387,35 +401,34 @@
 }
 
 @media (max-width: 600px) {
-  /* Mobile: Show 1 item */
   .carousel-container {
     margin-bottom: 20px;
   }
-  
+
   .listings-grid {
-    gap: 16px; 
-  }
-  
-  .listing-card {
-    width: 100%;
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 0 12px;
   }
 
-  .featured-section { 
-    padding: 20px 0 80px; 
+  .listings-grid app-listing-card {
+    width: min(84vw, 320px);
+    flex: 0 0 auto;
+    scroll-snap-align: start;
   }
-  
+
+  .featured-section {
+    padding: 20px 0 80px;
+  }
+
   .carousel-nav {
-    display: none; 
+    display: none;
   }
 
-  .carousel-prev {
-    left: 8px; /* Tighter spacing for mobile */
-  }
-
-  .carousel-next {
-    right: 8px; /* Tighter spacing for mobile */
-  }
-  
   .action-pill-container {
     flex-direction: column;
     gap: 8px;

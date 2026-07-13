@@ -1,31 +1,118 @@
 <div class="page-wrapper">
 
-  <section class="search-hero">
-    <div class="hero-container">
-      <h1>Find your perfect home</h1>
-      <p>Search verified properties across top locations.</p>
+  <section class="hero-section">
+    <div class="hero-bg">
+      <div class="hero-gradient-overlay"></div>
+    </div>
+
+    <div class="hero-inner container">
       
-      <div class="search-pill">
-        <mat-icon class="search-icon">search</mat-icon>
-        <input type="text" 
-               [formControl]="searchControl" 
-               [matAutocomplete]="auto" 
-              [placeholder]="currentPlaceholder"            
-                >
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Find Rooms,<br>PGs & Flats<br>
+          <span class="text-highlight">Without Brokerage</span>
+        </h1>
         
-        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCity" (optionSelected)="onCitySelected($event)" class="custom-autocomplete-panel">
-          <mat-option *ngFor="let loc of filteredCities" [value]="loc" style="display: flex; align-items: center; font-size: 0.95rem;">
-             <mat-icon style="color: #94a3b8; font-size: 20px; width: 20px; height: 20px; margin-right: 8px;">place</mat-icon>
-             <span>{{ displayCity(loc) }}</span>
-          </mat-option>
-        </mat-autocomplete>
-        
-        <button class="btn-primary search-btn" (click)="applyFilters()">Search</button>
+        <p class="hero-subtitle">
+          Direct Owner Contact.<br>
+          Verified Listings. <mat-icon class="verified-icon">verified</mat-icon>
+        </p>
+
+        <div class="hero-stats-row">
+          <div class="stat-box">
+            <mat-icon>home</mat-icon>
+            <div class="stat-info">
+              <span class="stat-val">200+</span>
+              <span class="stat-label">Listings</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <mat-icon>people</mat-icon>
+            <div class="stat-info">
+              <span class="stat-val">500+</span>
+              <span class="stat-label">Users</span>
+            </div>
+          </div>
+          <div class="stat-box">
+            <mat-icon>location_on</mat-icon>
+            <div class="stat-info">
+              <ng-container *ngIf="selectedLocation?.city; else scrollingCity">
+                <span class="stat-val">{{ selectedLocation?.city }}</span>
+              </ng-container>
+              <ng-template #scrollingCity>
+                <div class="scrolling-city-wrapper">
+                  <div class="scrolling-city-inner">
+                    <span class="stat-val">Prayagraj</span>
+                    <span class="stat-val">Varanasi</span>
+                    <span class="stat-val">Pune</span>
+                    <span class="stat-val">Prayagraj</span>
+                  </div>
+                </div>
+              </ng-template>
+              <span class="stat-label">Your City</span>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div class="search-card-container">
+        <div class="search-card">
+          <div class="search-input-group">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input type="text" 
+                   [formControl]="searchControl" 
+                   [matAutocomplete]="auto" 
+                   [placeholder]="currentPlaceholder">
+            
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCity" (optionSelected)="onCitySelected($event)" class="custom-autocomplete-panel">
+              <mat-option *ngFor="let loc of filteredCities" [value]="loc" class="dropdown-option">
+                 <mat-icon class="autocomplete-icon">place</mat-icon>
+                 <span>{{ displayCity(loc) }}</span>
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+          <button class="btn-primary search-btn" (click)="applyFilters()">Search</button>
+          
+          <div class="quick-suggestions">
+  <span class="suggestion-label">Trending:</span>
+  <button class="chip" (click)="quickSearch('Allahpur', 'Uttar Pradesh')">Allahpur</button>
+  <button class="chip" (click)="quickSearch('Stanley Road', 'Uttar Pradesh')">Stanley Rd</button>
+  <button class="chip" (click)="quickSearch('Civil Lines', 'Uttar Pradesh')">Civil Lines</button>
+  <button class="chip" (click)="quickSearch('Katra', 'Uttar Pradesh')">Katra</button>
+  <button class="chip" (click)="quickSearch('Naini', 'Uttar Pradesh')">Naini</button>
+  <button class="chip" (click)="quickSearch('Teliyarganj', 'Uttar Pradesh')">Teliyarganj</button>
+  <!-- <button class="chip" (click)="quickSearch('Varanasi', 'Uttar Pradesh')">Lanka</button> -->
+</div>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <main class="main-content">
+    
+<div class="container explore-zones-section">
+    <h2 class="section-title">Explore Popular Hubs</h2>
+    <div class="zones-card-grid">
+      <div class="zone-card-minimal" *ngFor="let zone of trendingZones" (click)="navigateToZone(zone)">
+        
+        <div class="zone-card-header">
+          <div class="zone-icon-box">
+            <mat-icon>{{ zone.icon }}</mat-icon>
+          </div>
+          <span class="trending-pill" *ngIf="zone.trending">
+            <mat-icon class="micro-icon">local_fire_department</mat-icon> Trending
+          </span>
+        </div>
+
+        <div class="zone-card-body">
+          <h3>{{ zone.name }}</h3>
+          <p>{{ zone.city }}</p>
+        </div>
+        
+      </div>
+    </div>
+  </div>
     <div class="container layout-grid">
       
       <aside class="filters-sidebar" [class.show-on-mobile]="isMobileFiltersOpen">
@@ -72,30 +159,26 @@
 
       <section class="listings-area">
         
-     <div class="results-header">
-  
-<div class="sort-container">
-  <label class="sort-label">Sort:</label>
-  
- <div class="pro-dropdown">
-  <div class="dropdown-trigger" [class.open]="isDropdownOpen" (click)="toggleDropdown()">
-    {{ getSortLabel() }}
-    <mat-icon class="dropdown-icon">expand_more</mat-icon>
-  </div>
-  <div class="dropdown-menu" *ngIf="isDropdownOpen">
-    <div class="dropdown-item" [class.active]="filters.sortBy === 'nearest'" (click)="selectSort('nearest')">Nearest First</div>
-    <div class="dropdown-item" [class.active]="filters.sortBy === 'latest'" (click)="selectSort('latest')">Latest First</div>
-    <div class="dropdown-item" [class.active]="filters.sortBy === 'oldest'" (click)="selectSort('oldest')">Oldest First</div>
-  </div>
-</div>
-</div>
-  
-  <!-- Filter Button -->
-  <button class="mobile-filter-toggle" (click)="toggleMobileFilters()">
-    <mat-icon>tune</mat-icon> Filters
-  </button>
-  
-</div>  
+        <div class="results-header">
+          <div class="sort-container">
+            <label class="sort-label">Sort:</label>
+            <div class="pro-dropdown">
+              <div class="dropdown-trigger" [class.open]="isDropdownOpen" (click)="toggleDropdown()">
+                {{ getSortLabel() }}
+                <mat-icon class="dropdown-icon">expand_more</mat-icon>
+              </div>
+              <div class="dropdown-menu" *ngIf="isDropdownOpen">
+                <div class="dropdown-item" [class.active]="filters.sortBy === 'nearest'" (click)="selectSort('nearest')">Nearest First</div>
+                <div class="dropdown-item" [class.active]="filters.sortBy === 'latest'" (click)="selectSort('latest')">Latest First</div>
+                <div class="dropdown-item" [class.active]="filters.sortBy === 'oldest'" (click)="selectSort('oldest')">Oldest First</div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="mobile-filter-toggle" (click)="toggleMobileFilters()">
+            <mat-icon>tune</mat-icon> Filters
+          </button>
+        </div>  
 
         <div class="loader-container" *ngIf="isLoading">
           <div class="modern-spinner"></div>
@@ -110,84 +193,43 @@
         </div>
 
         <div class="property-grid" *ngIf="!isLoading && listings.length > 0">
-          
-          <div class="listing-card" *ngFor="let prop of listings">
-            
-            <div class="card-image" (click)="viewDetails(prop.id)" style="cursor: pointer;">
-              <img [src]="(prop.photos && prop.photos.length > 0) ? prop.photos[0].photoUrl : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Home">
-              
-              <div class="badges-container">
-                 <span class="verified-badge" *ngIf="prop.isRented === false"><mat-icon>check</mat-icon> Available</span>
-                 <span class="verified-badge rented" *ngIf="prop.isRented === true">Rented</span>
-              </div>
-
-              <!-- Posted Date Badge -->
-              <div class="posted-date-badge">
-                <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.createdOn) }}
-              </div>
-
-              <div class="price-overlay">
-                <span class="price-amount">{{ formatPrice(prop.rentAmount) }}</span>
-                <span class="price-month">/ mo</span>
-              </div>
-            </div>
-
-            <div class="card-content">
-              <h3>{{ prop.propertyType }} in {{ prop.street }}</h3>
-              
-              <div class="location-text">
-                <mat-icon>location_on</mat-icon> {{ prop.street }}, {{ prop.city }}
-              </div>
-
-              <div class="specs-row">
-                <span><mat-icon>bed</mat-icon> {{ prop.bedrooms }} Bed</span>
-                <span><mat-icon>bathtub</mat-icon> {{ prop.bathrooms }} Bath</span>
-                <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize | number }} sqft</span>
-              </div>
-
-         <div class="action-buttons-container">
-  <button class="contact-btn" (click)="handleCardContactAction(prop, 'call')">
-    <mat-icon>call</mat-icon> Call
-  </button>
-  
-  <button class="contact-btn wa-btn" (click)="handleCardContactAction(prop, 'whatsapp')">
-    <mat-icon>chat</mat-icon> WhatsApp
-  </button>
-  
-  <button class="view-btn" (click)="viewDetails(prop.id)">
-    <mat-icon>info</mat-icon> View
-  </button>
-</div>
-            </div>
-            
-          </div>
+          <app-listing-card
+            *ngFor="let prop of listings"
+            [listing]="prop"
+            [showAvailabilityBadge]="true"
+            [priceUnit]="'/mo'"
+            [locationIcon]="'location_on'"
+            [availabilityLabel]="'Owner Verified'"
+            (view)="viewDetails($event.id)"
+            (call)="handleCardContactAction($event, 'call')"
+            (whatsapp)="handleCardContactAction($event, 'whatsapp')"
+            (save)="toggleSavedListing($event)">
+          </app-listing-card>
         </div>
 
-<div class="pagination" *ngIf="totalPages > 1 && !isLoading">
-  
-  <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'left')">
-    <mat-icon>chevron_left</mat-icon>
-  </button>
-  
-  <div class="pagination-scroll" #scrollContainer (wheel)="onScroll($event, scrollContainer)">
-    <ng-container *ngFor="let p of pagesArray">
-      <button class="page-btn" [class.active]="p === currentPage" (click)="changePage(+p)">
-        {{ +p + 1 }}
-      </button>
-    </ng-container>
-  </div>
-  
-  <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'right')">
-    <mat-icon>chevron_right</mat-icon>
-  </button>
+        <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+          <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'left')">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <div class="pagination-scroll" #scrollContainer (wheel)="onScroll($event, scrollContainer)">
+            <ng-container *ngFor="let p of pagesArray">
+              <button class="page-btn" [class.active]="p === currentPage" (click)="changePage(+p)">
+                {{ +p + 1 }}
+              </button>
+            </ng-container>
+          </div>
+          
+          <button class="page-btn nav-btn" (click)="scrollPagination(scrollContainer, 'right')">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
 
-</div>
       </section>
     </div>
   </main>
 </div>
 
-<!-- Add this at the very bottom of your explore html -->
 <app-safety-consent-bottom-sheet
   [isOpen]="isConsentModalOpen()"
   [pendingAction]="pendingAction()"

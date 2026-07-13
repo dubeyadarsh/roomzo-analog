@@ -1,0 +1,57 @@
+<article class="elegant-card" [attr.data-card-id]="listing?.id" (click)="onViewDetails()">
+  
+  <!-- === 1. Clean Media Wrapper === -->
+  <div class="card-media">
+    <img [src]="getImageUrl()" [alt]="getTitle() + ' for rent on Roomzo'" loading="lazy" decoding="async">
+    
+    <!-- Premium Glassmorphism Verified Badge -->
+    <div class="glass-badge top-left" *ngIf="showAvailabilityBadge">
+      <mat-icon>gpp_good</mat-icon> {{ getBadgeLabel() }}
+    </div>
+
+    <!-- Elegant Floating Heart -->
+    <button class="favorite-ring" type="button" aria-label="Save property" (click)="onSaveClick($event); $event.stopPropagation()">
+      <mat-icon [class.is-saved]="isSaved">{{ isSaved ? 'favorite' : 'favorite_border' }}</mat-icon>
+    </button>
+  </div>
+
+  <!-- === 2. Structured Content === -->
+  <div class="card-body">
+    
+    <!-- Price & Date Hierarchy -->
+    <div class="price-header">
+      <div class="price-block">
+        <span class="price-value">{{ formatPrice(getPrice()) }}</span>
+        <span class="price-unit" *ngIf="priceUnit">{{ priceUnit }}</span>
+      </div>
+      <span class="post-date" *ngIf="showPostedDate">{{ formatPostedDate(getPostedDate()) }}</span>
+    </div>
+
+    <!-- Title & Location -->
+<h3 class="property-title" [title]="getTitle()">{{ getTitle() }}</h3>
+<p class="property-location" [title]="getLocation()">
+  <mat-icon>location_on</mat-icon> {{ getLocation() }}
+</p>
+
+    <!-- Minimalist Specs -->
+    <div class="specs-ribbon" *ngIf="showSpecs">
+      <div class="spec-item"><mat-icon>bed</mat-icon> <span>{{ getBeds() }} Bed</span></div>
+      <div class="spec-divider"></div>
+      <div class="spec-item"><mat-icon>bathtub</mat-icon> <span>{{ getBaths() }} Bath</span></div>
+      <div class="spec-divider"></div>
+      <div class="spec-item"><mat-icon>square_foot</mat-icon> <span>{{ getArea() | number }} sqft</span></div>
+    </div>
+
+    <!-- Modern Action Footer -->
+    <div class="card-footer" *ngIf="showActions">
+      <button class="modern-btn call-btn" type="button" (click)="onCallClick($event); $event.stopPropagation()">
+        <mat-icon>call</mat-icon>
+      </button>
+
+      <button class="modern-btn whatsapp-btn" type="button" (click)="onWhatsAppClick($event); $event.stopPropagation()">
+        <mat-icon>chat</mat-icon> WhatsApp
+      </button>
+    </div>
+
+  </div>
+</article>

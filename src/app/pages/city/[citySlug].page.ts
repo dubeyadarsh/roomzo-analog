@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID, signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Inject, PLATFORM_ID, signal, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser, Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,6 +21,9 @@ import {
   getListingImageUrl,
   optimizeImageUrl,
 } from '../../utils/image-seo.util';
+
+// Import the JSON data for city zones
+import cityZonesData from '../../../../public/data/city-zones.json';
 
 @Component({
   selector: 'app-city-listings',
@@ -49,6 +52,18 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   pageSize = 12;
   totalPages = 0;
   totalItems = 0;
+  isFilterMenuOpen: boolean = false;
+  // --- NEW: Filter State Variables ---
+  selectedZone: string | null = null;
+  cityZones: any[] = [];
+  
+  selectedPropertyType: string | null = null;
+  propertyTypes = [
+    { label: 'All Spaces', value: null, icon: 'apps' },
+    { label: 'Flats', value: 'Flat', icon: 'apartment' },
+    { label: 'PGs', value: 'PG', icon: 'group' },
+    { label: 'Rooms', value: 'Room', icon: 'meeting_room' }
+  ];
 
   userHasGivenConsent = signal(false);
   isConsentModalOpen = signal(false);
@@ -91,9 +106,34 @@ export default class CityListingsPage implements OnInit, OnDestroy {
       ];
 
       this.applyCitySeo();
-      this.listings = [];
-      this.currentPage = 0;
-      this.loadCityData();
+      
+      // Load zones for the current city and reset filters
+      this.loadCityZones(this.city);
+      
+      // 2. Now listen to query params to set the active zone safely
+      this.route.queryParams.subscribe(queryParams => {
+        const requestedZone = queryParams['zone'];
+        
+        if (requestedZone && this.cityZones && this.cityZones.length > 0) {
+          // Find if the requested zone actually exists in THIS city's array (case-insensitive)
+          const matchedZone = this.cityZones.find(z => 
+            z.name.toLowerCase() === requestedZone.toLowerCase()
+          );
+          
+          // If found, select it. If not, default to null (All Spaces)
+          this.selectedZone = matchedZone ? matchedZone.name : null;
+        } else {
+          // No zone parameter passed, default to All Spaces
+          this.selectedZone = null;
+        }
+
+        this.selectedPropertyType = null;
+        this.listings = [];
+        this.currentPage = 0;
+        this.loadCityData();
+      });
+
+   
     });
 
     this.checkReturnFromLogin();
@@ -101,6 +141,31 @@ export default class CityListingsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.seo.removeJsonLd();
+  }
+
+  // --- NEW: Load Zones from JSON ---
+  private loadCityZones(cityName: string) {
+    const allZones: any = cityZonesData; 
+    this.cityZones = allZones[cityName] || [];
+  }
+
+  // --- NEW: Filter Actions ---
+  selectZone(zoneName: string | null) {
+    if (this.selectedZone === zoneName) return; // Prevent duplicate calls
+    this.selectedZone = zoneName;
+    this.resetAndLoadData();
+  }
+
+  selectPropertyType(typeValue: string | null) {
+    if (this.selectedPropertyType === typeValue) return; // Prevent duplicate calls
+    this.selectedPropertyType = typeValue;
+    this.resetAndLoadData();
+  }
+
+  private resetAndLoadData() {
+    this.currentPage = 0;
+    this.listings = [];
+    this.loadCityData();
   }
 
   private applyCitySeo(): void {
@@ -134,6 +199,7 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     ]);
   }
 
+  // --- UPDATED: Pass Filters to Service ---
   loadCityData(isLoadMore = false): void {
     if (isLoadMore) {
       this.isLoadingMore = true;
@@ -143,7 +209,15 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     this.cd.detectChanges();
 
     this.propertyService
-      .exploreByExactCity(this.city, this.state, this.sortBy, this.currentPage, this.pageSize)
+      .exploreByExactCity(
+        this.city, 
+        this.state, 
+        this.selectedZone, 
+        this.selectedPropertyType, 
+        this.sortBy, 
+        this.currentPage, 
+        this.pageSize
+      )
       .subscribe({
         next: (response: any) => {
           if (response?.listings) {
@@ -176,7 +250,13 @@ export default class CityListingsPage implements OnInit, OnDestroy {
       this.loadCityData(true);
     }
   }
-
+toggleMobileFilters(event: Event): void {
+    event?.preventDefault(); // Stop default button behavior
+    event?.stopPropagation(); // Prevent the body click listener from catching this
+    
+    this.isFilterMenuOpen = !this.isFilterMenuOpen;
+    this.cd.detectChanges(); // CRITICAL: Forces Angular to update the UI instantly
+  }
   toggleSortMenu(event?: Event) {
     event?.preventDefault();
     event?.stopPropagation();
@@ -189,9 +269,7 @@ export default class CityListingsPage implements OnInit, OnDestroy {
     event?.stopPropagation();
     this.sortBy = newSort;
     this.isSortMenuOpen = false;
-    this.currentPage = 0;
-    this.listings = [];
-    this.loadCityData();
+    this.resetAndLoadData();
   }
 
   getSortLabel(): string {
@@ -370,5 +448,14 @@ export default class CityListingsPage implements OnInit, OnDestroy {
 
   isOwnerLoggedIn(): boolean {
     return this.isUserLoggedIn();
+  }
+
+  // --- NEW: Global click listener to close menus ---
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    if (this.isSortMenuOpen) {
+      this.isSortMenuOpen = false;
+      this.cd.detectChanges();
+    }
   }
 }

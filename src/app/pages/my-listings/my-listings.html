@@ -10,12 +10,21 @@
         </button>
     </header>
 
+    <div class="tab-switcher" role="tablist" aria-label="Profile sections">
+      <button class="tab-btn" [class.active]="activeTab === 'my-properties'" (click)="switchTab('my-properties')">
+        <mat-icon>real_estate_agent</mat-icon> My Properties
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'favorites'" (click)="switchTab('favorites')">
+        <mat-icon>favorite</mat-icon> Favorites
+      </button>
+    </div>
+
     <div class="loading-state" *ngIf="isLoading">
         <div class="modern-spinner"></div>
         <p>Loading your portfolio...</p>
     </div>
 
-    <div class="empty-state" *ngIf="!isLoading && listings.length === 0">
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length === 0">
         <div class="empty-icon-circle">
             <mat-icon>holiday_village</mat-icon>
         </div>
@@ -24,7 +33,15 @@
         <button class="btn-primary mt-4" routerLink="/list">List Your Property</button>
     </div>
 
-    <div class="listings-grid" *ngIf="!isLoading && listings.length > 0">
+    <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length === 0">
+      <div class="empty-icon-circle">
+        <mat-icon>favorite_border</mat-icon>
+      </div>
+      <h3>No favorites saved yet</h3>
+      <p>Save properties you like and they will appear here for quick access.</p>
+    </div>
+
+    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'my-properties' && listings.length > 0">
 
         <div class="property-card" *ngFor="let prop of listings">
 
@@ -91,5 +108,44 @@
 
         </div>
 
+    </div>
+
+    <div class="listings-grid" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length > 0">
+        <div class="property-card" *ngFor="let prop of favoriteListings">
+            <div class="card-image" [routerLink]="['/room', prop.id]" style="cursor: pointer;">
+                <img [src]="(prop.photos && prop.photos.length > 0) ? (prop.photos[0].photoUrl || prop.photos[0].url) : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80'" alt="Saved home">
+                <div class="posted-date-badge">
+                    <mat-icon>schedule</mat-icon> {{ formatPostedDate(prop.dateCreated) }}
+                </div>
+            </div>
+
+            <div class="card-content">
+                <div class="header-row">
+                    <h3>{{ prop.propertyName || prop.propertyType || 'Saved property' }}</h3>
+                    <span class="price">{{ formatPrice(prop.rentAmount || 0) }}</span>
+                </div>
+
+                <p class="location">
+                    <mat-icon>location_on</mat-icon> {{ prop.city || prop.state ? (prop.city + ', ' + prop.state) : 'Location available' }}
+                </p>
+
+                <div class="stats-row">
+                    <span><mat-icon>bed</mat-icon> {{ prop.bedrooms || 0 }} Bed</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>square_foot</mat-icon> {{ prop.propertySize || 0 }} SqFt</span>
+                    <span class="divider"></span>
+                    <span><mat-icon>home</mat-icon> {{ prop.propertyType || 'Property' }}</span>
+                </div>
+
+                <div class="action-row">
+                    <span class="favorite-pill">
+                        <mat-icon>favorite</mat-icon> Saved
+                    </span>
+                    <a [routerLink]="['/room', prop.id]" class="btn-icon" title="View Property">
+                        <mat-icon>visibility</mat-icon>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -52,11 +52,16 @@
         </ng-container>
       </div>
 
-      <!-- Mobile Chat Button -->
-      <button *ngIf="isLoggedIn" class="mobile-chat-btn mobile-only" (click)="openChatDrawer()">
-        <mat-icon>chat_bubble_outline</mat-icon>
-        <span class="unread-badge" *ngIf="hasUnreadMessages"></span>
-      </button>
+      <ng-container *ngIf="isLoggedIn">
+        <button class="mobile-chat-btn mobile-only" (click)="openFavorites()" type="button" aria-label="Open favorites">
+          <mat-icon>favorite</mat-icon>
+        </button>
+
+        <!-- <button class="mobile-chat-btn mobile-only" (click)="openChatDrawer()" type="button" aria-label="Open chat">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <span class="unread-badge" *ngIf="hasUnreadMessages"></span>
+        </button> -->
+      </ng-container>
     </div>
   </div>
 </header>
@@ -76,6 +81,7 @@
     <button class="fab-button" (click)="togglePostMenu()" [class.fab-active]="isPostMenuOpen">
       <mat-icon>{{ isPostMenuOpen ? 'close' : 'add' }}</mat-icon>
     </button>
+    <span class="free-badge" *ngIf="!isPostMenuOpen">Free</span>
     <span>Post</span>
 
     <div class="speed-dial-wrapper" *ngIf="isPostMenuOpen">

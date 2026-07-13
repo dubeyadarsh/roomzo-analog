@@ -44,7 +44,7 @@ export const ROOMZO_CITIES: RoomzoCity[] = [
     name: 'Lucknow',
     state: 'Uttar Pradesh',
     slug: 'lucknow',
-    active: false,
+    active: true,
     heroImage: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1600&q=80',
     localKeywords: ['gomti nagar flat', 'hazratganj room', 'alambagh pg'],
   },

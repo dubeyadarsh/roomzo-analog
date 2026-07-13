@@ -121,7 +121,10 @@ ngOnDestroy() {
     }
     this.router.navigate(['/post-flatmate']); 
   }
-
+  openFavorites() {
+    this.closeMenu();
+    this.router.navigate(['/my-listings'], { queryParams: { tab: 'favorites' } });
+  }
  openChatDrawer() {
     console.log("💬 Header Chat Button Clicked!");
     this.hasUnreadMessages = false; // ✅ 5. Clear the red dot when they open chats

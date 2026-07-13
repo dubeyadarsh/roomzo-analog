@@ -28,8 +28,8 @@ export class RelatedSearchesComponent {
         // Top 10 Target Pages
         { label: 'Rooms for Rent in Prayagraj', routerLink: '/city/prayagraj' },
         { label: 'Room for Rent in Allahabad', routerLink: '/city/prayagraj' },
-        { label: 'PG in Prayagraj', routerLink: '/category/pg-for-rent' },
-        { label: 'Flats for Rent in Prayagraj', routerLink: '/category/flats-for-rent' },
+        { label: 'PG in Prayagraj', routerLink: '/explore-listing?city=Prayagraj&state=Uttar%20Pradesh&lat=25.4381302&lng=81.8338005&propertyType=PG&maxPrice=50000' },
+        { label: 'Flats for Rent in Prayagraj', routerLink: '/explore-listing?city=Prayagraj&state=Uttar%20Pradesh&lat=25.4381302&lng=81.8338005&propertyType=Flat&maxPrice=50000' },
         { label: 'Boys PG in Prayagraj', routerLink: '/category/pg-for-rent' },
         { label: 'Girls PG in Prayagraj', routerLink: '/category/pg-for-rent' },
         { label: 'Rooms Near Allahabad University', routerLink: '/city/prayagraj' },
@@ -72,12 +72,12 @@ export class RelatedSearchesComponent {
     // --- 3. GLOBAL / DEFAULT TARGETING (No city selected) ---
     return [
       { label: 'Room for Rent in Allahabad', routerLink: '/city/prayagraj' }, // Injecting top priority
-      { label: 'Rooms for rent without broker', routerLink: '/category/rooms-for-rent' },
-      { label: 'PG & Hostels for Students', routerLink: '/category/student-housing' },
-      { label: 'Flats for Rent in India', routerLink: '/category/flats-for-rent' },
-      { label: 'No Brokerage Rooms', routerLink: '/category/brokerless-property' },
+      { label: 'Rooms for rent without broker', routerLink: '/explore-listing' },
+      { label: 'PG & Hostels for Students', routerLink: '/explore-listing?propertyType=PG&maxPrice=50000' },
+      { label: 'Flats for Rent in India', routerLink: '/explore-listing?propertyType=Flat&maxPrice=50000' },
+      { label: 'No Brokerage Rooms', routerLink: '/explore-listing?propertyType=Room&maxPrice=50000' },
       { label: 'Find Flatmates', routerLink: '/flatmates' },
-      { label: 'Rooms Near Universities', routerLink: '/category/student-housing' },
+      { label: 'Rooms Near Universities', routerLink: '/explore-listing?propertyType=Room&maxPrice=50000' },
     ];
   }
 

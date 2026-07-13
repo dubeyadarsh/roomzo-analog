@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PropertyService } from '../../services/property.service';
+import { ActivityService } from '../../services/activity.service';
 import { Subscription, switchMap, tap } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
@@ -78,6 +79,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private propertyService: PropertyService,
+    private activityService: ActivityService,
     private cd: ChangeDetectorRef,
     private sanitizer: DomSanitizer,
     private toastr: ToastrService,
@@ -120,7 +122,14 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response.status === 1 && response.data) {
           this.property = response.data;
-          
+
+          this.activityService.logPropertyView(this.property.id, {
+            ownerId: this.property.ownerId,
+            city: this.property.city,
+            state: this.property.state,
+            zone: this.property.zone
+          });
+
           this.ownerName = response.ownerName || 'Property Owner';
           if (this.property.guidebook && Array.isArray(this.property.guidebook.rules)) {
             this.property.guidebook.rules = this.property.guidebook.rules.filter(
@@ -199,6 +208,11 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   // Triggered via Desktop Sidebar
   contactAgent() {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      if (this.property?.id) {
+        this.activityService.logPropertyContact(this.property.id, 'modal', {
+          ownerId: this.property.ownerId
+        });
+      }
       const actionPayload = { actionType: 'contactOwnerModal' };
       
       this.checkAndExecuteConsent(actionPayload, () => {
@@ -213,6 +227,11 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
   // Triggered via Mobile Bottom Bar
   handleContactAction(actionType: 'call' | 'whatsapp') {
     if (this.isUserLoggedIn() || this.isOwnerLoggedIn()) {
+      if (this.property?.id) {
+        this.activityService.logPropertyContact(this.property.id, actionType, {
+          ownerId: this.property.ownerId
+        });
+      }
       if (this.ownerDetails.propertyPhone || this.ownerDetails.ownerPhone) {
         this.executeContactAction(actionType);
       } else {
@@ -449,6 +468,11 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
   shareProperty() {
     if (this.isBrowser && navigator.clipboard) {
+      if (this.property?.id) {
+        this.activityService.logPropertyShare(this.property.id, {
+          ownerId: this.property.ownerId
+        });
+      }
       const currentUrl = window.location.href;
       if (navigator.share) {
         navigator.share({

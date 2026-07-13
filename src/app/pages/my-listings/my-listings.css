@@ -146,6 +146,45 @@ h1, h2, h3, h4, p { margin: 0; }
 .btn-icon:hover { background: #f8fafc; color: var(--rz-primary); border-color: var(--rz-primary); transform: translateY(-2px); }
 .btn-icon.edit { color: var(--rz-primary); border-color: rgba(25, 97, 83, 0.2); background: rgba(25, 97, 83, 0.05); }
 .btn-icon.edit:hover { background: var(--rz-primary); color: white; }
+/* --- 4.5 Profile Tabs --- */
+.tab-switcher {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  border: 1px solid var(--rz-border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: white;
+  color: var(--rz-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  background: var(--rz-primary);
+  color: white;
+  border-color: var(--rz-primary);
+}
+.favorite-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ef4444;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.favorite-pill mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
 /* --- 5. Empty & Loading States --- */
 .loading-state, .empty-state { 
   display: flex; flex-direction: column; align-items: center; justify-content: center; 

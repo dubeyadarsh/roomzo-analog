@@ -1,43 +1,44 @@
 <div class="page-wrapper">
 
+  <!-- === 1. HEADER (Filter & Sort Side-by-Side on Mobile) === -->
   <nav class="glass-header">
     <div class="header-container">
       <button class="header-action-ring" (click)="goBack()" aria-label="Go back">
         <mat-icon>arrow_back</mat-icon>
       </button>
       
-      <div class="header-typography">
-        <h2>Explore {{ city }}</h2>
-      </div>
+  
       
-      <div class="sort-action-container">
-        <button class="sort-trigger-pill" [class.menu-active]="isSortMenuOpen" (click)="toggleSortMenu($event)" aria-label="Sort listings">
-          <span class="sort-label-text">{{ getSortLabel() }}</span>
-          <mat-icon>sort</mat-icon>
+      <div class="header-actions-group">
+        <!-- Filter Trigger -->
+        <button class="mobile-filter-trigger" (click)="toggleMobileFilters($event)" aria-label="Open Filters">
+          <mat-icon>tune</mat-icon>
         </button>
-        
-        <div class="premium-sort-dropdown" *ngIf="isSortMenuOpen">
-          <div class="dropdown-option" [class.selected]="sortBy === 'latest'" (click)="applySort('latest', $event)">
-            <span>Newest First</span>
-            <mat-icon *ngIf="sortBy === 'latest'">check</mat-icon>
-          </div>
-          <div class="dropdown-option" [class.selected]="sortBy === 'oldest'" (click)="applySort('oldest', $event)">
-            <span>Oldest First</span>
-            <mat-icon *ngIf="sortBy === 'oldest'">check</mat-icon>
-          </div>
-          <div class="dropdown-option" [class.selected]="sortBy === 'price_low'" (click)="applySort('price_low', $event)">
-            <span>Price: Low to High</span>
-            <mat-icon *ngIf="sortBy === 'price_low'">check</mat-icon>
-          </div>
-          <div class="dropdown-option" [class.selected]="sortBy === 'price_high'" (click)="applySort('price_high', $event)">
-            <span>Price: High to Low</span>
-            <mat-icon *ngIf="sortBy === 'price_high'">check</mat-icon>
+
+        <!-- Sort Trigger & Dropdown -->
+        <div class="sort-action-container">
+          <button class="sort-trigger-pill" [class.menu-active]="isSortMenuOpen" (click)="toggleSortMenu($event)">
+            <span class="sort-label-text">{{ getSortLabel() }}</span>
+            <mat-icon>sort</mat-icon>
+          </button>
+          
+          <div class="premium-sort-dropdown" *ngIf="isSortMenuOpen">
+            <div class="dropdown-option" [class.selected]="sortBy === 'latest'" (click)="applySort('latest', $event)">
+              <span>Newest First</span><mat-icon *ngIf="sortBy === 'latest'">check</mat-icon>
+            </div>
+            <div class="dropdown-option" [class.selected]="sortBy === 'price_low'" (click)="applySort('price_low', $event)">
+              <span>Price: Low to High</span><mat-icon *ngIf="sortBy === 'price_low'">check</mat-icon>
+            </div>
+            <div class="dropdown-option" [class.selected]="sortBy === 'price_high'" (click)="applySort('price_high', $event)">
+              <span>Price: High to Low</span><mat-icon *ngIf="sortBy === 'price_high'">check</mat-icon>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </nav>
 
+  <!-- === 2. HERO BANNER === -->
   <div class="city-hero-banner" [style.backgroundImage]="'url(' + getCityHeaderImage() + ')'">
     <div class="banner-gradient-shading"></div>
     <div class="banner-text-block container">
@@ -47,48 +48,72 @@
     </div>
   </div>
 
+  <!-- === 3. MAIN FEED === -->
   <main class="feed-layout-area">
     <div class="container">
+      
+      <!-- Breadcrumbs -->
       <app-seo-breadcrumb *ngIf="breadcrumbItems?.length" [items]="breadcrumbItems"></app-seo-breadcrumb>
       
+      <!-- Popular Locations (Inline directly below breadcrumbs) -->
+      <div class="zones-carousel-container" *ngIf="cityZones && cityZones.length > 0">
+        <h3 class="filter-section-title">Popular in {{ city }}</h3>
+        <div class="zones-carousel">
+          <div class="zone-pill" [class.active]="selectedZone === null" (click)="selectZone(null)">
+            <div class="zone-monogram all-icon-wrapper"><mat-icon>public</mat-icon></div>
+            <span class="zone-name">All {{ city }}</span>
+          </div>
+          <div class="zone-pill" *ngFor="let z of cityZones" [class.active]="selectedZone === z.name" (click)="selectZone(z.name)">
+            <div class="zone-monogram text-monogram">{{ z.name.charAt(0) | uppercase }}</div>
+            <span class="zone-name">{{ z.name }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Property Type Filters (Becomes a Bottom Sheet on Mobile) -->
+      <div class="city-exploration-filters" [class.mobile-open]="isFilterMenuOpen">
+        <h3 class="filter-section-title">Property Type</h3>
+        <div class="property-type-pills">
+          <button class="type-pill" *ngFor="let pt of propertyTypes" [class.active]="selectedPropertyType === pt.value" (click)="selectPropertyType(pt.value)">
+            <mat-icon>{{ pt.icon }}</mat-icon>
+            {{ pt.label }}
+          </button>
+        </div>
+        <button class="mobile-close-filters-btn" *ngIf="isFilterMenuOpen" (click)="toggleMobileFilters($event)">
+          Apply Filters
+        </button>
+      </div>
+
+      <!-- Loader State -->
       <div class="feed-loader-box" *ngIf="isLoading">
         <div class="premium-pulse-spinner"></div>
         <p>Curating exceptional spaces...</p>
       </div>
 
+      <!-- Empty State -->
       <div class="premium-empty-state" *ngIf="!isLoading && listings.length === 0">
         <div class="empty-vector-circle">
           <mat-icon>night_shelter</mat-icon>
         </div>
         <h3>No spaces found yet</h3>
-        <p>We're currently onboarding verified listings in {{ city }}. Check back soon!</p>
+        <p>We're currently onboarding verified listings in {{ city }} matching these filters. Check back soon!</p>
       </div>
 
+      <!-- Listings Grid -->
       <div class="listings-grid-layout" *ngIf="!isLoading && listings.length > 0">
-        
         <article class="refined-property-card" *ngFor="let prop of listings">
           <div class="media-frame" (click)="viewDetails(prop.id)">
-            <img
-              [src]="optimizeImageUrl(getListingImageUrl(prop.photos))"
-              [alt]="generatePropertyAltText(prop)"
-              loading="lazy"
-              decoding="async"
-              width="400"
-              height="300"
-            />
-            
+            <img [src]="optimizeImageUrl(getListingImageUrl(prop.photos))" [alt]="generatePropertyAltText(prop)" loading="lazy" decoding="async" width="400" height="300" />
             <div class="floating-badge-cluster">
               <span class="feed-status-badge" [class.badge-rented]="prop.isRented === 1">
                 <mat-icon>{{ prop.isRented === 1 ? 'gpp_maybe' : 'verified' }}</mat-icon>
                 {{ prop.isRented === 1 ? 'Rented' : 'Verified Available' }}
               </span>
             </div>
-
             <div class="media-age-chip">
               <mat-icon>schedule</mat-icon>
               <span>{{ formatPostedDate(prop.createdOn) }}</span>
             </div>
-            
             <div class="media-price-overlay">
               <span class="currency-symbol">₹</span>
               <span class="price-digits">{{ prop.rentAmount ? prop.rentAmount.toLocaleString('en-IN') : '0' }}</span>
@@ -122,23 +147,15 @@
             </div>
 
            <div class="action-buttons-container">
-  <button class="contact-btn" (click)="handleCardContactAction(prop, 'call')">
-    <mat-icon>call</mat-icon> Call
-  </button>
-  
-  <button class="contact-btn wa-btn" (click)="handleCardContactAction(prop, 'whatsapp')">
-    <mat-icon>chat</mat-icon> WhatsApp
-  </button>
-  
-  <button class="view-btn" (click)="viewDetails(prop.id)">
-    <mat-icon>info</mat-icon> View
-  </button>
-</div>
+             <button class="contact-btn" (click)="handleCardContactAction(prop, 'call')"><mat-icon>call</mat-icon> Call</button>
+             <button class="contact-btn wa-btn" (click)="handleCardContactAction(prop, 'whatsapp')"><mat-icon>chat</mat-icon> WhatsApp</button>
+             <button class="view-btn" (click)="viewDetails(prop.id)"><mat-icon>info</mat-icon> View</button>
+           </div>
           </div>
         </article>
-
       </div>
 
+      <!-- Pagination -->
       <div class="feed-pagination-trigger-area" *ngIf="currentPage < totalPages - 1 && !isLoading">
         <button class="premium-load-more-action" (click)="loadMore()" [disabled]="isLoadingMore">
           <span *ngIf="!isLoadingMore">Load More Spaces</span>
@@ -152,7 +169,9 @@
   </main>
 </div>
 
+<!-- Overlays & Modals -->
 <div class="dropdown-backdrop-shield" *ngIf="isSortMenuOpen" (click)="isSortMenuOpen = false"></div>
+<div class="dropdown-backdrop-shield" *ngIf="isFilterMenuOpen" (click)="toggleMobileFilters($event)" style="z-index: 1050; background: rgba(15, 23, 42, 0.4);"></div>
 
 <app-safety-consent-bottom-sheet
   [isOpen]="isConsentModalOpen()"

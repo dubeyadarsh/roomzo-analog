@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { PropertyService } from '../../services/property.service';
@@ -55,26 +55,83 @@ export class ConfirmDeleteDialogComponent {}
 export default class MyListingsComponent implements OnInit {
 
   listings: any[] = [];
+  favoriteListings: any[] = [];
   isLoading = true; 
   ownerId: number | null = null;
+  activeTab: 'my-properties' | 'favorites' = 'my-properties';
 
   constructor(
     private propertyService: PropertyService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastr: ToastrService,
     private cd: ChangeDetectorRef,
     private dialog: MatDialog // NEW: Inject MatDialog
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      if (tab === 'favorites') {
+        this.activeTab = 'favorites';
+      }
+    });
+
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null'); 
     if (storedUser && storedUser.id) {
       this.ownerId = parseInt(storedUser.id, 10);
       this.loadMyListings();
+      this.loadFavoriteListings();
     } else {
       this.toastr.error('User not logged in');
       this.isLoading = false; 
     }
+  }
+
+  normalizeFavoriteListing(item: any): any {
+    const property = item?.property ?? item?.listing ?? item;
+
+    return {
+      ...property,
+      _favoriteMeta: item,
+      id: property?.id ?? item?.propertyId ?? item?.listingId ?? item?.id,
+      propertyName: property?.propertyName ?? property?.title ?? property?.name,
+      rentAmount: property?.rentAmount ?? property?.price ?? property?.monthlyRent,
+      bedrooms: property?.bedrooms ?? property?.bedCount,
+      propertySize: property?.propertySize ?? property?.area,
+      city: property?.city ?? property?.location?.city,
+      state: property?.state ?? property?.location?.state,
+      photos: property?.photos ?? property?.images ?? [],
+      dateCreated: property?.dateCreated ?? property?.createdOn ?? property?.postedDate,
+      propertyType: property?.propertyType ?? property?.type,
+    };
+  }
+
+  loadFavoriteListings(): void {
+    this.propertyService.getFavoriteProperties().subscribe({
+      next: (res: any) => {
+        const payload = res?.data ?? res?.favorites ?? res?.items ?? res ?? [];
+        const favorites = Array.isArray(payload) ? payload : payload?.listings ?? payload?.properties ?? [];
+
+        this.favoriteListings = favorites
+          .map((item: any) => this.normalizeFavoriteListing(item))
+          .filter((item: any) => item && item.id);
+
+        if (!this.favoriteListings.length && this.propertyService.getFavoritePropertyIds().length) {
+          this.favoriteListings = this.propertyService.getFavoritePropertyIds().map((id: string) => ({ id, propertyName: 'Saved property', rentAmount: 0, city: '', state: '', photos: [], propertyType: 'Property' }));
+        }
+
+        this.cd.detectChanges();
+      },
+      error: () => {
+        this.favoriteListings = [];
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  switchTab(tab: 'my-properties' | 'favorites'): void {
+    this.activeTab = tab;
   }
 
   loadMyListings() {

@@ -85,54 +85,17 @@
       </button>
 
       <div class="listings-grid" #carouselGrid (scroll)="onScroll()">
-        <div class="listing-card" *ngFor="let item of listings; let i = index">
-          
-          <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
-            <img [src]="item.image" [alt]="item.title + ' for rent on Roomzo'" loading="lazy" decoding="async" width="400" height="300">
-            
-            <div class="verified-badge">
-              <mat-icon>check</mat-icon> Owner Verified
-            </div>
-
-            <div class="posted-date-badge">
-              <mat-icon>schedule</mat-icon> {{ formatPostedDate(item.postedDate) }}
-            </div>
-            
-            <div class="price-overlay">
-              <span class="price-amount">{{ formatPrice(item.price) }}</span>
-              <span class="price-month" *ngIf="item.priceUnit">/ {{ item.priceUnit }}</span>
-            </div>
-          </div>
-
-          <div class="card-content" >
-            <h3 (click)="viewDetails(item.id)">{{ item.title }}</h3>
-            
-            <div class="location-text">
-              <mat-icon>fiber_manual_record</mat-icon> {{ item.location }}
-            </div>
-
-            <div class="specs-row">
-              <span><mat-icon>bed</mat-icon> {{ item.specs.beds }} Bed</span>
-              <span><mat-icon>bathtub</mat-icon> {{ item.specs.baths }} Bath</span>
-              <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
-            </div>
-
-               <div class="action-buttons-container">
-  <button class="contact-btn" (click)="handleCardContactAction(item, 'call')">
-    <mat-icon>call</mat-icon> Call
-  </button>
-  
-  <button class="contact-btn wa-btn" (click)="handleCardContactAction(item, 'whatsapp')">
-    <mat-icon>whatsapp</mat-icon> WhatsApp
-  </button>
-  
-  <button class="view-btn" (click)="viewDetails(item.id)">
-    <mat-icon>info</mat-icon> View
-  </button>
-</div>
-
-          </div>
-        </div>
+        <app-listing-card
+          *ngFor="let item of listings; let i = index"
+          [listing]="item"
+          [availabilityLabel]="'Owner Verified'"
+          [locationIcon]="'fiber_manual_record'"
+          [showPostedDate]="true"
+          (view)="viewDetails($event.id)"
+          (call)="handleCardContactAction($event, 'call')"
+          (whatsapp)="handleCardContactAction($event, 'whatsapp')"
+          (save)="toggleSavedListing($event)">
+        </app-listing-card>
       </div>
 
       <button class="carousel-nav carousel-next" (click)="scrollRight()" [disabled]="isAtEnd" [attr.aria-label]="'Next listings'">
@@ -163,53 +126,17 @@
       </button>
 
       <div class="listings-grid" #nearbyCarouselGrid (scroll)="onNearbyScroll()">
-        <div class="listing-card" *ngFor="let item of nearbyListings">
-          
-          <div class="card-image" (click)="viewDetails(item.id)" style="cursor: pointer;">
-            <img [src]="item.image" [alt]="item.title + ' for rent on Roomzo'" loading="lazy" decoding="async" width="400" height="300">
-            
-            <div class="verified-badge">
-              <mat-icon>check</mat-icon> Owner Verified
-            </div>
-
-            <div class="posted-date-badge">
-              <mat-icon>schedule</mat-icon> {{ formatPostedDate(item.postedDate) }}
-            </div>
-            
-            <div class="price-overlay">
-              <span class="price-amount">{{ formatPrice(item.price) }}</span>
-              <span class="price-month" *ngIf="item.priceUnit">/ {{ item.priceUnit }}</span>
-            </div>
-          </div>
-
-          <div class="card-content" >
-            <h3 (click)="viewDetails(item.id)">{{ item.title }}</h3>
-            
-            <div class="location-text">
-              <mat-icon>location_on</mat-icon> {{ item.location }}
-            </div>
-
-            <div class="specs-row">
-              <span><mat-icon>bed</mat-icon> {{ item.specs.beds }} Bed</span>
-              <span><mat-icon>bathtub</mat-icon> {{ item.specs.baths }} Bath</span>
-              <span><mat-icon>square_foot</mat-icon> {{ item.specs.area | number }} sqft</span>
-            </div>
-
-          <div class="action-buttons-container">
-  <button class="contact-btn" (click)="handleCardContactAction(item, 'call')">
-    <mat-icon>call</mat-icon> Call
-  </button>
-  
-  <button class="contact-btn wa-btn" (click)="handleCardContactAction(item, 'whatsapp')">
-    <mat-icon>chat</mat-icon> WhatsApp
-  </button>
-  
-  <button class="view-btn" (click)="viewDetails(item.id)">
-    <mat-icon>info</mat-icon> View
-  </button>
-</div>
-          </div>
-        </div>
+        <app-listing-card
+          *ngFor="let item of nearbyListings"
+          [listing]="item"
+          [availabilityLabel]="'Owner Verified'"
+          [locationIcon]="'location_on'"
+          [showPostedDate]="true"
+          (view)="viewDetails($event.id)"
+          (call)="handleCardContactAction($event, 'call')"
+          (whatsapp)="handleCardContactAction($event, 'whatsapp')"
+          (save)="toggleSavedListing($event)">
+        </app-listing-card>
       </div>
 
       <button class="carousel-nav carousel-next" (click)="scrollNearbyRight()" [disabled]="nearbyIsAtEnd" [attr.aria-label]="'Next nearby listings'">

@@ -4,10 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core'; 
-import { ToastrService } from 'ngx-toastr'; // Added for contact error messages
+import { ToastrService } from 'ngx-toastr';
 
 import { HeroComponent } from '../components/hero/hero';
 import { ContactComponent } from '../components/contact/contact';
+import { ListingCardComponent } from '../components/listing-card/listing-card';
 import { PropertyService } from '../services/property.service';
 import { mapBackendListingsToUi } from '../services/Utility';
 import { RouteMeta } from '@analogjs/router';
@@ -49,7 +50,7 @@ interface Listing {
   badge: { text: string; color: 'blue' | 'green' | 'purple' };
   specs: { beds: number; baths: number; area: number };
   rating?: number;
-  isFavorite: boolean;
+  isFavorite?: boolean;
   postedDate?: string; 
   contactNo?: string;     // Added to support contact logic
   tempContactNo?: string; // Added to support contact logic
@@ -59,7 +60,7 @@ interface Listing {
   selector: 'app-home',
   standalone: true,
   // Added SafetyConsentBottomSheetComponent to imports
-  imports: [CommonModule, HeroComponent, MatIconModule, MatButtonModule, ContactComponent, RouterModule, SafetyConsentBottomSheetComponent],
+  imports: [CommonModule, HeroComponent, MatIconModule, MatButtonModule, ContactComponent, RouterModule, SafetyConsentBottomSheetComponent, ListingCardComponent],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
@@ -125,6 +126,7 @@ export default class HomeComponent implements OnInit {
 
     // Added: Check if returning from Login for Call/WhatsApp
     this.checkReturnFromLogin();
+    this.syncFavoriteStateFromStorage();
   }
 
   calculateItemsToShow(): void {
@@ -150,6 +152,7 @@ export default class HomeComponent implements OnInit {
       (response: any) => {
         if (response.listings && response.listings.length > 0) {
           this.listings = mapBackendListingsToUi(response.listings);
+          this.syncFavoriteStateFromStorage();
           this.calculateItemsToShow();
         }
         this.isLoading = false;
@@ -252,6 +255,44 @@ export default class HomeComponent implements OnInit {
     this.router.navigate(['/room', id]);
   }
 
+  toggleSavedListing(item: Listing): void {
+    const isLoggedIn = this.isUserLoggedIn() || this.isOwnerLoggedIn();
+    if (!isLoggedIn) {
+      localStorage.setItem('pendingFavoritePropertyId', String(item.id));
+      const shouldNavigate = window.confirm('Please log in to save this property. Would you like to go to the login page now?');
+      if (shouldNavigate) {
+        this.router.navigate(['/owner-auth'], { queryParams: { returnUrl: this.router.url } });
+      }
+      return;
+    }
+
+    const nextValue = !item.isFavorite;
+    const propertyId = String(item.id);
+
+    item.isFavorite = nextValue;
+
+    const request = nextValue
+      ? this.propertyService.saveFavoriteProperty(propertyId)
+      : this.propertyService.removeFavoriteProperty(propertyId);
+
+    request.subscribe({
+      next: (res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          this.toastr.success(nextValue ? 'Property saved to favorites.' : 'Property removed from favorites.');
+        } else {
+          item.isFavorite = !nextValue;
+          this.toastr.error(res?.message || 'Could not update favorites right now.');
+        }
+        this.cd.detectChanges();
+      },
+      error: () => {
+        item.isFavorite = !nextValue;
+        this.toastr.error('Could not update favorites right now.');
+        this.cd.detectChanges();
+      }
+    });
+  }
+
   scrollToContact(id: number): void {
     this.router.navigate(['/room', id], {
       queryParams: { focusContact: 'true' } 
@@ -272,6 +313,7 @@ export default class HomeComponent implements OnInit {
           (res: any) => {
             if (res.listings && res.listings.length > 0) {
               this.nearbyListings = mapBackendListingsToUi(res.listings);
+              this.syncFavoriteStateFromStorage();
             }
             this.isLoadingNearby = false;
             this.cd.detectChanges();
@@ -324,8 +366,33 @@ export default class HomeComponent implements OnInit {
   // --- SAFETY CONSENT & CONTACT LOGIC ---
   // ==========================================
 
+  syncFavoriteStateFromStorage(): void {
+    const favoriteIds = this.propertyService.getFavoritePropertyIds();
+    const favoriteSet = new Set(favoriteIds.map(String));
+
+    this.listings = this.listings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
+    this.nearbyListings = this.nearbyListings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
+    this.cd.detectChanges();
+  }
+
   checkReturnFromLogin() {
     if (isPlatformBrowser(this.platformId) && (this.isUserLoggedIn() || this.isOwnerLoggedIn())) {
+      const pendingFavorite = localStorage.getItem('pendingFavoritePropertyId');
+      if (pendingFavorite) {
+        localStorage.removeItem('pendingFavoritePropertyId');
+        this.propertyService.saveFavoriteProperty(pendingFavorite).subscribe({
+          next: (res: any) => {
+            if (res?.status === 1 || res?.status === '1') {
+              this.toastr.success('Property saved to favorites.');
+              this.syncFavoriteStateFromStorage();
+            }
+          },
+          error: () => {
+            this.toastr.error('Could not save your favorite right now.');
+          }
+        });
+      }
+
       const pending = localStorage.getItem('pendingAction');
       
       if (pending) {

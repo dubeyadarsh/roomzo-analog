@@ -60,8 +60,114 @@ export class PropertyService {
   private storageKey = 'rental_properties';
   private baseUrl = environment.apiUrl;
   private uploadUrl = environment.hostingerUploadUrl + "/upload.php";
+  private favoriteIdsStorageKey = 'roomzo_favorite_ids';
 
   constructor(private http: HttpClient) {}
+
+  getFavoritePropertyIds(): string[] {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return [];
+    }
+
+    const stored = window.localStorage.getItem(this.favoriteIdsStorageKey);
+    if (!stored) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  extractFavoriteIdsFromPayload(payload: any): string[] {
+    const list = payload?.data ?? payload?.favorites ?? payload?.items ?? payload ?? [];
+    const favorites = Array.isArray(list) ? list : list?.listings ?? list?.properties ?? [];
+
+    return favorites
+      .map((item: any) => {
+        const property = item?.property ?? item?.listing ?? item;
+        return property?.id ?? item?.propertyId ?? item?.listingId ?? item?.id;
+      })
+      .filter((id: any) => id != null && id !== '')
+      .map((id: any) => String(id));
+  }
+
+  private setFavoritePropertyIds(ids: string[]): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(this.favoriteIdsStorageKey, JSON.stringify(ids));
+    }
+  }
+
+  saveFavoriteProperty(propertyId: string | number): Observable<any> {
+    const user = this.getStoredUser();
+    if (!user?.id) {
+      return of({ status: 0, message: 'User not logged in' });
+    }
+
+    return this.http.post(`${this.baseUrl}/favourites/save`, {
+      userId: user.id,
+      propertyId
+    }).pipe(
+      tap((res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          console.log("favourites res" ,res);
+          const current = this.getFavoritePropertyIds();
+          const next = Array.from(new Set([...current, String(propertyId)]));
+          this.setFavoritePropertyIds(next);
+        }
+      })
+    );
+  }
+
+  removeFavoriteProperty(propertyId: string | number): Observable<any> {
+    const user = this.getStoredUser();
+    if (!user?.id) {
+      return of({ status: 0, message: 'User not logged in' });
+    }
+
+    return this.http.delete(`${this.baseUrl}/favourites/remove`, {
+      body: { userId: user.id, propertyId }
+    }).pipe(
+      tap((res: any) => {
+        if (res?.status === 1 || res?.status === '1') {
+          const current = this.getFavoritePropertyIds();
+          const next = current.filter((id) => id !== String(propertyId));
+          this.setFavoritePropertyIds(next);
+        }
+      })
+    );
+  }
+
+  getFavoriteProperties(): Observable<any> {
+    const user = this.getStoredUser();
+    if (!user?.id) {
+      return of({ status: 0, message: 'User not logged in', data: [] });
+    }
+
+    return this.http.get(`${this.baseUrl}/favourites/user/${user.id}`).pipe(
+      tap((res: any) => {
+        const ids = this.extractFavoriteIdsFromPayload(res);
+        if (ids.length) {
+          this.setFavoritePropertyIds(ids);
+        }
+      })
+    );
+  }
+
+  private getStoredUser(): any {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(window.localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
+  }
 
  getListings(): PropertyListing[] {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -235,16 +341,17 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
     }
 
    // Add this inside property.service.ts
-  exploreByExactCity(city: string, state: string, sortBy: string, page: number, size: number) {
+ exploreByExactCity(city: string, state: string, zone: string | null, propertyType: string | null, sortBy: string, page: number, size: number) {
     let params = new HttpParams()
       .set('city', city)
-      .set('page', page)
-      .set('size', size)
-      .set('sortBy', sortBy);
-
+      .set('sortBy', sortBy)
+      .set('page', page.toString())
+      .set('size', size.toString());
+      
     if (state) params = params.set('state', state);
-    
-    // Ensure the endpoint matches your ListingController route (e.g., /listings/exploreCity)
+    if (zone) params = params.set('zone', zone);
+    if (propertyType) params = params.set('propertyType', propertyType);
+
     return this.http.get(`${this.baseUrl}/listings/exploreCity`, { params });
   }
 
