@@ -154,7 +154,76 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
 .map-card:hover img { filter: grayscale(0%); transform: scale(1.05); }
 
 .map-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-.map-pin { font-size: 48px; width: 48px; height: 48px; color: var(--rz-primary); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); } /* Changed to Teal */
+.map-pin { font-size: 48px; width: 48px; height: 48px; color: var(--rz-primary); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+
+.service-areas-card {
+  height: auto;
+  min-height: unset;
+  background: linear-gradient(165deg, #f0f7f5 0%, #ffffff 55%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+.service-areas-body {
+  position: relative;
+  z-index: 1;
+  color: var(--rz-text-muted);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+.service-areas-body .map-pin {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  filter: none;
+  color: var(--rz-primary);
+}
+.service-areas-body h3 {
+  margin: 12px 0 8px;
+  color: var(--rz-text-main);
+  font-size: 1.15rem;
+}
+.service-areas-body ul {
+  margin: 8px 0 12px;
+  padding-left: 1.2rem;
+}
+.service-areas-body .service-note {
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+.browse-listings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  align-self: stretch;
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--rz-primary);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: var(--rz-radius-pill);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(25, 97, 83, 0.25);
+}
+.browse-listings-btn:hover {
+  background: var(--rz-primary-hover);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.browse-listings-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #fff;
+}
 
 .directions-btn {
   position: absolute; bottom: 16px; left: 16px;
@@ -195,7 +264,15 @@ input::placeholder, textarea::placeholder { color: #9ca3af; }
   .form-card { padding: 24px; } /* Less padding inside the card on mobile */
   .info-card { padding: 24px; }
   
-  .map-card { height: 200px; } /* Shorter map on mobile */
+  .map-card:not(.service-areas-card) { height: 200px; }
+  .service-areas-card {
+    height: auto;
+    padding: 20px;
+  }
+  .browse-listings-btn {
+    width: 100%;
+    padding: 14px 18px;
+  }
   
   .faq-banner { 
     flex-direction: column; 

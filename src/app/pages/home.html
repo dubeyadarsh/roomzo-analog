@@ -88,7 +88,7 @@
         <app-listing-card
           *ngFor="let item of listings; let i = index"
           [listing]="item"
-          [availabilityLabel]="'Owner Verified'"
+          [availabilityLabel]="'Owner listing'"
           [locationIcon]="'fiber_manual_record'"
           [showPostedDate]="true"
           (view)="viewDetails($event.id)"
@@ -129,7 +129,7 @@
         <app-listing-card
           *ngFor="let item of nearbyListings"
           [listing]="item"
-          [availabilityLabel]="'Owner Verified'"
+          [availabilityLabel]="'Owner listing'"
           [locationIcon]="'location_on'"
           [showPostedDate]="true"
           (view)="viewDetails($event.id)"
@@ -152,11 +152,11 @@
     <div class="trust-features-container">
       <div class="trust-feature-card">
         <div class="trust-icon-wrapper trust-icon-green">
-          <mat-icon>verified_user</mat-icon>
+          <mat-icon>shield</mat-icon>
         </div>
         <div class="trust-text">
-          <span class="trust-title">Verified Owners</span>
-          <span class="trust-subtitle">Your safety first</span>
+          <span class="trust-title">Safety reminders</span>
+          <span class="trust-subtitle">Visit before you pay</span>
         </div>
       </div>
 
@@ -165,8 +165,8 @@
           <mat-icon>chat</mat-icon>
         </div>
         <div class="trust-text">
-          <span class="trust-title">Direct Contact</span>
-          <span class="trust-subtitle">Talk on WhatsApp</span>
+          <span class="trust-title">Direct contact</span>
+          <span class="trust-subtitle">Call or WhatsApp owners</span>
         </div>
       </div>
 
@@ -175,8 +175,8 @@
           <mat-icon>currency_rupee</mat-icon>
         </div>
         <div class="trust-text">
-          <span class="trust-title">No Brokerage</span>
-          <span class="trust-subtitle">Zero Commission</span>
+          <span class="trust-title">No Roomzo brokerage</span>
+          <span class="trust-subtitle">For browse &amp; contact</span>
         </div>
       </div>
 
@@ -185,20 +185,64 @@
           <mat-icon>location_on</mat-icon>
         </div>
         <div class="trust-text">
-          <span class="trust-title">Local &amp; Trusted</span>
-          <span class="trust-subtitle">Properties in Prayagraj</span>
+          <span class="trust-title">City-focused</span>
+          <span class="trust-subtitle">Prayagraj, Varanasi, Pune &amp; more</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+    <article class="home-editorial">
+      <div class="editorial-inner">
+        <span class="editorial-kicker">Rent smarter</span>
+        <h2>How Roomzo helps you rent with more clarity</h2>
+        <p class="editorial-lead">
+          Browse owner-listed rooms, PGs, and flats, read city guides, contact the owner,
+          then visit in person before paying any deposit — a clearer path from search to keys.
+        </p>
+
+        <div class="editorial-steps">
+          <div class="editorial-step">
+            <span class="step-num">01</span>
+            <div>
+              <h3>Explore cities &amp; types</h3>
+              <p>Use city pages and filters to shortlist what fits your budget and locality.</p>
+            </div>
+          </div>
+          <div class="editorial-step">
+            <span class="step-num">02</span>
+            <div>
+              <h3>Contact owners directly</h3>
+              <p>Call or WhatsApp after a short safety reminder — no Roomzo brokerage for contact.</p>
+            </div>
+          </div>
+          <div class="editorial-step">
+            <span class="step-num">03</span>
+            <div>
+              <h3>Visit before you pay</h3>
+              <p>Verify the property offline, and report anything that looks wrong.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="editorial-chips">
+          <a routerLink="/city/prayagraj" class="editorial-chip">Prayagraj guide</a>
+          <a routerLink="/city/varanasi" class="editorial-chip">Varanasi guide</a>
+          <a routerLink="/city/pune" class="editorial-chip">Pune guide</a>
+          <a routerLink="/blog" class="editorial-chip">Blog tips</a>
+          <a routerLink="/faq" class="editorial-chip">FAQ</a>
+          <a routerLink="/about" class="editorial-chip chip-muted">About</a>
+        </div>
+      </div>
+    </article>
+
     <div class="bottom-features-row">
       <div class="feature-box">
-        <mat-icon class="feature-icon">verified_user</mat-icon>
+        <mat-icon class="feature-icon">menu_book</mat-icon>
         <div>
-          <h4>Verified Listings</h4>
-          <p>All properties are verified by our team</p>
+          <h4>Guides &amp; tips</h4>
+          <p>City pages and articles to rent with more clarity</p>
         </div>
       </div>
 

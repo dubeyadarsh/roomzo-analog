@@ -271,11 +271,122 @@ imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=for
       <h3>2. Direct Negotiation</h3>
       <p>Brokers often act as a barrier, pushing the rent higher to increase their cut. When you speak directly to an owner on Roomzo, you can have honest, human conversations. You can negotiate rent, discuss pet policies, or ask for a fresh coat of paint directly.</p>
       
-      <h3>3. Genuine Property Details</h3>
-      <p>No more "bait and switch" tactics where a broker shows you photos of a luxury flat but takes you to a dilapidated building. Owners upload real photos of their own properties, and our verification systems ensure what you see is what you get.</p>
+      <h3>3. Clearer starting point — still verify offline</h3>
+      <p>Owner-uploaded photos and descriptions are a useful starting point, but they can still be outdated or inaccurate. Always visit the property, match what you see to the listing, and document agreed terms before transferring money. Roomzo provides report tools when something looks wrong.</p>
       
-      <h3>4. Faster Decisions</h3>
-      <p>Without a middleman juggling 50 different clients, communication is direct via WhatsApp or phone. You can view the property, agree to terms, and move in within 24 hours.</p>
+      <h3>4. Faster conversations</h3>
+      <p>Without a middleman juggling dozens of clients, you can often message or call the owner directly via WhatsApp or phone, schedule a visit, and decide on a timeline that works for both sides.</p>
+    `
+  },
+  {
+    id: '11',
+    slug: 'rental-deposit-rules-india-tenants',
+    title: 'Security Deposits in India: What Tenants Should Clarify Before Paying',
+    excerpt: 'Deposits are normal — surprises are not. Learn which questions to ask so refunds and lock-ins are clear.',
+    author: 'Roomzo Team',
+    date: 'Jul 1, 2026',
+    readTime: '7 min read',
+    imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&q=80',
+    content: `
+      <p>Most Indian rentals require a security deposit. The problem is rarely the deposit itself — it is unclear refund rules, surprise deductions, and pressure to transfer money before you have even seen the room. This guide helps you ask better questions whether you found a home on Roomzo or elsewhere.</p>
+      <h3>1. Confirm the deposit amount in writing</h3>
+      <p>Ask for the exact amount in a WhatsApp or SMS message: how many months of rent, whether it is refundable, and whether any non-refundable “token” is separate. Do not rely only on a verbal call.</p>
+      <h3>2. Ask how deductions work</h3>
+      <p>Typical fair deductions include unpaid rent, unpaid utility bills, or damage beyond normal wear and tear. Unfair patterns include inventing cleaning fees never mentioned earlier or refusing to return the deposit without a list of damages. Take move-in photos.</p>
+      <h3>3. Understand lock-in and notice</h3>
+      <p>Some owners require a lock-in period (for example 6–11 months). If you leave early, part of the deposit may be kept. Know this before you pay. Also confirm how many days’ notice is required when you leave.</p>
+      <h3>4. Prefer visiting before transferring</h3>
+      <p>Roomzo’s product flow reminds users not to pay before visiting. That advice applies everywhere: scammers often rush “today only” tokens. If an owner refuses a visit but demands payment, walk away and report the listing if it appears on Roomzo.</p>
+      <h3>5. Keep a paper trail</h3>
+      <p>Save chat history, rent receipts, and a simple written note of utilities included. When you vacate, request a dated refund confirmation. Clear records reduce conflict for both tenants and honest owners.</p>
+    `
+  },
+  {
+    id: '12',
+    slug: 'how-to-compare-pg-options-students',
+    title: 'How Students Should Compare PG Options (Beyond Monthly Rent)',
+    excerpt: 'Food, curfew, Wi‑Fi, occupancy, and commute often matter more than a ₹500 rent difference.',
+    author: 'Roomzo Team',
+    date: 'Jul 3, 2026',
+    readTime: '8 min read',
+    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+    content: `
+      <p>Paying Guest (PG) stays are common for students near universities and coaching hubs — from Lanka in Varanasi to Katra in Prayagraj. Cheap rent that comes with bad water supply or an impossible curfew is not a bargain. Use this comparison checklist.</p>
+      <h3>Occupancy and privacy</h3>
+      <p>Is the rent for a single room or sharing with one/two others? Are bathrooms attached or common? Ask to see the exact bed you would get, not only a showcase room.</p>
+      <h3>Food and schedule</h3>
+      <p>If meals are included, ask for a sample weekly menu and timings. Confirm whether packing tiffin for late college days is allowed.</p>
+      <h3>Rules that affect daily life</h3>
+      <p>Curfew, visitor policy, girls/boys-only rules, and cooking restrictions should be clear before you move. Write them down when the caretaker explains them.</p>
+      <h3>Utilities and study environment</h3>
+      <p>Ask about Wi‑Fi fairness, power backup for fans/lights during outages, water heater access, and quiet hours for study. Students often underestimate noise until exams arrive.</p>
+      <h3>How Roomzo fits in</h3>
+      <p>Shortlist 2–3 PGs on Roomzo’s city or PG category pages, message owners with your college location and move-in date, then visit. Our city guides for Prayagraj and Varanasi explain neighbourhood patterns so you are not choosing only by map pins.</p>
+    `
+  },
+  {
+    id: '13',
+    slug: 'owner-guide-honest-listing-photos',
+    title: 'Owner Guide: How Honest Listing Photos Attract Better Tenants',
+    excerpt: 'Daylight photos, accurate amenities, and clear rules reduce wasted calls and build trust.',
+    author: 'Roomzo Team',
+    date: 'Jul 5, 2026',
+    readTime: '6 min read',
+    imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3be42?w=800&q=80',
+    content: `
+      <p>If you list a room, PG, or flat on Roomzo, your photos and description are your first conversation with a tenant. Misleading images create angry visits and wasted time. Honest listings close faster with the right people.</p>
+      <h3>Shoot in daylight</h3>
+      <p>Natural light shows real condition. Include bedroom, bathroom, kitchen/common areas, and a landmark or building exterior when possible.</p>
+      <h3>State what is included</h3>
+      <p>Furniture, Wi‑Fi, meals, parking, power backup, and water tanker frequency matter. If electricity is charged separately, say so.</p>
+      <h3>Be clear about preferred tenants</h3>
+      <p>Family only, working professionals, or students — stating preference upfront is better than awkward rejections after a visit.</p>
+      <h3>Update when rented</h3>
+      <p>Mark the listing rented or take it down when occupied. Seekers appreciate accuracy, and you avoid repeated calls.</p>
+      <h3>Safety culture helps owners too</h3>
+      <p>Tenants who visit before paying are usually more serious. Encourage site visits and put key terms in chat. Roomzo’s report tools also help remove bad actors who misuse the platform.</p>
+    `
+  },
+  {
+    id: '14',
+    slug: 'red-flags-rental-whatsapp-scams',
+    title: 'WhatsApp Rental Scams: Red Flags Every Seeker Should Know',
+    excerpt: 'Rushed tokens, refusal to visit, and OTP requests are classic patterns. Here’s how to respond.',
+    author: 'Roomzo Team',
+    date: 'Jul 8, 2026',
+    readTime: '7 min read',
+    imageUrl: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
+    content: `
+      <p>Many rental conversations in India move to WhatsApp quickly — including on Roomzo after you tap contact. That is normal. Scam behaviour has patterns you can learn to spot.</p>
+      <h3>Red flag: pay before visit</h3>
+      <p>Anyone insisting on a booking amount before showing the room should lose your trust. Legitimate owners usually prefer serious visitors who show up.</p>
+      <h3>Red flag: “I’m out of town, my agent will collect”</h3>
+      <p>Sometimes real; often abused. Verify the property, verify who holds the keys, and never hand over large cash to an unknown courier without documentation.</p>
+      <h3>Red flag: OTP or remote access apps</h3>
+      <p>Roomzo staff will never ask for your login OTP, UPI PIN, or control of your phone. Hang up and change passwords if you shared something sensitive.</p>
+      <h3>What to do instead</h3>
+      <p>Shortlist, visit with a friend if possible, transfer only after agreement terms are clear, and use Roomzo’s report feature for fraudulent listings. Read our safety consent tips shown before call/WhatsApp — they exist for a reason.</p>
+    `
+  },
+  {
+    id: '15',
+    slug: 'choosing-between-room-pg-and-1bhk',
+    title: 'Room vs PG vs 1BHK: Which Rental Type Fits You?',
+    excerpt: 'Budget, privacy, and cooking freedom differ a lot. Match the housing type to your lifestyle.',
+    author: 'Roomzo Team',
+    date: 'Jul 10, 2026',
+    readTime: '6 min read',
+    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    content: `
+      <p>Roomzo lists rooms, PGs, and flats because each solves a different need. Choosing the wrong type creates monthly frustration even when rent looks low.</p>
+      <h3>Single / shared room</h3>
+      <p>Best when budget is tight and you mainly need a place to sleep and study. Confirm bathroom access and kitchen rights. Common in student belts of Prayagraj and Varanasi.</p>
+      <h3>PG</h3>
+      <p>Best when you want meals and managed utilities. Trade-off: house rules and less cooking freedom. Compare inclusions carefully using our student/PG guides.</p>
+      <h3>1BHK / flat</h3>
+      <p>Best for privacy, couples, or small families — and often higher deposit plus society rules. Check maintenance, parking, and bachelor restrictions early.</p>
+      <h3>Next step on Roomzo</h3>
+      <p>Open the matching category page (Rooms, PG, Flats), read the guide, then jump into city listings. Contact owners with your move-in date so conversations stay practical.</p>
     `
   }
 ];

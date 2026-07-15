@@ -2,7 +2,12 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { getActiveCities, buildCityPath } from '../../config/cities.config';
-import { ROOMZO_CATEGORIES, buildCategoryPath } from '../../config/categories.config';
+
+export interface RelatedQuery {
+  label: string;
+  routerLink: string | string[];
+  queryParams?: Record<string, string>;
+}
 
 @Component({
   selector: 'app-related-searches',
@@ -16,71 +21,130 @@ export class RelatedSearchesComponent {
   @Input() compact = false;
 
   readonly activeCities = getActiveCities();
-  readonly categories = ROOMZO_CATEGORIES;
 
-  /** Highly targeted local SEO and Natural-language queries */
-  get relatedQueries(): { label: string; routerLink: string | string[] }[] {
+  /**
+   * Links land on /city/{slug} with optional zone + propertyType query params
+   * so the city page selects the matching filter pills.
+   */
+  get relatedQueries(): RelatedQuery[] {
     const city = this.cityName?.toLowerCase();
 
-    // --- 1. PRAYAGRAJ / ALLAHABAD SPECIFIC TARGETING ---
     if (city === 'prayagraj' || city === 'allahabad') {
       return [
-        // Top 10 Target Pages
-        { label: 'Rooms for Rent in Prayagraj', routerLink: '/city/prayagraj' },
-        { label: 'Room for Rent in Allahabad', routerLink: '/city/prayagraj' },
-        { label: 'PG in Prayagraj', routerLink: '/explore-listing?city=Prayagraj&state=Uttar%20Pradesh&lat=25.4381302&lng=81.8338005&propertyType=PG&maxPrice=50000' },
-        { label: 'Flats for Rent in Prayagraj', routerLink: '/explore-listing?city=Prayagraj&state=Uttar%20Pradesh&lat=25.4381302&lng=81.8338005&propertyType=Flat&maxPrice=50000' },
-        { label: 'Boys PG in Prayagraj', routerLink: '/category/pg-for-rent' },
-        { label: 'Girls PG in Prayagraj', routerLink: '/category/pg-for-rent' },
-        { label: 'Rooms Near Allahabad University', routerLink: '/city/prayagraj' },
-        { label: 'PG Near Allahabad University', routerLink: '/category/pg-for-rent' },
-        { label: 'No Brokerage Rooms in Prayagraj', routerLink: '/category/brokerless-property' },
-        { label: 'Flatmates in Prayagraj', routerLink: '/flatmates' },
-        
-        // Micro-Local Areas
-        { label: 'Rooms for Rent in Civil Lines Prayagraj', routerLink: '/city/prayagraj' },
-        { label: 'Rooms for Rent in Katra Prayagraj', routerLink: '/city/prayagraj' },
-        { label: 'Rooms for Rent in Teliyarganj', routerLink: '/city/prayagraj' },
-        { label: 'Rooms for Rent in Naini', routerLink: '/city/prayagraj' },
-        { label: 'Rooms for Rent in Jhunsi', routerLink: '/city/prayagraj' },
-        { label: 'Rooms for Rent in George Town', routerLink: '/city/prayagraj' },
-        { label: 'PG in Civil Lines Prayagraj', routerLink: '/category/pg-for-rent' },
-        { label: 'Flats in Civil Lines Prayagraj', routerLink: '/category/flats-for-rent' },
-        
-        // Additional Student Keywords
-        { label: 'Student Rooms in Prayagraj', routerLink: '/category/student-housing' },
-        { label: 'Student PG in Prayagraj', routerLink: '/category/student-housing' },
-        { label: 'Hostel Near Allahabad University', routerLink: '/category/student-housing' }
+        this.cityLink('Rooms for Rent in Prayagraj', 'prayagraj', { propertyType: 'Room' }),
+        this.cityLink('Room for Rent in Allahabad', 'prayagraj', { propertyType: 'Room' }),
+        this.cityLink('PG in Prayagraj', 'prayagraj', { propertyType: 'PG' }),
+        this.cityLink('Flats for Rent in Prayagraj', 'prayagraj', { propertyType: 'Flat' }),
+        this.cityLink('Boys PG in Prayagraj', 'prayagraj', { propertyType: 'PG' }),
+        this.cityLink('Girls PG in Prayagraj', 'prayagraj', { propertyType: 'PG' }),
+        this.cityLink('Rooms Near Allahabad University', 'prayagraj', { propertyType: 'Room' }),
+        this.cityLink('PG Near Allahabad University', 'prayagraj', { propertyType: 'PG' }),
+        this.cityLink('Student Rooms in Prayagraj', 'prayagraj', { propertyType: 'Room' }),
+        this.cityLink('Flatmates in Prayagraj', null, null, '/flatmates'),
+
+        // Zone-specific — matches public/data/city-zones.json names
+        this.cityLink('Rooms for Rent in Civil Lines Prayagraj', 'prayagraj', { zone: 'Civil Lines', propertyType: 'Room' }),
+        this.cityLink('PG in Civil Lines Prayagraj', 'prayagraj', { zone: 'Civil Lines', propertyType: 'PG' }),
+        this.cityLink('Flats in Civil Lines Prayagraj', 'prayagraj', { zone: 'Civil Lines', propertyType: 'Flat' }),
+        this.cityLink('Rooms for Rent in Katra Prayagraj', 'prayagraj', { zone: 'Katra', propertyType: 'Room' }),
+        this.cityLink('PG in Katra Prayagraj', 'prayagraj', { zone: 'Katra', propertyType: 'PG' }),
+        this.cityLink('Rooms for Rent in Teliyarganj', 'prayagraj', { zone: 'Teliyarganj', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Naini', 'prayagraj', { zone: 'Naini', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Jhusi', 'prayagraj', { zone: 'Jhusi', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in George Town', 'prayagraj', { zone: 'George', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Allahpur', 'prayagraj', { zone: 'Allahpur', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Phaphamau', 'prayagraj', { zone: 'Phaphamau', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Mutthiganj', 'prayagraj', { zone: 'Mutthiganj', propertyType: 'Room' }),
+        this.cityLink('Rooms for Rent in Stanley Road', 'prayagraj', { zone: 'Stanley Road', propertyType: 'Room' }),
       ];
     }
 
-    // --- 2. DYNAMIC TARGETING FOR OTHER CITIES ---
-    if (city) {
-      const cityUrl = buildCityPath(getActiveCities().find((c) => c.name.toLowerCase() === city) ?? getActiveCities()[0]);
+    if (city === 'varanasi' || city === 'banaras' || city === 'kashi') {
       return [
-        { label: `Rooms for Rent in ${this.cityName}`, routerLink: cityUrl },
-        { label: `PG in ${this.cityName}`, routerLink: '/category/pg-for-rent' },
-        { label: `Flats for Rent in ${this.cityName}`, routerLink: '/category/flats-for-rent' },
-        { label: `Boys PG in ${this.cityName}`, routerLink: '/category/pg-for-rent' },
-        { label: `Girls PG in ${this.cityName}`, routerLink: '/category/pg-for-rent' },
-        { label: `Rooms Near University in ${this.cityName}`, routerLink: '/category/student-housing' },
-        { label: `No Brokerage Rooms in ${this.cityName}`, routerLink: '/category/brokerless-property' },
-        { label: `Flatmates in ${this.cityName}`, routerLink: '/flatmates' },
+        this.cityLink('Rooms for Rent in Varanasi', 'varanasi', { propertyType: 'Room' }),
+        this.cityLink('PG in Varanasi', 'varanasi', { propertyType: 'PG' }),
+        this.cityLink('Flats for Rent in Varanasi', 'varanasi', { propertyType: 'Flat' }),
+        this.cityLink('PG Near BHU', 'varanasi', { propertyType: 'PG' }),
+        this.cityLink('Rooms Near BHU Varanasi', 'varanasi', { propertyType: 'Room' }),
+        this.cityLink('Student PG in Varanasi', 'varanasi', { propertyType: 'PG' }),
+        this.cityLink('Boys PG in Varanasi', 'varanasi', { propertyType: 'PG' }),
+        this.cityLink('Girls PG in Varanasi', 'varanasi', { propertyType: 'PG' }),
+        this.cityLink('Flatmates in Varanasi', null, null, '/flatmates'),
       ];
     }
 
-    // --- 3. GLOBAL / DEFAULT TARGETING (No city selected) ---
+    if (city === 'pune') {
+      return [
+        this.cityLink('Rooms for Rent in Pune', 'pune', { propertyType: 'Room' }),
+        this.cityLink('PG in Pune', 'pune', { propertyType: 'PG' }),
+        this.cityLink('Flats for Rent in Pune', 'pune', { propertyType: 'Flat' }),
+        this.cityLink('Rooms in Viman Nagar Pune', 'pune', { zone: 'Viman Nagar', propertyType: 'Room' }),
+        this.cityLink('PG in Viman Nagar Pune', 'pune', { zone: 'Viman Nagar', propertyType: 'PG' }),
+        this.cityLink('Flats in Viman Nagar Pune', 'pune', { zone: 'Viman Nagar', propertyType: 'Flat' }),
+        this.cityLink('Rooms in Koregaon Park Pune', 'pune', { zone: 'Koregaon Park', propertyType: 'Room' }),
+        this.cityLink('PG in Koregaon Park Pune', 'pune', { zone: 'Koregaon Park', propertyType: 'PG' }),
+        this.cityLink('Boys PG in Pune', 'pune', { propertyType: 'PG' }),
+        this.cityLink('Girls PG in Pune', 'pune', { propertyType: 'PG' }),
+        this.cityLink('Flatmates in Pune', null, null, '/flatmates'),
+      ];
+    }
+
+    if (city === 'lucknow') {
+      return [
+        this.cityLink('Rooms for Rent in Lucknow', 'lucknow', { propertyType: 'Room' }),
+        this.cityLink('PG in Lucknow', 'lucknow', { propertyType: 'PG' }),
+        this.cityLink('Flats for Rent in Lucknow', 'lucknow', { propertyType: 'Flat' }),
+        this.cityLink('Boys PG in Lucknow', 'lucknow', { propertyType: 'PG' }),
+        this.cityLink('Girls PG in Lucknow', 'lucknow', { propertyType: 'PG' }),
+        this.cityLink('Student Rooms in Lucknow', 'lucknow', { propertyType: 'Room' }),
+        this.cityLink('Flatmates in Lucknow', null, null, '/flatmates'),
+      ];
+    }
+
+    if (city) {
+      const conf = getActiveCities().find((c) => c.name.toLowerCase() === city);
+      const slug = conf?.slug ?? city;
+      const name = this.cityName ?? conf?.name ?? city;
+      return [
+        this.cityLink(`Rooms for Rent in ${name}`, slug, { propertyType: 'Room' }),
+        this.cityLink(`PG in ${name}`, slug, { propertyType: 'PG' }),
+        this.cityLink(`Flats for Rent in ${name}`, slug, { propertyType: 'Flat' }),
+        this.cityLink(`Boys PG in ${name}`, slug, { propertyType: 'PG' }),
+        this.cityLink(`Girls PG in ${name}`, slug, { propertyType: 'PG' }),
+        this.cityLink(`Student Rooms in ${name}`, slug, { propertyType: 'Room' }),
+        this.cityLink(`Flatmates in ${name}`, null, null, '/flatmates'),
+      ];
+    }
+
+    // Global / footer default — city landings with type filters
     return [
-      { label: 'Room for Rent in Allahabad', routerLink: '/city/prayagraj' }, // Injecting top priority
-      { label: 'Rooms for rent without broker', routerLink: '/explore-listing' },
-      { label: 'PG & Hostels for Students', routerLink: '/explore-listing?propertyType=PG&maxPrice=50000' },
-      { label: 'Flats for Rent in India', routerLink: '/explore-listing?propertyType=Flat&maxPrice=50000' },
-      { label: 'No Brokerage Rooms', routerLink: '/explore-listing?propertyType=Room&maxPrice=50000' },
-      { label: 'Find Flatmates', routerLink: '/flatmates' },
-      { label: 'Rooms Near Universities', routerLink: '/explore-listing?propertyType=Room&maxPrice=50000' },
+      this.cityLink('Rooms for Rent in Prayagraj', 'prayagraj', { propertyType: 'Room' }),
+      this.cityLink('Rooms in Civil Lines Prayagraj', 'prayagraj', { zone: 'Civil Lines', propertyType: 'Room' }),
+      this.cityLink('PG in Prayagraj', 'prayagraj', { propertyType: 'PG' }),
+      this.cityLink('Rooms for Rent in Varanasi', 'varanasi', { propertyType: 'Room' }),
+      this.cityLink('PG Near BHU Varanasi', 'varanasi', { propertyType: 'PG' }),
+      this.cityLink('Flats for Rent in Pune', 'pune', { propertyType: 'Flat' }),
+      this.cityLink('PG in Viman Nagar Pune', 'pune', { zone: 'Viman Nagar', propertyType: 'PG' }),
+      this.cityLink('Rooms for Rent in Lucknow', 'lucknow', { propertyType: 'Room' }),
+      this.cityLink('Find Flatmates', null, null, '/flatmates'),
     ];
   }
 
   cityPath = buildCityPath;
-  categoryPath = buildCategoryPath;
+
+  private cityLink(
+    label: string,
+    slug: string | null,
+    queryParams: Record<string, string> | null,
+    absolutePath?: string
+  ): RelatedQuery {
+    if (absolutePath) {
+      return { label, routerLink: absolutePath };
+    }
+    return {
+      label,
+      routerLink: ['/city', slug!],
+      queryParams: queryParams ?? undefined,
+    };
+  }
 }

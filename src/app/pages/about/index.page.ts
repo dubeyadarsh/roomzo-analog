@@ -3,6 +3,18 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
+import { RouteMeta } from '@analogjs/router';
+
+export const routeMeta: RouteMeta = {
+  title: 'About Roomzo | Owner-listed Rentals Platform',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Learn what Roomzo is: an Indian rental listing platform connecting tenants with property owners for rooms, PGs, and flats — with safety tips and city guides.',
+    },
+  ],
+};
 
 @Component({
   selector: 'app-about',
@@ -13,58 +25,26 @@ import { Router, RouterLink } from '@angular/router';
 })
 export default class AboutComponent {
 constructor(private router: Router) {}
-  // Stats Data
-  stats = [
-    { label: 'Properties Sold', value: '5k+' },
-    { label: 'Years Experience', value: '12+' },
-    { label: 'Client Satisfaction', value: '98%' },
-    { label: 'Active Agents', value: '250+' }
-  ];
 
-  // Values Data
   values = [
     { 
       icon: 'visibility', 
       title: 'Transparency', 
-      desc: 'No brokers. No hidden fees. Clear information and honest listings, always..' 
+      desc: 'Clear role as a listing platform. Direct owner contact. No hidden Roomzo brokerage for browsing or calling through the site.' 
     },
     { 
       icon: 'verified_user', 
-      title: 'Integrity', 
-      desc: 'Trust comes first. We stay fair, ethical, and user-focused in every decision.' 
+      title: 'Safety-first habits', 
+      desc: 'We remind users to visit before paying and to report suspicious listings. Caution beats rushed advances.' 
     },
     { 
       icon: 'lightbulb', 
-      title: 'Innovation', 
-      desc: 'Smart technology for simple renting. Modern tools designed for speed, comfort, and ease.' 
+      title: 'Useful tools', 
+      desc: 'City guides, filters, favourites, and educational articles so renting decisions are better informed.' 
     }
   ];
 
-  // Team Data
-  team = [
-    { 
-      name: 'David Chen', 
-      role: 'Co-Founder & CEO', 
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80' 
-    },
-    { 
-      name: 'Sarah Jenkins', 
-      role: 'Head of Sales', 
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=80' 
-    },
-    { 
-      name: 'Marcus Johnson', 
-      role: 'Senior Broker', 
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80' 
-    },
-    { 
-      name: 'Elena Rodriguez', 
-      role: 'Marketing Director', 
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80' 
-    }
-  ];
   goToContact() {
-    // valid navigation
 this.router.navigate(['/'], { fragment: 'contactUs' });
   }
 }

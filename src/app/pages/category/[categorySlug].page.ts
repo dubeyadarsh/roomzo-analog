@@ -7,6 +7,9 @@ import { getCategoryBySlug, ROOMZO_CATEGORIES } from '../../config/categories.co
 import { RelatedSearchesComponent } from '../../components/related-searches/related-searches';
 import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
 import { MatIconModule } from '@angular/material/icon';
+import { ContentGuideComponent } from '../../components/content-guide/content-guide';
+import { CategoryGuide, getCategoryGuide } from '../../content/category-guides';
+import { GuideSection } from '../../content/city-guides';
 
 export const routeMeta: RouteMeta = {
   title: 'Browse Rental Categories | Roomzo',
@@ -15,14 +18,16 @@ export const routeMeta: RouteMeta = {
 @Component({
   selector: 'app-category-landing',
   standalone: true,
-  imports: [CommonModule, RouterLink, RelatedSearchesComponent, SeoBreadcrumbComponent, MatIconModule],
+  imports: [CommonModule, RouterLink, RelatedSearchesComponent, SeoBreadcrumbComponent, MatIconModule, ContentGuideComponent],
   templateUrl: './category-landing.html',
   styleUrls: ['./category-landing.css'],
 })
 export default class CategoryLandingPage implements OnInit, OnDestroy {
   categorySlug = '';
   category = getCategoryBySlug('rooms-for-rent')!;
-  allCategories = [...ROOMZO_CATEGORIES]; 
+  allCategories = [...ROOMZO_CATEGORIES];
+  categoryGuide: CategoryGuide | null = null;
+  guideSections: GuideSection[] = [];
 
   breadcrumbItems = [
     { label: 'Home', path: '/' },
@@ -63,6 +68,8 @@ export default class CategoryLandingPage implements OnInit, OnDestroy {
       
       this.category = found;
       this.breadcrumbItems[2] = { label: found.label };
+      this.categoryGuide = getCategoryGuide(found.slug);
+      this.guideSections = this.categoryGuide?.sections ?? [];
 
       this.seo.applyPageSeo({
         title: found.seoTitle,

@@ -9,10 +9,10 @@
       </div>
       
       <h1>
-        Popular Rental Searches in <span class="highlight-text">{{ category.label.split(' in ')[1] || category.label }}</span>
+        {{ category.label }} — owner-listed rentals on Roomzo
       </h1>
       
-      <p>{{ category.seoDescription || 'Explore the most searched broker-free rooms, PGs and flats. Find verified rental options directly from owners.' }}</p>
+      <p>{{ categoryGuide?.intro || category.seoDescription || 'Explore rooms, PGs and flats listed by owners. Contact them directly after reviewing details and safety tips.' }}</p>
       
       <!-- <button type="button" class="cta-btn elevated-shadow" (click)="handleCategoryRoute(category, $event)">
         Browse {{ category.label }}
@@ -55,6 +55,14 @@
       </div>
 
     </div>
+
+    <app-content-guide
+      *ngIf="categoryGuide"
+      kicker="Category guide"
+      [title]="category.label + ': what to know before you rent'"
+      [intro]="categoryGuide.intro"
+      [sections]="guideSections">
+    </app-content-guide>
 
     <section class="browse-city">
       <h2 class="section-title">Browse by City</h2>

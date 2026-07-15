@@ -20,14 +20,14 @@ import { SafetyConsentBottomSheetComponent, PendingAction } from '../../componen
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
 
 export const routeMeta: RouteMeta = {
-  title: 'Roomzo : Trusted Rooms, PG & Flats Near You | No Broker | No Fake Listing',
+  title: 'Explore Rooms, PG & Flats for Rent | Roomzo',
   meta: [
-    { name: 'description', content: 'Find 100% broker-free rooms, PGs, and flats for rent in Prayagraj (Katra, Civil Lines), Varanasi (Lanka, BHU), and Pune. Connect directly with owners.' },
-    { name: 'keywords', content: 'room rent in prayagraj, pg in varanasi, flat for rent in pune, brokerless pg, katra room rent, civil lines flats' },
-    { property: 'og:title', content: '100% Brokerless Rooms & PG in UP & Pune | Roomzo' },
-    { property: 'og:description', content: 'Zero broker fees. Connect directly with owners for verified single rooms, hostels, and flats in Prayagraj, Varanasi, and Pune.' },
+    { name: 'description', content: 'Search owner-listed rooms, PGs, and flats for rent in Prayagraj, Varanasi, Pune, Lucknow and more. Contact owners directly and visit before you pay.' },
+    { name: 'keywords', content: 'room rent, pg for rent, flat for rent, prayagraj, varanasi, pune, roomzo' },
+    { property: 'og:title', content: 'Explore Rentals | Roomzo' },
+    { property: 'og:description', content: 'Browse rooms, hostels, and flats with direct owner contact. Safety tips included before you call or WhatsApp.' },
     { property: 'og:type', content: 'website' },
-    { property: 'og:image', content: 'https://www.roomzo.in/favicon.ico' },
+    { property: 'og:image', content: 'https://www.roomzo.in/assets/og-roomzo-share.jpg' },
   ]
 };
 

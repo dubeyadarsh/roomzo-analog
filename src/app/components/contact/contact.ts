@@ -4,14 +4,14 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select'; // <-- Add this import
-import { Router } from '@angular/router'; 
+import { Router, RouterLink } from '@angular/router'; 
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatSelectModule], // <-- Add MatSelectModule here
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule, MatSelectModule, RouterLink],
   templateUrl: './contact.html',
   styleUrls: ['./contact.css']
 })

@@ -7,15 +7,15 @@ import { RouteMeta } from '@analogjs/router';
 
 // 1. ANALOG ROUTE META: Highly targeted for the UP region
 export const routeMeta: RouteMeta = {
-  title: 'Frequently Asked Questions | Roomzo - Brokerless Rentals UP',
+  title: 'Frequently Asked Questions | Roomzo Rentals',
   meta: [
     { 
       name: 'description', 
-      content: 'Have questions about finding a room, PG, or flat in Prayagraj, Varanasi, or Lucknow? Read the Roomzo FAQ for a 100% agentless, trusted rental experience.' 
+      content: 'FAQ about Roomzo — how owner-listed rooms, PGs, and flats work, fees, safety tips, and support for cities across India.' 
     },
     { 
       name: 'keywords', 
-      content: 'room rent FAQ, how to find pg in varanasi, brokerless flat prayagraj, agentless roomzo, up rental platform' 
+      content: 'roomzo faq, how to find pg, flat rent tips, owner contact rentals, rental safety' 
     }
   ]
 };
@@ -45,69 +45,70 @@ export default class FaqComponent implements OnInit, OnDestroy {
 
   // 2. EXPANDED FAQS: Kept your originals and added high-volume SEO questions
   allFaqs: FaqItem[] = [
-    // --- GENERAL ---
     {
       question: 'What is Roomzo?',
-      answer: 'Roomzo is a premium property rental platform connecting verified homeowners with tenants looking for quality stays. We simplify the rental process with verified listings and direct communication.',
+      answer: 'Roomzo is an online rental listing platform at roomzo.in. Property owners publish rooms, PGs, and flats; seekers browse, compare, and contact owners directly after a short safety reminder. Roomzo is a technology platform, not a real estate brokerage.',
       category: 'General'
     },
     {
       question: 'Is Roomzo free to use?',
-      answer: 'Yes! Browsing listings and contacting agents is completely free for tenants. Property owners pay a small fee only when they want to feature their listing.',
+      answer: 'Browsing listings and contacting owners through Roomzo is free for tenants. Owners can list properties for discovery on the platform. Any optional paid promotion features, if offered later, will be clearly labelled before purchase.',
       category: 'General'
     },
     {
       question: 'How do I contact customer support?',
-      answer: 'You can reach out to our 24/7 support team via the "Contact Us" page or email us directly at support@roomzo.in.',
-      category: 'General'
-    },
-
-    // --- FOR TENANTS ---
-    {
-      question: 'Is Roomzo truly no-broker?',
-      answer: 'Yes — Roomzo offers direct owner contact with zero brokerage or hidden fees.',
-      category: 'Tenants'
-    },
-    {
-      question: 'Are the listings reliable?',
-      answer: 'We focus on genuine listings with clear details, so you rent with confidence.',
-      category: 'Tenants'
-    },
-    // NEW SEO TARGET: Prayagraj
-    {
-      question: 'How can I find a brokerless room for rent in Prayagraj?',
-      answer: 'Roomzo lists hundreds of verified, agentless single rooms and flats in top Prayagraj locations like Katra, Civil Lines, and near Allahabad University. Simply use our search filter to connect directly with owners.',
-      category: 'Tenants'
-    },
-    // NEW SEO TARGET: Varanasi
-    {
-      question: 'What are the best areas for students to rent a PG in Varanasi?',
-      answer: 'For students, the most trusted areas in Varanasi are Lanka, Durgakund, and near the BHU campus. You can find highly-rated, affordable PGs in these areas directly on Roomzo.',
-      category: 'Tenants'
-    },
-    // NEW SEO TARGET: Lucknow
-  
-    // --- FOR OWNERS ---
-    {
-      question: 'Is Roomzo a good alternative to 99acres or Housing.com for brokerless rentals?',
-      answer: 'Yes. Unlike traditional portals that rely on brokers, Roomzo focuses on verified owner listings with zero brokerage. Tenants in Prayagraj, Varanasi, Pune, and other cities can search rooms, PGs, and flats and contact owners directly — similar convenience to Housing.com or 99acres, but without agent fees.',
+      answer: 'Email us at support@roomzo.in or use the Contact form on the Roomzo homepage. We aim to respond to support and listing-report queries as quickly as possible during business hours.',
       category: 'General'
     },
     {
-      question: 'How does Roomzo compare to NoBroker for student housing?',
-      answer: 'Roomzo offers a student-first experience with city-specific pages, verified PG listings near colleges, and direct WhatsApp or call contact with owners. It is a practical NoBroker alternative for affordable student housing across Uttar Pradesh, Maharashtra, and expanding cities.',
+      question: 'Does Roomzo charge brokerage?',
+      answer: 'Roomzo does not charge tenants brokerage simply for browsing or contacting an owner through the website. Offline rent, deposits, and any third-party help you arrange yourself are between you and those parties. Always clarify costs before paying.',
       category: 'Tenants'
     },
     {
-      question: 'Can I find PG for rent in Pune without paying brokerage?',
-      answer: 'Absolutely. Roomzo lists broker-free PGs in Hinjewadi, Viman Nagar, Kothrud, Wakad, and Baner. Filter by PG type on our explore page or visit the Pune city page for curated listings.',
+      question: 'Are listings guaranteed accurate?',
+      answer: 'No. Owners are responsible for the information they publish. Roomzo provides tools to report incorrect or suspicious listings and reminds users to visit properties before paying deposits. Treat every listing as a starting point for offline verification.',
       category: 'Tenants'
     },
-    // NEW SEO TARGET: Owners in UP
     {
-      question: 'How do I list my property in Prayagraj or Varanasi without an agent?',
-      answer: 'Sign up on Roomzo as an owner and click "Add New Listing". You can upload photos of your property in Prayagraj, Varanasi, or Lucknow and connect directly with verified tenants, completely bypassing broker commissions.',
+      question: 'How can I stay safe while renting?',
+      answer: 'Visit the property before paying. Never share OTPs or bank passwords. Be cautious if someone demands “token”, “gate pass”, or “booking” fees without letting you see the room. Prefer written confirmation of rent, deposit, and notice period. Use Roomzo’s report option if something feels wrong.',
+      category: 'Tenants'
+    },
+    {
+      question: 'How can I find a room for rent in Prayagraj?',
+      answer: 'Open the Prayagraj city page on Roomzo, filter by Room / PG / Flat, and compare owner-listed options in areas such as Katra, Civil Lines, Mumfordganj, and nearby localities. Contact owners after reading details, then visit before you pay.',
+      category: 'Tenants'
+    },
+    {
+      question: 'What are good areas for students to rent a PG in Varanasi?',
+      answer: 'Students often look near BHU, Lanka, Durgakund, and Assi. Quality varies street by street — shortlist on Roomzo, ask about food, curfew, and occupancy, and visit in person. Read our Varanasi city guide on the city page for more context.',
+      category: 'Tenants'
+    },
+    {
+      question: 'How does Roomzo differ from large property portals?',
+      answer: 'Many large portals mix brokers and owners. Roomzo focuses on owner-listed discovery and direct contact through our product, plus city/category educational guides. We do not claim to replace your due diligence — we help you start conversations faster.',
+      category: 'General'
+    },
+    {
+      question: 'Can I find PG for rent in Pune without paying portal brokerage?',
+      answer: 'Yes — Roomzo does not charge tenants brokerage for contacting owners via the site. Browse Pune listings (Hinjewadi, Viman Nagar, Kothrud, Wakad, Baner and more when available), visit properties, and confirm all money transfers only after you are comfortable.',
+      category: 'Tenants'
+    },
+    {
+      question: 'How do I list my property without an agent?',
+      answer: 'Sign up on Roomzo, open List Property / Add Listing, upload honest photos, set rent and amenities, and publish. When rented, update the status so seekers do not keep calling. You handle agreements and deposits directly with the tenant.',
       category: 'Owners'
+    },
+    {
+      question: 'What should owners never do?',
+      answer: 'Do not upload photos of properties you do not control, invent amenities, or ask tenants for money before showing the actual unit. Misleading listings may be removed and accounts restricted.',
+      category: 'Owners'
+    },
+    {
+      question: 'Does Roomzo verify every listing personally?',
+      answer: 'Roomzo uses account checks, user reports, and product moderation. We do not claim that a Roomzo employee has physically inspected every property. Always visit yourself before paying.',
+      category: 'General'
     }
   ];
 

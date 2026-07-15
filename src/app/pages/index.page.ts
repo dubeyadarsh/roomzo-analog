@@ -15,22 +15,22 @@ import { RouteMeta } from '@analogjs/router';
 import { ROOMZO_CITIES, buildCityPath, slugifyCity } from '../config/cities.config';
 
 export const routeMeta: RouteMeta = {
-  title: 'Roomzo — Rooms, PG & Flats for Rent | No Broker | Verified Listings',
+  title: 'Roomzo — Rooms, PG & Flats for Rent | Direct Owner Contact',
   meta: [
     {
       name: 'description',
       content:
-        'Find verified rooms, PGs, and flats for rent across India. 100% broker-free student housing with direct owner contact on Roomzo.',
+        'Find rooms, PGs, and flats listed by owners across India. Browse on Roomzo, contact owners directly, and follow safety tips before you pay or move in.',
     },
     {
       name: 'keywords',
       content:
-        'room for rent, student housing, brokerless property, pg for rent, flat for rent, no broker, roomzo',
+        'room for rent, student housing, pg for rent, flat for rent, owner contact rentals, roomzo',
     },
-    { property: 'og:title', content: 'Roomzo | Brokerless Rooms & PG Across India' },
+    { property: 'og:title', content: 'Roomzo | Rooms, PG & Flats with Direct Owner Contact' },
     {
       property: 'og:description',
-      content: 'Zero broker fees. Connect directly with owners for verified rooms, PGs, and flats.',
+      content: 'Owner-listed rentals with city guides and safety tips. Browse, contact, then visit before you pay.',
     },
     { property: 'og:type', content: 'website' },
     { property: 'og:image', content: 'https://www.roomzo.in/assets/og-roomzo-share.jpg' },
@@ -148,7 +148,7 @@ export default class HomeComponent implements OnInit {
   fetchRecentListings() {
     this.isLoading = true;
     
-    this.propertyService.getRecentListings(5).subscribe(
+    this.propertyService.getRecentListings(10).subscribe(
       (response: any) => {
         if (response.listings && response.listings.length > 0) {
           this.listings = mapBackendListingsToUi(response.listings);
@@ -309,7 +309,7 @@ export default class HomeComponent implements OnInit {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
-        this.propertyService.searchListingsWithFilters(0, 5, { lat, lng, sortBy: 'nearest' }).subscribe(
+        this.propertyService.searchListingsWithFilters(0, 10, { lat, lng, sortBy: 'nearest' }).subscribe(
           (res: any) => {
             if (res.listings && res.listings.length > 0) {
               this.nearbyListings = mapBackendListingsToUi(res.listings);

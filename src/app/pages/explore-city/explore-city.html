@@ -42,9 +42,9 @@
   <div class="city-hero-banner" [style.backgroundImage]="'url(' + getCityHeaderImage() + ')'">
     <div class="banner-gradient-shading"></div>
     <div class="banner-text-block container">
-      <span class="premium-tag">Broker-Free Hub</span>
+      <span class="premium-tag">Owner listings</span>
       <h1>{{ city }}</h1>
-      <p>Handpicked rooms, flats & PGs direct from verified owners.</p>
+      <p>{{ cityGuide?.tagline || ('Rooms, flats & PGs listed by owners in ' + city) }}</p>
     </div>
   </div>
 
@@ -96,7 +96,7 @@
           <mat-icon>night_shelter</mat-icon>
         </div>
         <h3>No spaces found yet</h3>
-        <p>We're currently onboarding verified listings in {{ city }} matching these filters. Check back soon!</p>
+        <p>We're currently onboarding more listings in {{ city }} matching these filters. Check back soon, or browse other cities while owners add new properties.</p>
       </div>
 
       <!-- Listings Grid -->
@@ -107,7 +107,7 @@
             <div class="floating-badge-cluster">
               <span class="feed-status-badge" [class.badge-rented]="prop.isRented === 1">
                 <mat-icon>{{ prop.isRented === 1 ? 'gpp_maybe' : 'verified' }}</mat-icon>
-                {{ prop.isRented === 1 ? 'Rented' : 'Verified Available' }}
+                {{ prop.isRented === 1 ? 'Rented' : 'Available' }}
               </span>
             </div>
             <div class="media-age-chip">
@@ -162,6 +162,15 @@
           <div class="premium-pulse-spinner mini" *ngIf="isLoadingMore"></div>
         </button>
       </div>
+
+      <app-content-guide
+        *ngIf="cityGuide"
+        kicker="City rental guide"
+        [title]="'Renting in ' + city + ': areas, tips & how Roomzo helps'"
+        [tagline]="cityGuide.tagline"
+        [intro]="cityGuide.intro"
+        [sections]="cityGuide.sections">
+      </app-content-guide>
 
       <app-related-searches [cityName]="city"></app-related-searches>
 

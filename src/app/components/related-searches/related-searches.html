@@ -1,13 +1,14 @@
 <aside class="related-searches" [class.compact]="compact" aria-label="Related rental searches">
   <h2 class="related-title">Related Searches</h2>
   <p class="related-desc">
-    Popular broker-free rental queries tenants search for on Roomzo
+    Popular rental searches on Roomzo
     <span *ngIf="cityName"> in {{ cityName }}</span>.
   </p>
   <nav class="related-links" aria-label="Related search links">
     <a
       *ngFor="let q of relatedQueries"
       [routerLink]="q.routerLink"
+      [queryParams]="q.queryParams || null"
       class="related-chip"
     >{{ q.label }}</a>
   </nav>

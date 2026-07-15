@@ -16,6 +16,8 @@ import {
 } from '../../config/cities.config';
 import { RelatedSearchesComponent } from '../../components/related-searches/related-searches';
 import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
+import { ContentGuideComponent } from '../../components/content-guide/content-guide';
+import { CityGuide, getCityGuide } from '../../content/city-guides';
 import {
   generatePropertyAltText,
   getListingImageUrl,
@@ -34,6 +36,7 @@ import cityZonesData from '../../../../public/data/city-zones.json';
     SafetyConsentBottomSheetComponent,
     RelatedSearchesComponent,
     SeoBreadcrumbComponent,
+    ContentGuideComponent,
   ],
   templateUrl: '../explore-city/explore-city.html',
   styleUrls: ['../explore-city/explore-city.css'],
@@ -74,6 +77,7 @@ export default class CityListingsPage implements OnInit, OnDestroy {
   readonly optimizeImageUrl = optimizeImageUrl;
 
   breadcrumbItems: { label: string; path?: string }[] = [];
+  cityGuide: CityGuide | null = null;
 
   constructor(
     private propertyService: PropertyService,
@@ -99,6 +103,7 @@ export default class CityListingsPage implements OnInit, OnDestroy {
 
       this.city = this.cityConfig.name;
       this.state = this.cityConfig.state;
+      this.cityGuide = getCityGuide(this.cityConfig.slug);
       this.breadcrumbItems = [
         { label: 'Home', path: '/' },
         { label: 'Explore', path: '/explore-listing' },
@@ -110,24 +115,27 @@ export default class CityListingsPage implements OnInit, OnDestroy {
       // Load zones for the current city and reset filters
       this.loadCityZones(this.city);
       
-      // 2. Now listen to query params to set the active zone safely
+      // 2. Apply zone + propertyType from URL (related searches / deep links)
       this.route.queryParams.subscribe(queryParams => {
         const requestedZone = queryParams['zone'];
         
         if (requestedZone && this.cityZones && this.cityZones.length > 0) {
-          // Find if the requested zone actually exists in THIS city's array (case-insensitive)
           const matchedZone = this.cityZones.find(z => 
             z.name.toLowerCase() === requestedZone.toLowerCase()
           );
-          
-          // If found, select it. If not, default to null (All Spaces)
           this.selectedZone = matchedZone ? matchedZone.name : null;
         } else {
-          // No zone parameter passed, default to All Spaces
           this.selectedZone = null;
         }
 
-        this.selectedPropertyType = null;
+        const requestedType = queryParams['propertyType'];
+        const allowedTypes = ['Room', 'PG', 'Flat'];
+        if (requestedType && allowedTypes.includes(requestedType)) {
+          this.selectedPropertyType = requestedType;
+        } else {
+          this.selectedPropertyType = null;
+        }
+
         this.listings = [];
         this.currentPage = 0;
         this.loadCityData();
@@ -151,15 +159,29 @@ export default class CityListingsPage implements OnInit, OnDestroy {
 
   // --- NEW: Filter Actions ---
   selectZone(zoneName: string | null) {
-    if (this.selectedZone === zoneName) return; // Prevent duplicate calls
-    this.selectedZone = zoneName;
-    this.resetAndLoadData();
+    if (this.selectedZone === zoneName) return;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        zone: zoneName || null,
+        propertyType: this.selectedPropertyType || null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   selectPropertyType(typeValue: string | null) {
-    if (this.selectedPropertyType === typeValue) return; // Prevent duplicate calls
-    this.selectedPropertyType = typeValue;
-    this.resetAndLoadData();
+    if (this.selectedPropertyType === typeValue) return;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        zone: this.selectedZone || null,
+        propertyType: typeValue || null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   private resetAndLoadData() {

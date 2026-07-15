@@ -139,14 +139,14 @@ export function getActiveCities(): RoomzoCity[] {
 export function getCitySeoTitle(city: RoomzoCity): string {
   return (
     city.seoTitle ??
-    `Rooms, PG & Flats for Rent in ${city.name} | Brokerless | Roomzo`
+    `Rooms, PG & Flats for Rent in ${city.name} | Direct Owner Contact | Roomzo`
   );
 }
 
 export function getCitySeoDescription(city: RoomzoCity): string {
   return (
     city.seoDescription ??
-    `Find verified rooms, PGs, and flats for rent in ${city.name}, ${city.state}. 100% broker-free listings with direct owner contact on Roomzo — India's trusted student housing platform.`
+    `Browse owner-listed rooms, PGs, and flats for rent in ${city.name}, ${city.state}. Compare options on Roomzo, contact owners directly, and follow our safety tips before you pay or move in.`
   );
 }
 

@@ -3,11 +3,11 @@
   <section class="hero-section">
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1>Finding Your Way Home</h1>
-      <p>We bridge the gap between dream homes and reality with integrity and personalized care.</p>
+      <h1>About Roomzo</h1>
+      <p>An Indian rental discovery platform that connects tenants with property owners — built for transparency, safety habits, and direct contact.</p>
       <div class="hero-actions">
-        <button class="btn-white">Our Values</button>
-        <button class="btn-outline-light">Meet The Team</button>
+        <a class="btn-white" routerLink="/explore-listing">Browse listings</a>
+        <button type="button" class="btn-outline-light" (click)="goToContact()">Contact support</button>
       </div>
     </div>
   </section>
@@ -15,9 +15,49 @@
   <section class="mission-section">
     <div class="container">
       <div class="section-header center">
-        <span class="eyebrow">OUR MISSION</span>
-        <h2>To make renting rooms, PGs, and flats simple, transparent, and broker-free across India.</h2>
-        <p class="subtext">We aim to connect tenants directly with verified property owners, eliminating middlemen, hidden charges, and fake listings—so finding a place to stay is fast, affordable, and trustworthy.</p>
+        <span class="eyebrow">WHO WE ARE</span>
+        <h2>Roomzo makes finding rooms, PGs, and flats clearer and more direct.</h2>
+        <p class="subtext">
+          Roomzo (roomzo.in) is a technology platform for rental listings. Owners publish rooms, paying guest stays,
+          and flats; seekers browse by city and category, read details, and contact owners by call or WhatsApp after
+          a short safety reminder. We are <strong>not</strong> a brokerage firm and we do not claim that every
+          offline deal is risk-free — we focus on useful discovery tools and practical safety guidance.
+        </p>
+      </div>
+
+      <div class="about-prose">
+        <h3>Why Roomzo exists</h3>
+        <p>
+          Renting in India often involves brokers, opaque fees, and pressure to pay before seeing a property.
+          Students moving to Prayagraj or Varanasi, and professionals relocating to Pune or Lucknow, need a simple
+          way to discover options and speak to the person responsible for the property. Roomzo was built for that flow:
+          search → compare → contact → visit → decide.
+        </p>
+        <h3>What we do</h3>
+        <ul>
+          <li>Host owner-submitted listings with photos, rent, location, and amenities.</li>
+          <li>Offer city pages, category guides, and search filters so users can explore meaningfully.</li>
+          <li>Enable call and WhatsApp contact with safety messaging (visit before you pay; watch for scam patterns).</li>
+          <li>Provide report tools when a listing appears fraudulent or incorrect.</li>
+          <li>Publish educational blog and FAQ content about renting safely.</li>
+        </ul>
+        <h3>What we do not do</h3>
+        <ul>
+          <li>We do not guarantee listing accuracy — owners are responsible for their content.</li>
+          <li>We do not hold deposits, execute rent agreements, or transfer property keys on your behalf.</li>
+          <li>We do not promise “zero scam” outcomes; safety depends on user caution and offline verification.</li>
+        </ul>
+        <h3>Where we focus</h3>
+        <p>
+          Active discovery today emphasises cities such as Prayagraj, Varanasi, Pune, and Lucknow, with more cities
+          planned as inventory grows. Both students and working professionals use Roomzo, as do owners who want
+          inbound interest without listing only through agents.
+        </p>
+        <h3>Contact</h3>
+        <p>
+          Support email: <a href="mailto:support@roomzo.in">support@roomzo.in</a><br />
+          Website: <a href="https://www.roomzo.in">https://www.roomzo.in</a>
+        </p>
       </div>
 
       <div class="values-grid">
@@ -32,64 +72,13 @@
     </div>
   </section>
 
-  <!-- <section class="stats-section">
-    <div class="container stats-grid">
-      <div class="stat-item" *ngFor="let stat of stats">
-        <div class="stat-val">{{ stat.value }}</div>
-        <div class="stat-label">{{ stat.label }}</div>
-      </div>
-    </div>
-  </section> -->
-
-  <!-- <section class="journey-section">
-    <div class="container split-layout">
-      <div class="journey-content">
-        <span class="eyebrow">OUR JOURNEY</span>
-        <h2>From a small office to a city-wide leader.</h2>
-        <p>
-          EstateView began in 2012 with a simple idea: that finding a home should be an exciting adventure, not a stressful chore. Founded by two friends in a small downtown office, we started with just a handful of local listings.
-        </p>
-        <p>
-          Over the years, our commitment to integrity and personalized service fueled our growth. We embraced technology early, becoming one of the first agencies to offer virtual tours. Today, we are proud to be a trusted partner for thousands of families.
-        </p>
-        <button class="link-btn">Read full story <mat-icon>arrow_forward</mat-icon></button>
-      </div>
-      <div class="journey-image">
-        <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80" alt="Our Office HQ">
-        <div class="image-caption">Headquarters, Downtown</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="team-section">
-    <div class="container">
-      <div class="section-header center">
-        <h2>Meet the Leadership</h2>
-        <p class="subtext">The experts guiding our vision and ensuring your success.</p>
-      </div>
-
-      <div class="team-grid">
-        <div class="team-card" *ngFor="let member of team">
-          <div class="member-img">
-            <img [src]="member.image" [alt]="member.name">
-          </div>
-          <div class="member-info">
-            <h3>{{ member.name }}</h3>
-            <span class="role">{{ member.role }}</span>
-            <button class="email-btn"><mat-icon>mail_outline</mat-icon></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section> -->
-
   <section class="cta-section">
     <div class="container center">
-      <h2>Ready to find your dream home?</h2>
-      <p>Browse our exclusive listings or get in touch with one of our expert agents today.</p>
+      <h2>Ready to explore rentals?</h2>
+      <p>Browse owner-listed rooms, PGs, and flats — and always visit before you pay a deposit.</p>
       <div class="cta-actions">
-        <button class="btn-white" routerLink="/explore-listing">Browse Listings</button>
-        <button (click)="goToContact()" class="btn-dark-outline">Contact Us</button>
+        <button type="button" class="btn-white" routerLink="/explore-listing">Browse Listings</button>
+        <button type="button" (click)="goToContact()" class="btn-dark-outline">Contact Us</button>
       </div>
     </div>
   </section>
