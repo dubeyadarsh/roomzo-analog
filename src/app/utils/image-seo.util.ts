@@ -1,6 +1,8 @@
 const PLACEHOLDER =
   'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80';
 
+export type ListingPhotoInput = { photoUrl?: string; url?: string } | string;
+
 export interface PropertyImageContext {
   propertyType?: string;
   propertyName?: string;
@@ -32,7 +34,24 @@ export function getListingImageUrl(
   photos?: { photoUrl: string }[],
   fallback = PLACEHOLDER
 ): string {
-  return photos?.[0]?.photoUrl ?? fallback;
+  return getListingPhotoUrls(photos, fallback)[0];
+}
+
+/** All photo URLs from API photos array (supports photoUrl objects or plain strings). */
+export function getListingPhotoUrls(
+  photos?: ListingPhotoInput[] | null,
+  fallback = PLACEHOLDER
+): string[] {
+  if (!photos?.length) return [fallback];
+
+  const urls = photos
+    .map((p) => {
+      if (typeof p === 'string') return p;
+      return p?.photoUrl || p?.url || '';
+    })
+    .filter((url): url is string => Boolean(url && url.trim()));
+
+  return urls.length ? urls : [fallback];
 }
 
 /** Append width/quality params for faster LCP where CDN supports it. */

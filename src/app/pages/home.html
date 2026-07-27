@@ -71,22 +71,76 @@
     
     <div class="section-header-mobile">
       <h3>FEATURED PROPERTIES</h3>
+      <p class="section-subtitle">Hand-picked listings promoted on Roomzo</p>
     </div>
 
-    <div class="loader-container" *ngIf="isLoading">
+    <div class="loader-container" *ngIf="isLoadingFeatured">
+      <div class="modern-spinner"></div>
+      <p class="loader-text">Loading featured properties...</p>
+    </div>
+
+    <div class="carousel-container" *ngIf="!isLoadingFeatured && featuredListings.length > 0">
+      
+      <button class="carousel-nav carousel-prev" (click)="scrollFeaturedLeft()" [disabled]="featuredIsAtStart" [attr.aria-label]="'Previous featured listings'">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <div class="listings-grid" #featuredCarouselGrid (scroll)="onFeaturedScroll()">
+        <app-listing-card
+          *ngFor="let item of featuredListings; let i = index"
+          [listing]="item"
+          [availabilityLabel]="'Featured'"
+          [locationIcon]="'fiber_manual_record'"
+          [showPostedDate]="true"
+          (view)="viewDetails($event.id)"
+          (call)="handleCardContactAction($event, 'call')"
+          (whatsapp)="handleCardContactAction($event, 'whatsapp')"
+          (save)="toggleSavedListing($event)">
+        </app-listing-card>
+      </div>
+
+      <button class="carousel-nav carousel-next" (click)="scrollFeaturedRight()" [disabled]="featuredIsAtEnd" [attr.aria-label]="'Next featured listings'">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <div class="carousel-dots" *ngIf="!isLoadingFeatured && featuredListings.length > 0">
+      <div class="dot" *ngFor="let item of featuredListings; let i = index" 
+           [ngClass]="{ 'active': getFeaturedVisibleIndices().includes(i) }"
+           (click)="scrollFeaturedToIndex(i)">
+      </div>
+    </div>
+
+    <div class="section-empty" *ngIf="!isLoadingFeatured && featuredListings.length === 0">
+      <mat-icon>star_border</mat-icon>
+      <p>Featured picks will appear here soon.</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="featured-section recent-section">
+  <div class="container">
+
+    <div class="section-header-mobile">
+      <h3>RECENT PROPERTIES</h3>
+      <p class="section-subtitle">Latest owner listings added on Roomzo</p>
+    </div>
+
+    <div class="loader-container" *ngIf="isLoadingRecent">
       <div class="modern-spinner"></div>
       <p class="loader-text">Finding the latest properties for you...</p>
     </div>
 
-    <div class="carousel-container" *ngIf="!isLoading && listings.length > 0">
+    <div class="carousel-container" *ngIf="!isLoadingRecent && recentListings.length > 0">
       
-      <button class="carousel-nav carousel-prev" (click)="scrollLeft()" [disabled]="isAtStart" [attr.aria-label]="'Previous listings'">
+      <button class="carousel-nav carousel-prev" (click)="scrollRecentLeft()" [disabled]="recentIsAtStart" [attr.aria-label]="'Previous recent listings'">
         <mat-icon>chevron_left</mat-icon>
       </button>
 
-      <div class="listings-grid" #carouselGrid (scroll)="onScroll()">
+      <div class="listings-grid" #recentCarouselGrid (scroll)="onRecentScroll()">
         <app-listing-card
-          *ngFor="let item of listings; let i = index"
+          *ngFor="let item of recentListings; let i = index"
           [listing]="item"
           [availabilityLabel]="'Owner listing'"
           [locationIcon]="'fiber_manual_record'"
@@ -98,20 +152,32 @@
         </app-listing-card>
       </div>
 
-      <button class="carousel-nav carousel-next" (click)="scrollRight()" [disabled]="isAtEnd" [attr.aria-label]="'Next listings'">
+      <button class="carousel-nav carousel-next" (click)="scrollRecentRight()" [disabled]="recentIsAtEnd" [attr.aria-label]="'Next recent listings'">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
 
-    <div class="carousel-dots" *ngIf="!isLoading && listings.length > 0">
-      <div class="dot" *ngFor="let item of listings; let i = index" 
-           [ngClass]="{ 'active': getVisibleIndices().includes(i) }"
-           (click)="scrollToIndex(i)">
+    <div class="carousel-dots" *ngIf="!isLoadingRecent && recentListings.length > 0">
+      <div class="dot" *ngFor="let item of recentListings; let i = index" 
+           [ngClass]="{ 'active': getRecentVisibleIndices().includes(i) }"
+           (click)="scrollRecentToIndex(i)">
       </div>
     </div>
 
+    <div class="section-empty" *ngIf="!isLoadingRecent && recentListings.length === 0">
+      <mat-icon>home_work</mat-icon>
+      <p>No recent listings yet. Check back soon or browse all rentals.</p>
+      <button routerLink="/explore-listing" class="btn-primary browse-btn-sm">Browse all</button>
+    </div>
 
-<div class="section-header-mobile" *ngIf="isLoadingNearby || nearbyListings.length > 0" style="margin-top: 16px;">      <h3>PROPERTIES NEAR YOU</h3>
+  </div>
+</section>
+
+<section class="featured-section nearby-section" *ngIf="isLoadingNearby || nearbyListings.length > 0">
+  <div class="container">
+
+    <div class="section-header-mobile">
+      <h3>PROPERTIES NEAR YOU</h3>
     </div>
 
     <div class="loader-container" *ngIf="isLoadingNearby">
@@ -143,7 +209,11 @@
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>
- <section class="trust-features-section">
+
+  </div>
+</section>
+
+<section class="trust-features-section">
   <div class="container">
     <div class="section-header-mobile">
       <h3>WHY CHOOSE ROOMZO?</h3>
@@ -193,6 +263,8 @@
   </div>
 </section>
 
+<section class="home-bottom-section">
+  <div class="container">
     <article class="home-editorial">
       <div class="editorial-inner">
         <span class="editorial-kicker">Rent smarter</span>
@@ -267,14 +339,13 @@
       </picture>
     </div>
 
-  </div> 
+  </div>
   <app-contact></app-contact>
- 
-  <!-- Add this at the absolute bottom of your homepage HTML -->
-<app-safety-consent-bottom-sheet
-  [isOpen]="isConsentModalOpen()"
-  [pendingAction]="pendingAction()"
-  (accept)="onConsentAccepted($event)"
-  (closeModal)="isConsentModalOpen.set(false)"
-/>
+
+  <app-safety-consent-bottom-sheet
+    [isOpen]="isConsentModalOpen()"
+    [pendingAction]="pendingAction()"
+    (accept)="onConsentAccepted($event)"
+    (closeModal)="isConsentModalOpen.set(false)"
+  />
 </section>

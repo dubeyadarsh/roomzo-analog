@@ -205,68 +205,57 @@
     font-size: 0.80rem;
   }
 
-  /* Stats mobile */
+  /* Stats mobile — all 4 in one row */
   .hero-stats-strip {
-    width: calc(100% - 32px);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: calc(100% - 20px);
     margin: 10px auto 0;
-    padding: 12px 10px;
+    padding: 10px 4px;
     border-radius: 12px;
+    gap: 0;
   }
 
-  .stat-item { gap: 7px; }
+  .stat-item {
+    flex: 1 1 0;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 2px;
+  }
 
   .stat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
   }
 
-  .stat-number { font-size: 0.95rem; }
-  .stat-label  { font-size: 0.70rem; }
+  .stat-text {
+    align-items: center;
+  }
+
+  .stat-number {
+    font-size: 0.8rem;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 0.56rem;
+    white-space: nowrap;
+    line-height: 1.15;
+  }
 
   .stat-divider {
+    display: block;
+    align-self: center;
     height: 28px;
-    margin: 0 4px;
+    margin: 0 1px;
+    flex-shrink: 0;
   }
-  
-}
-/* ============================================================
-   ANIMATED CITY STATS (Works on all screens)
-============================================================ */
-.stat-city {
-  display: block;
-  height: 1.5em;
-  position: relative; /* Allows absolute positioning of child items */
-  overflow: hidden;
-  min-width: 80px;    /* Prevents the container from collapsing */
 }
 
-.city-item {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  opacity: 0;         /* Default hidden */
-  display: block;
-  animation: cityRotate 9s infinite ease-in-out;
-}
-
-/* Staggered delays for 3 items over a 9-second loop */
-.city-item:nth-child(1) { animation-delay: 0s; }
-.city-item:nth-child(2) { animation-delay: 3s; }
-.city-item:nth-child(3) { animation-delay: 6s; }
-
-@keyframes cityRotate {
-  0% {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  5%, 28% {            /* Fades in and stays visible */
-    opacity: 1;
-    transform: translateY(0);
-  }
-  33%, 100% {          /* Fades out and slides up */
-    opacity: 0;
-    transform: translateY(-15px);
-  }
-}
+/* Removed animated city rotate — replaced with static 4+ Cities */

@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { RelatedSearchesComponent } from "../related-searches/related-searches";
 import { getActiveCities, buildCityPath } from '../../config/cities.config';
 import { ROOMZO_CATEGORIES, buildCategoryPath } from '../../config/categories.config';
-imports: [CommonModule, RouterModule, MatIconModule, RelatedSearchesComponent]
+
 @Component({
   selector: 'app-footer',
   standalone: true,

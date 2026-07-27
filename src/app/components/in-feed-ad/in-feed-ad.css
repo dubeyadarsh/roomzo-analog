@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+:host(.grid-ad-slot) {
+  grid-column: 1 / -1;
+}
+
+.in-feed-ad-slot {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.ad-kicker {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.ad-text-link {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #0d9488;
+  text-decoration: none;
+}
+
+.ad-text-link:hover {
+  color: #0f766e;
+  text-decoration: underline;
+}
+
+.native-mount {
+  margin-top: 2px;
+  min-height: 28px;
+  max-height: 72px;
+  overflow: hidden;
+}
+
+.native-mount :is(iframe, a, div) {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  .in-feed-ad-slot {
+    padding: 9px 12px;
+    border-radius: 10px;
+  }
+
+  .ad-text-link {
+    font-size: 0.85rem;
+  }
+}

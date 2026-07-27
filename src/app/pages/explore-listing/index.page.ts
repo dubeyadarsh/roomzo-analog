@@ -18,6 +18,8 @@ import { RouteMeta } from '@analogjs/router';
 
 import { SafetyConsentBottomSheetComponent, PendingAction } from '../../components/safety-consent/safety-consent';
 import { ListingCardComponent } from '../../components/listing-card/listing-card';
+import { InFeedAdComponent } from '../../components/in-feed-ad/in-feed-ad';
+import { getInFeedAdSlotIndex, shouldShowInFeedAd } from '../../utils/in-feed-ad.util';
 
 export const routeMeta: RouteMeta = {
   title: 'Explore Rooms, PG & Flats for Rent | Roomzo',
@@ -38,12 +40,15 @@ export const routeMeta: RouteMeta = {
     CommonModule, MatIconModule, MatButtonModule, 
     FormsModule, ReactiveFormsModule, 
     MatAutocompleteModule, MatInputModule,
-    SafetyConsentBottomSheetComponent, ListingCardComponent
+    SafetyConsentBottomSheetComponent, ListingCardComponent, InFeedAdComponent
   ],
   templateUrl: './explore-listing.html',
   styleUrls: ['./explore-listing.css']
 })
 export default class ExploreListingsComponent implements OnInit, OnDestroy {
+  readonly shouldShowInFeedAd = shouldShowInFeedAd;
+  readonly getInFeedAdSlotIndex = getInFeedAdSlotIndex;
+
   listings: any[] = [];
   totalItems = 0;
   isLoading = false;

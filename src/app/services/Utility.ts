@@ -5,6 +5,7 @@ export interface Listing {
   price: number;
   priceUnit?: string; // e.g. '/month' or 'Total Price'
   image: string;
+  photos?: any[];
   badge: { text: string; color: 'blue' | 'green' | 'purple' };
   specs: { beds: number; baths: number; area: number };
   rating?: number;
@@ -14,6 +15,7 @@ export interface Listing {
 
 export function mapBackendListingsToUi(list: any[]): Listing[] {
   return list.map(item => ({
+    ...item,
     id: item.id,
 
     title: item.propertyName
@@ -28,6 +30,8 @@ export function mapBackendListingsToUi(list: any[]): Listing[] {
     image: item.photos?.length
       ? item.photos[0].photoUrl
       : 'assets/no-image.jpg',
+
+    photos: item.photos ?? [],
 
     badge: {
       text: item.isRented ? 'RENTED' : 'FOR RENT',

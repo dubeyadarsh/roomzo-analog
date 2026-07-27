@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, Inject, PLATFORM_ID, Renderer2, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, CUSTOM_ELEMENTS_SCHEMA, Inject, PLATFORM_ID, Renderer2, signal, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser, DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,16 +21,17 @@ import {
 import { slugifyCity } from '../../config/cities.config';
 
 import { PendingAction, SafetyConsentBottomSheetComponent } from '../../components/safety-consent/safety-consent';
+import { InFeedAdComponent } from '../../components/in-feed-ad/in-feed-ad';
 
 @Component({
   selector: 'app-property-details',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule, SafetyConsentBottomSheetComponent, RelatedSearchesComponent, SeoBreadcrumbComponent],
+  imports: [CommonModule, MatIconModule, MatButtonModule, RouterLink, FormsModule, SafetyConsentBottomSheetComponent, RelatedSearchesComponent, SeoBreadcrumbComponent, InFeedAdComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './property-details.html',
   styleUrls: ['./property-details.css']
 })
-export default class PropertyDetailsComponent implements OnInit, OnDestroy {
+export default class PropertyDetailsComponent implements OnInit, OnDestroy, AfterViewInit {
   property: any | undefined;
   similarProperties: any[] = [];
   displayAmenities: any[] = [];
@@ -65,6 +66,24 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
 
   isBrowser = isPlatformBrowser(this.platformId);
   activePhotoIndex = 0;
+  zoomViewerOpen = false;
+  zoomPhotoIndex = 0;
+  zoomScale = 1;
+  zoomPanX = 0;
+  zoomPanY = 0;
+  @ViewChild('galleryScroll') galleryScroll?: ElementRef<HTMLElement>;
+  @ViewChild('thumbStrip') thumbStrip?: ElementRef<HTMLElement>;
+  private scrollRaf: number | null = null;
+  private zoomTouchState = {
+    mode: 'none' as 'none' | 'pan' | 'pinch' | 'swipe',
+    startX: 0,
+    startY: 0,
+    startPanX: 0,
+    startPanY: 0,
+    startDistance: 0,
+    startScale: 1,
+    lastTap: 0,
+  };
   private routeSub: Subscription | null = null;
 
   userHasGivenConsent = signal(false); 
@@ -103,6 +122,7 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         if (this.isBrowser) {
           window.scrollTo(0, 0);
           this.renderer.addClass(this.document.body, 'hide-global-bottom-nav');
+          this.renderer.addClass(this.document.body, 'immersive-detail-page');
         }
         
         this.cd.detectChanges();
@@ -150,6 +170,9 @@ export default class PropertyDetailsComponent implements OnInit, OnDestroy {
         }
         this.isLoading = false;
         this.cd.detectChanges();
+        if (this.isBrowser && this.property) {
+          setTimeout(() => this.syncGalleryToIndex(0, false), 0);
+        }
       },
       error: (err) => {
         console.error('Error:', err);
@@ -321,22 +344,228 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
   // ... (All other existing methods remain exactly the same: isUserLoggedIn, openContactModal, loadMapCoordinates, shareProperty, etc.)
   
+  ngAfterViewInit(): void {
+    if (this.isBrowser) {
+      this.syncGalleryToIndex(0, false);
+    }
+  }
+
+  @HostListener('window:resize')
+  onGalleryResize(): void {
+    if (this.isBrowser) {
+      this.syncGalleryToIndex(this.activePhotoIndex, false);
+    }
+  }
+
+  get zoomTransform(): string {
+    return `translate3d(${this.zoomPanX}px, ${this.zoomPanY}px, 0) scale(${this.zoomScale})`;
+  }
+
+  openZoomViewer(index: number, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.isBrowser) return;
+    this.zoomPhotoIndex = index;
+    this.resetZoomTransform();
+    this.zoomViewerOpen = true;
+    this.renderer.addClass(this.document.body, 'zoom-viewer-open');
+    this.cd.markForCheck();
+  }
+
+  closeZoomViewer(): void {
+    this.zoomViewerOpen = false;
+    this.resetZoomTransform();
+    this.renderer.removeClass(this.document.body, 'zoom-viewer-open');
+    this.cd.markForCheck();
+  }
+
+  zoomPrevPhoto(): void {
+    if (this.zoomPhotoIndex > 0) {
+      this.zoomPhotoIndex--;
+      this.resetZoomTransform();
+    }
+  }
+
+  zoomNextPhoto(): void {
+    const total = this.getDisplayPhotos().length;
+    if (this.zoomPhotoIndex < total - 1) {
+      this.zoomPhotoIndex++;
+      this.resetZoomTransform();
+    }
+  }
+
+  private resetZoomTransform(): void {
+    this.zoomScale = 1;
+    this.zoomPanX = 0;
+    this.zoomPanY = 0;
+    this.zoomTouchState.mode = 'none';
+  }
+
+  onZoomTouchStart(event: TouchEvent): void {
+    if (!this.zoomViewerOpen) return;
+    const touches = event.touches;
+
+    if (touches.length === 2) {
+      this.zoomTouchState.mode = 'pinch';
+      this.zoomTouchState.startDistance = this.getTouchDistance(touches);
+      this.zoomTouchState.startScale = this.zoomScale;
+      return;
+    }
+
+    if (touches.length === 1) {
+      const now = Date.now();
+      if (now - this.zoomTouchState.lastTap < 280) {
+        this.handleZoomDoubleTap();
+        this.zoomTouchState.lastTap = 0;
+        return;
+      }
+      this.zoomTouchState.lastTap = now;
+      this.zoomTouchState.startX = touches[0].clientX;
+      this.zoomTouchState.startY = touches[0].clientY;
+      this.zoomTouchState.startPanX = this.zoomPanX;
+      this.zoomTouchState.startPanY = this.zoomPanY;
+      this.zoomTouchState.mode = this.zoomScale > 1 ? 'pan' : 'swipe';
+    }
+  }
+
+  onZoomTouchMove(event: TouchEvent): void {
+    if (!this.zoomViewerOpen) return;
+    const touches = event.touches;
+
+    if (this.zoomTouchState.mode === 'pinch' && touches.length === 2) {
+      event.preventDefault();
+      const distance = this.getTouchDistance(touches);
+      if (this.zoomTouchState.startDistance > 0) {
+        const nextScale = this.zoomTouchState.startScale * (distance / this.zoomTouchState.startDistance);
+        this.zoomScale = Math.min(4, Math.max(1, nextScale));
+        if (this.zoomScale <= 1.02) {
+          this.resetZoomTransform();
+        }
+      }
+      this.cd.markForCheck();
+      return;
+    }
+
+    if (this.zoomTouchState.mode === 'pan' && touches.length === 1) {
+      event.preventDefault();
+      this.zoomPanX = this.zoomTouchState.startPanX + (touches[0].clientX - this.zoomTouchState.startX);
+      this.zoomPanY = this.zoomTouchState.startPanY + (touches[0].clientY - this.zoomTouchState.startY);
+      this.cd.markForCheck();
+    }
+  }
+
+  onZoomTouchEnd(event: TouchEvent): void {
+    if (!this.zoomViewerOpen) return;
+
+    if (this.zoomTouchState.mode === 'swipe' && event.changedTouches.length === 1 && this.zoomScale <= 1) {
+      const dx = event.changedTouches[0].clientX - this.zoomTouchState.startX;
+      const dy = event.changedTouches[0].clientY - this.zoomTouchState.startY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+        if (dx < 0) {
+          this.zoomNextPhoto();
+        } else {
+          this.zoomPrevPhoto();
+        }
+      }
+    }
+
+    this.zoomTouchState.mode = 'none';
+  }
+
+  private handleZoomDoubleTap(): void {
+    if (this.zoomScale > 1) {
+      this.resetZoomTransform();
+    } else {
+      this.zoomScale = 2.5;
+    }
+    this.cd.markForCheck();
+  }
+
+  private getTouchDistance(touches: TouchList): number {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  getDisplayPhotos(): { photoUrl: string }[] {
+    const photos = this.property?.photos;
+    if (photos?.length) {
+      return photos;
+    }
+    return [{ photoUrl: 'assets/placeholder.jpg' }];
+  }
+
+  getZoomPhotoUrl(index = this.zoomPhotoIndex): string {
+    const photos = this.getDisplayPhotos();
+    const safeIndex = Math.max(0, Math.min(index, photos.length - 1));
+    return photos[safeIndex]?.photoUrl ?? 'assets/placeholder.jpg';
+  }
+
+  onGalleryScroll(): void {
+    if (!this.isBrowser || !this.galleryScroll) return;
+    if (this.scrollRaf !== null) {
+      cancelAnimationFrame(this.scrollRaf);
+    }
+    this.scrollRaf = requestAnimationFrame(() => {
+      const el = this.galleryScroll?.nativeElement;
+      if (!el || el.clientWidth === 0) return;
+      const index = Math.round(el.scrollLeft / el.clientWidth);
+      const clamped = Math.max(0, Math.min(index, this.getDisplayPhotos().length - 1));
+      if (clamped !== this.activePhotoIndex) {
+        this.activePhotoIndex = clamped;
+        this.scrollActiveThumbIntoView();
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  scrollToPhoto(index: number): void {
+    this.activePhotoIndex = index;
+    this.syncGalleryToIndex(index, true);
+    this.scrollActiveThumbIntoView();
+  }
+
+  private scrollActiveThumbIntoView(): void {
+    if (!this.isBrowser) return;
+    const strip = this.thumbStrip?.nativeElement;
+    if (!strip) return;
+    const activeThumb = strip.querySelector<HTMLElement>(
+      `[data-thumb-index="${this.activePhotoIndex}"]`
+    );
+    if (!activeThumb) return;
+    const targetLeft =
+      activeThumb.offsetLeft - strip.clientWidth / 2 + activeThumb.clientWidth / 2;
+    strip.scrollTo({ left: Math.max(0, targetLeft), behavior: 'smooth' });
+  }
+
+  private syncGalleryToIndex(index: number, smooth: boolean): void {
+    const el = this.galleryScroll?.nativeElement;
+    if (!el || el.clientWidth === 0) return;
+    el.scrollTo({
+      left: index * el.clientWidth,
+      behavior: smooth ? 'smooth' : 'auto',
+    });
+  }
+
   nextPhoto(event: Event) {
     event.stopPropagation();
-    if (this.property?.photos) {
-      this.activePhotoIndex = (this.activePhotoIndex + 1) % this.property.photos.length;
+    const total = this.getDisplayPhotos().length;
+    if (total > 1) {
+      const next = (this.activePhotoIndex + 1) % total;
+      this.scrollToPhoto(next);
     }
   }
 
   prevPhoto(event: Event) {
     event.stopPropagation();
-    if (this.property?.photos) {
-      this.activePhotoIndex = (this.activePhotoIndex - 1 + this.property.photos.length) % this.property.photos.length;
+    const total = this.getDisplayPhotos().length;
+    if (total > 1) {
+      const prev = (this.activePhotoIndex - 1 + total) % total;
+      this.scrollToPhoto(prev);
     }
   }
 
   setActivePhoto(index: number) {
-    this.activePhotoIndex = index;
+    this.scrollToPhoto(index);
   }
 
   isUserLoggedIn(): boolean {
@@ -504,8 +733,13 @@ private checkAndExecuteConsent(actionData: any, successCallback: () => void) {
 
   ngOnDestroy(): void {
     this.seo.removeJsonLd();
+    if (this.scrollRaf !== null) {
+      cancelAnimationFrame(this.scrollRaf);
+    }
     if (this.isBrowser) {
       this.renderer.removeClass(this.document.body, 'hide-global-bottom-nav');
+      this.renderer.removeClass(this.document.body, 'immersive-detail-page');
+      this.renderer.removeClass(this.document.body, 'zoom-viewer-open');
     }
     if (this.routeSub) this.routeSub.unsubscribe();
   }

@@ -6,46 +6,78 @@
 <div class="page-container" *ngIf="!isLoading && property">
 
   <section class="gallery-container mobile-only" *ngIf="isBrowser">
-    <button class="mobile-floating-btn back-btn" routerLink="/explore-listing">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-
-    <div class="main-image-wrapper">
-      <div class="overlay-tags-container">
-        <div class="tags-left">
-          <span class="img-tag tag-verified"><mat-icon>verified</mat-icon> Verified Owner</span>
-          <span class="img-tag tag-danger"><mat-icon>block</mat-icon> No Brokerage</span>
-          <!-- <span class="img-tag tag-success"><mat-icon>bolt</mat-icon> Available Now</span> -->
-        </div>
-        <div class="tags-right">
-          <span class="img-tag tag-dark"><mat-icon>camera_alt</mat-icon> {{ activePhotoIndex + 1 }} / {{ property.photos?.length || 1 }}</span>
+    <div class="gallery-stage">
+      <div class="mobile-gallery-toolbar">
+        <button class="mobile-floating-btn back-btn" routerLink="/explore-listing" aria-label="Go back">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="toolbar-actions">
+          <button class="mobile-floating-btn share-btn" (click)="shareProperty()" aria-label="Share property">
+            <mat-icon>{{ isCopied ? 'check' : 'ios_share' }}</mat-icon>
+          </button>
+          <button class="mobile-floating-btn report-btn" (click)="reportProperty()" aria-label="Report property">
+            <mat-icon>flag</mat-icon>
+          </button>
         </div>
       </div>
 
-      <button class="nav-arrow prev-arrow" (click)="prevPhoto($event)" *ngIf="property.photos?.length > 1">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
+      <div
+        class="mobile-gallery-scroll"
+        #galleryScroll
+        (scroll)="onGalleryScroll()"
+        role="region"
+        aria-label="Property photos"
+      >
+        <article
+          class="gallery-slide"
+          *ngFor="let photo of getDisplayPhotos(); let i = index"
+          [attr.aria-label]="'Photo ' + (i + 1) + ' of ' + getDisplayPhotos().length"
+        >
+          <div class="slide-frame" (click)="openZoomViewer(i, $event)">
+            <img
+              class="slide-bg"
+              [src]="optimizeImageUrl(photo.photoUrl)"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              draggable="false"
+            />
+            <img
+              class="slide-img"
+              [src]="optimizeImageUrl(photo.photoUrl)"
+              [alt]="generatePropertyAltText(property, i)"
+              [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+              decoding="async"
+              draggable="false"
+            />
+          </div>
+        </article>
+      </div>
 
-      <img [src]="optimizeImageUrl(property.photos && property.photos.length > 0 ? property.photos[activePhotoIndex].photoUrl : 'assets/placeholder.jpg')" 
-           [alt]="generatePropertyAltText(property, activePhotoIndex)" 
-           class="main-image fade-in" 
-           width="800"
-           height="600"
-           [attr.loading]="activePhotoIndex === 0 ? 'eager' : 'lazy'"
-           decoding="async"
-           (click)="openImage(property.photos[activePhotoIndex]?.photoUrl)" />
-
-      <button class="nav-arrow next-arrow" (click)="nextPhoto($event)" *ngIf="property.photos?.length > 1">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+      <span class="photo-counter" *ngIf="getDisplayPhotos().length > 1">
+        <mat-icon>photo_library</mat-icon>
+        {{ activePhotoIndex + 1 }} / {{ getDisplayPhotos().length }}
+      </span>
     </div>
 
-    <div class="thumbnail-strip" *ngIf="property.photos?.length > 1">
-      <button class="thumbnail-btn" 
-              *ngFor="let photo of property.photos; let i = index" 
-              [class.active]="i === activePhotoIndex" 
-              (click)="setActivePhoto(i)">
-        <img [src]="photo.photoUrl" [alt]="generatePropertyAltText(property, i)" loading="lazy" decoding="async" width="80" height="60" />
+    <div class="mobile-thumbnail-strip" #thumbStrip *ngIf="getDisplayPhotos().length > 1">
+      <button
+        type="button"
+        class="thumb"
+        *ngFor="let photo of getDisplayPhotos(); let i = index"
+        [class.active]="i === activePhotoIndex"
+        [attr.data-thumb-index]="i"
+        [attr.aria-label]="'View photo ' + (i + 1)"
+        (click)="scrollToPhoto(i)"
+      >
+        <img
+          [src]="optimizeImageUrl(photo.photoUrl)"
+          [alt]="'Photo ' + (i + 1) + ' thumbnail'"
+          loading="lazy"
+          decoding="async"
+          draggable="false"
+        />
       </button>
     </div>
   </section>
@@ -83,32 +115,24 @@
   </section>
 
   <div class="content-wrapper">
-    
-    <header class="property-header">
+
+    <header class="property-header stagger-item">
       <div class="header-content">
-        <div class="title-section" style="width: 100%;">
-          <app-seo-breadcrumb [items]="breadcrumbItems"></app-seo-breadcrumb>
+        <div class="title-section">
+          <app-seo-breadcrumb class="desktop-only" [items]="breadcrumbItems"></app-seo-breadcrumb>
+          <div class="mobile-eyebrow-row mobile-only">
+            <span class="type-eyebrow">
+              <mat-icon>verified</mat-icon> Owner listed · No brokerage
+            </span>
+            <span class="posted-inline" *ngIf="property.createdOn">
+              <mat-icon>schedule</mat-icon> {{ property.createdOn | date: 'MMM d, y' }}
+            </span>
+          </div>
           <h1>{{ property.propertyType }} in {{ property.street }}</h1>
           <p class="address">
             <mat-icon>location_on</mat-icon>
-            {{ property.street }}, {{ property.city }}, {{ property.state }}
+            <span>{{ property.street }}, {{ property.city }}, {{ property.state }}</span>
           </p>
-          
-          <div class="mobile-meta-row">
-            <div class="posted-info" *ngIf="property.createdOn">
-              <mat-icon>schedule</mat-icon>
-              <span>Posted {{ property.createdOn | date: 'MMM d, y' }}</span>
-            </div>
-            
-            <div class="inline-actions mobile-only">
-              <button class="icon-only-btn" (click)="shareProperty()" aria-label="Share">
-                <mat-icon>ios_share</mat-icon>
-              </button>
-              <button class="icon-only-btn report-icon" (click)="reportProperty()" aria-label="Report">
-                <mat-icon>flag</mat-icon>
-              </button>
-            </div>
-          </div>
         </div>
         <div class="action-buttons desktop-only">
           <button class="btn-outline" (click)="shareProperty()" [class.success-btn]="isCopied">
@@ -123,7 +147,26 @@
       </div>
     </header>
 
-    <section class="premium-specs-grid">
+    <section class="mobile-summary-card mobile-only stagger-item">
+      <div class="summary-top">
+        <div class="summary-price">
+          <span class="rent-label">Monthly rent</span>
+          <div class="price-highlight">{{ formatPrice(property.rentAmount) }}<span>/mo</span></div>
+        </div>
+        <span class="availability-chip" [class.rented]="property.isRented">
+          <mat-icon>{{ property.isRented ? 'block' : 'check_circle' }}</mat-icon>
+          {{ property.isRented ? 'Rented' : 'Available' }}
+        </span>
+      </div>
+      <div class="summary-meta">
+        <span class="meta-pill"><mat-icon>bed</mat-icon>{{ property.bedrooms }} BHK</span>
+        <span class="meta-pill"><mat-icon>square_foot</mat-icon>{{ property.propertySize | number }} sq ft</span>
+        <span class="meta-pill"><mat-icon>bathtub</mat-icon>{{ property.bathrooms || 1 }} Bath</span>
+        <span class="meta-pill"><mat-icon>directions_car</mat-icon>{{ property.parking || 1 }} Parking</span>
+      </div>
+    </section>
+
+    <section class="premium-specs-grid desktop-only">
       <div class="spec-card">
         <mat-icon>bed</mat-icon>
         <div class="spec-val">{{ property.bedrooms }} BHK</div>
@@ -146,36 +189,34 @@
       </div>
     </section>
 
-    <section class="verification-badges-section mt-24">
+    <section class="verification-badges-section stagger-item">
       <div class="v-badge">
         <div class="v-icon-wrapper"><mat-icon>person</mat-icon></div>
-        <strong>Owner contact</strong>
+        <strong>Direct contact</strong>
         <span>Reach the lister directly</span>
       </div>
       <div class="v-badge">
         <div class="v-icon-wrapper"><mat-icon>money_off</mat-icon></div>
-        <strong>No Roomzo brokerage</strong>
-        <span>For browse &amp; contact on site</span>
+        <strong>No brokerage</strong>
+        <span>No Roomzo fee to contact</span>
       </div>
       <div class="v-badge">
         <div class="v-icon-wrapper"><mat-icon>location_on</mat-icon></div>
-        <strong>Listed location</strong>
-        <span>Confirm on your visit</span>
+        <strong>Visit first</strong>
+        <span>Confirm location on site</span>
       </div>
       <div class="v-badge">
         <div class="v-icon-wrapper"><mat-icon>photo_camera</mat-icon></div>
         <strong>Owner photos</strong>
-        <span>Match them on site</span>
+        <span>Match them in person</span>
       </div>
     </section>
-    
-    <div class=" mt-24" style="margin-bottom: 24px;"></div>
 
-    <div class="content-layout">
+    <div class="content-layout stagger-item">
       
       <div class="details-column">
         
-        <section class="info-block desc-roomzo-layout">
+        <section class="info-block detail-card desc-roomzo-layout">
           <div class="desc-content">
   <h2>Description</h2>
   <!-- Removed the [class.truncated] logic to always show full content -->
@@ -202,9 +243,11 @@
           </div>
         </section>
 
+        <app-in-feed-ad class="detail-in-feed-ad" [slotIndex]="0"></app-in-feed-ad>
+
         <div class="divider"></div>
 
-        <section class="info-block">
+        <section class="info-block detail-card">
           <h2>What this place offers</h2>
           <div class="amenities-grid">
             <div class="amenity-item" *ngFor="let am of displayAmenities">
@@ -215,7 +258,7 @@
 
         <div class="divider" *ngIf="property.guidebook"></div>
 
-        <section class="info-block guidebook-section" *ngIf="property.guidebook">
+        <section class="info-block detail-card guidebook-section" *ngIf="property.guidebook">
           <div class="guidebook-group" *ngIf="property.guidebook.rules?.length > 0 || property.guidebook.customRules">
             <h2>House Rules</h2>
             <ul class="rules-list" *ngIf="property.guidebook.rules?.length > 0">
@@ -250,7 +293,7 @@
         </section>
         
         <div class="divider"></div>
-        <section class="info-block safety-section">
+        <section class="info-block detail-card safety-section">
           <div class="safety-card">
             <div class="safety-header">
               <mat-icon class="shield-icon">gpp_maybe</mat-icon>
@@ -266,7 +309,7 @@
           </div>
         </section>
         <div class="divider"></div>
-        <section class="info-block">
+        <section class="info-block detail-card">
           <div class="map-header-row">
             <div>
               <h2>Where you'll be</h2>
@@ -284,6 +327,17 @@
             </div>
           </div>
         </section>
+
+        <div class="mobile-owner-card mobile-only">
+          <div class="agent-profile">
+            <div class="avatar">{{ ownerName.charAt(0) | uppercase }}</div>
+            <div class="agent-info-text">
+              <p class="listed-by">Listed by</p>
+              <h4>{{ ownerName }}</h4>
+            </div>
+          </div>
+          <button type="button" class="btn-primary btn-contact-inline" (click)="contactAgent()">Contact Owner</button>
+        </div>
       </div>
 
       <div class="sidebar-column">
@@ -301,7 +355,20 @@
                   [ngClass]="{'pulse-highlight': highlightContact}" 
                   (click)="contactAgent()">
             Contact Owner
-          </button>          
+          </button>
+
+          <div class="desktop-contact-actions mt-16">
+            <button class="btn-outline dt-call-btn" (click)="handleContactAction('call')">
+              <mat-icon>call</mat-icon> Call
+            </button>
+            <button class="btn-outline dt-whatsapp-btn" (click)="handleContactAction('whatsapp')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+              </svg>
+              WhatsApp
+            </button>
+          </div>
+
           <button class="btn-outline full-width mt-16" (click)="scheduleTour()">Schedule a Tour</button>
         </div>
 
@@ -342,7 +409,10 @@
     <mat-icon>call</mat-icon> Call Owner
   </button>
   <button class="action-btn btn-whatsapp" (click)="handleContactAction('whatsapp')">
-    <mat-icon>chat</mat-icon> WhatsApp
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+    </svg>
+    WhatsApp
   </button>
 </div>
 
@@ -420,6 +490,42 @@
       </button>
     </div>
   </div>
+</div>
+
+<div
+  class="image-zoom-overlay mobile-only"
+  *ngIf="zoomViewerOpen"
+  (click)="closeZoomViewer()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Zoomed property photo"
+>
+  <div class="zoom-top-bar" (click)="$event.stopPropagation()">
+    <button type="button" class="zoom-close-btn" (click)="closeZoomViewer()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+    <span class="zoom-counter">{{ zoomPhotoIndex + 1 }} / {{ getDisplayPhotos().length }}</span>
+    <span class="zoom-top-spacer" aria-hidden="true"></span>
+  </div>
+
+  <div
+    class="zoom-stage"
+    (click)="$event.stopPropagation()"
+    (touchstart)="onZoomTouchStart($event)"
+    (touchmove)="onZoomTouchMove($event)"
+    (touchend)="onZoomTouchEnd($event)"
+    (touchcancel)="onZoomTouchEnd($event)"
+  >
+    <img
+      class="zoom-image"
+      [src]="optimizeImageUrl(getZoomPhotoUrl())"
+      [alt]="generatePropertyAltText(property, zoomPhotoIndex)"
+      [style.transform]="zoomTransform"
+      draggable="false"
+    />
+  </div>
+
+  <p class="zoom-hint-text" (click)="$event.stopPropagation()">Pinch or double-tap to zoom · Swipe for next photo</p>
 </div>
 
 <app-safety-consent-bottom-sheet

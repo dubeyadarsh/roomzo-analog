@@ -95,6 +95,18 @@ export class ActivityService {
     });
   }
 
+  getUserActivity(userId: string | number, limit = 20, days?: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/activity/user/${userId}`, {
+      params: this.buildParams({ limit, days })
+    });
+  }
+
+  getUserInsights(userId: string | number, limit = 5, days?: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/activity/user/${userId}/insights`, {
+      params: this.buildParams({ limit, days })
+    });
+  }
+
   // ----------------------------------------------------------------- INTERNAL
 
   private fireAndForget(payload: Record<string, any>): void {

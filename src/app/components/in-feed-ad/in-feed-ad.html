@@ -1,0 +1,14 @@
+<div *ngIf="isBrowser" class="in-feed-ad-slot" [class.is-native]="slotIndex === 0">
+  <span class="ad-kicker">Sponsored</span>
+
+  <div *ngIf="slotIndex === 0" class="native-mount" [id]="nativeContainerId"></div>
+
+  <a
+    *ngIf="slotIndex > 0"
+    class="ad-text-link"
+    [href]="smartLinkUrl"
+    target="_blank"
+    rel="noopener sponsored nofollow">
+    Explore rental tips &amp; exclusive offers for tenants →
+  </a>
+</div>

@@ -19,6 +19,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ComingSoonModalComponent } from './components/coming-soon/coming-soon-modal';
 import { isPlatformBrowser } from '@angular/common';
 import { ChatBotComponent } from "./components/chat-bot/chat-bot";
+import { AdsterraSmartLinkService } from './services/adsterra-smartlink.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -85,6 +86,7 @@ export class App implements OnInit {
   private dialog = inject(MatDialog);
   private propertyService = inject(PropertyService);
   private platformId = inject(PLATFORM_ID);
+  private adsterraSmartLink = inject(AdsterraSmartLinkService);
 
   constructor() {
     this.router.events.subscribe((event) => {
@@ -108,6 +110,7 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
+      this.adsterraSmartLink.init();
       this.loadFavoriteState();
       this.initComingSoonModal();
     }

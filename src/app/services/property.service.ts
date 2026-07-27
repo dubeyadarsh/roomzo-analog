@@ -281,11 +281,38 @@ saveListing(formData: any): Observable<any> {
     // Matches your Java Controller: @GetMapping("/owner/{ownerId}")
 return this.http.get(`${this.baseUrl}/listings/owner/${ownerId}`);
   }
-  // --- Update Listing (PUT) ---
-  updateListing(id: string, data: any): Observable<any> {
-    // Matches Backend: @PutMapping("/listings/update/{id}")
-    return this.http.
-    put(`${this.baseUrl}/listings/update/${id}`, data);
+  // --- Update Listing (PUT) — uploads new images first when provided ---
+  updateListing(id: string, payload: any, newImages: File[] = [], originalImages: File[] = []): Observable<any> {
+    const filesToUpload = [...newImages, ...originalImages];
+
+    if (filesToUpload.length === 0) {
+      return this.http.put(`${this.baseUrl}/listings/update/${id}`, payload);
+    }
+
+    const uploadObservables = filesToUpload.map((file) =>
+      this.uploadImageToHostinger(file).pipe(
+        catchError((err) => {
+          console.error('Image upload failed:', err);
+          return of(null);
+        })
+      )
+    );
+
+    return forkJoin(uploadObservables).pipe(
+      switchMap((responses: any[]) => {
+        const uploadedUrls = responses
+          .filter((res) => res && res.status === 1 && !res.url.includes('-org'))
+          .map((res) => environment.hostingerUploadUrl + res.url);
+
+        const existingUrls: string[] = payload.photos || [];
+        const finalPayload = {
+          ...payload,
+          photos: [...existingUrls, ...uploadedUrls],
+        };
+
+        return this.http.put(`${this.baseUrl}/listings/update/${id}`, finalPayload);
+      })
+    );
   }
   updateListingStatus(propertyId: number, status: string): Observable<any> {
 
@@ -331,6 +358,11 @@ searchListingsWithFilters(page: number, size: number, filters?: ListingFilter, i
   getRecentListings(limit: number = 5): Observable<PaginatedResponse> {
     let params = new HttpParams().set('limit', limit.toString());
     return this.http.get<PaginatedResponse>(`${this.baseUrl}/listings/recent`, { params });
+  }
+
+  getFeaturedListings(limit: number = 10): Observable<PaginatedResponse> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<PaginatedResponse>(`${this.baseUrl}/listings/featured`, { params });
   }
 
   reportProperty(payload: any) {

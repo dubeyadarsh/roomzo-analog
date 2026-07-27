@@ -214,5 +214,19 @@ label{display:block;font-weight:600;color:var(--rz-primary);margin-bottom:6px}
 
 /* Hides the main app bottom navigation on specific detail pages */
 body.hide-global-bottom-nav .mobile-bottom-nav {
+  display: none !important;
+}
+
+/* Immersive detail pages (e.g. property details): full-bleed hero image on mobile.
+   Hide the fixed global header so it does not overlap the top of the image. */
+@media (max-width: 900px) {
+  body.immersive-detail-page .rz-header {
     display: none !important;
+  }
+}
+
+body.zoom-viewer-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }

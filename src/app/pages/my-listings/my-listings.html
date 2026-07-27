@@ -1,21 +1,33 @@
 <div class="page-container">
 
     <header class="dashboard-header">
-        <div class="header-text">
-            <h1>My Properties</h1>
-            <p>Manage your listings, update statuses, and track performance.</p>
+        <div class="header-main">
+            <div class="header-text">
+                <span class="header-kicker mobile-only">Owner dashboard</span>
+                <h1>{{ activeTab === 'favorites' ? 'Saved Properties' : 'My Properties' }}</h1>
+                <p class="header-desc">Manage your listings, update statuses, and track performance.</p>
+                <p class="header-meta mobile-only" *ngIf="!isLoading">
+                    <ng-container *ngIf="activeTab === 'my-properties'">{{ listings.length }} listing{{ listings.length === 1 ? '' : 's' }}</ng-container>
+                    <ng-container *ngIf="activeTab === 'favorites'">{{ favoriteListings.length }} saved</ng-container>
+                </p>
+            </div>
+            <a routerLink="/list-property" class="btn-add-listing" aria-label="Add new listing">
+                <mat-icon>add</mat-icon>
+                <span>Add Listing</span>
+            </a>
         </div>
-        <button class="btn-primary" routerLink="/list-property">
-            <mat-icon>add</mat-icon> Add New Listing
-        </button>
     </header>
 
-    <div class="tab-switcher" role="tablist" aria-label="Profile sections">
+    <div class="tab-switcher" role="tablist" aria-label="Portfolio sections">
       <button class="tab-btn" [class.active]="activeTab === 'my-properties'" (click)="switchTab('my-properties')">
-        <mat-icon>real_estate_agent</mat-icon> My Properties
+        <mat-icon>real_estate_agent</mat-icon>
+        <span class="tab-label-full">My Properties</span>
+        <span class="tab-label-short">Listings</span>
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'favorites'" (click)="switchTab('favorites')">
-        <mat-icon>favorite</mat-icon> Favorites
+        <mat-icon>favorite</mat-icon>
+        <span class="tab-label-full">Favorites</span>
+        <span class="tab-label-short">Saved</span>
       </button>
     </div>
 
@@ -30,7 +42,7 @@
         </div>
         <h3>No properties listed yet</h3>
         <p>Get started by listing your first property today. It's fast and easy!</p>
-        <button class="btn-primary mt-4" routerLink="/list">List Your Property</button>
+        <button class="btn-primary mt-4" routerLink="/list-property">List Your Property</button>
     </div>
 
     <div class="empty-state" *ngIf="!isLoading && activeTab === 'favorites' && favoriteListings.length === 0">

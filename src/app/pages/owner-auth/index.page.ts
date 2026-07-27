@@ -55,6 +55,11 @@ export default class OwnerAuthComponent implements OnInit {
 
   ngOnInit() {
     this.initForms();
+    this.route.queryParams.subscribe((params) => {
+      if (params['forgot'] === '1') {
+        this.openForgotPassword();
+      }
+    });
   }
 
   // --- Form Initializations & Validations ---

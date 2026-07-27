@@ -1,0 +1,281 @@
+<div class="profile-page">
+
+  <!-- Mobile top identity strip -->
+  <header class="mobile-profile-hero">
+    <div class="mobile-avatar">{{ initials }}</div>
+    <div class="mobile-hero-text">
+      <span class="hero-greeting">Your profile</span>
+      <h1>{{ displayName }}</h1>
+      <div class="hero-contact" *ngIf="profile?.email || profile?.phone">
+        <mat-icon>{{ profile?.email ? 'mail_outline' : 'phone' }}</mat-icon>
+        <div class="hero-contact-text">
+          <span class="hero-contact-label">{{ profile?.email ? 'Email' : 'Phone' }}</span>
+          <span class="hero-contact-value">{{ profile?.email || profile?.phone }}</span>
+        </div>
+      </div>
+    </div>
+    <span class="member-chip" *ngIf="profile?.usertype">{{ profile?.usertype }}</span>
+  </header>
+
+  <!-- Account shortcuts: profile, listings, logout -->
+  <nav class="account-actions mobile-only" aria-label="Account shortcuts">
+    <button type="button" class="account-action" [class.active]="activeSection === 'profile'" (click)="switchSection('profile')">
+      <span class="account-action-icon"><mat-icon>person</mat-icon></span>
+      <span class="account-action-text">
+        <strong>My Profile</strong>
+        <small>Edit your details</small>
+      </span>
+      <mat-icon class="account-action-chevron">chevron_right</mat-icon>
+    </button>
+    <a routerLink="/my-listings" class="account-action" *ngIf="isOwner">
+      <span class="account-action-icon"><mat-icon>real_estate_agent</mat-icon></span>
+      <span class="account-action-text">
+        <strong>Manage Listings</strong>
+        <small>View &amp; edit your properties</small>
+      </span>
+      <mat-icon class="account-action-chevron">chevron_right</mat-icon>
+    </a>
+    <button type="button" class="account-action account-action--logout" (click)="logout()">
+      <span class="account-action-icon"><mat-icon>logout</mat-icon></span>
+      <span class="account-action-text">
+        <strong>Logout</strong>
+        <small>Sign out of your account</small>
+      </span>
+    </button>
+  </nav>
+
+  <!-- Sticky section tabs (mobile + desktop) -->
+  <nav class="section-tabs" aria-label="Profile sections">
+    <button type="button" class="tab-pill" [class.active]="activeSection === 'profile'" (click)="switchSection('profile')">
+      <mat-icon>person</mat-icon>
+      <span>Profile</span>
+    </button>
+    <button type="button" class="tab-pill" [class.active]="activeSection === 'favorites'" (click)="switchSection('favorites')">
+      <mat-icon>favorite</mat-icon>
+      <span>Saved</span>
+      <em *ngIf="favoriteListings.length">{{ favoriteListings.length }}</em>
+    </button>
+    <button type="button" class="tab-pill" [class.active]="activeSection === 'activity'" (click)="switchSection('activity')">
+      <mat-icon>insights</mat-icon>
+      <span>Activity</span>
+    </button>
+  </nav>
+
+  <div class="profile-shell">
+
+    <!-- Desktop sidebar -->
+    <aside class="profile-sidebar desktop-only">
+      <div class="identity-card">
+        <div class="avatar-ring">{{ initials }}</div>
+        <span class="hero-greeting">Your profile</span>
+        <h2>{{ displayName }}</h2>
+        <div class="hero-contact hero-contact--desktop" *ngIf="profile?.email || profile?.phone">
+          <mat-icon>{{ profile?.email ? 'mail_outline' : 'phone' }}</mat-icon>
+          <div class="hero-contact-text">
+            <span class="hero-contact-label">{{ profile?.email ? 'Email' : 'Phone' }}</span>
+            <span class="hero-contact-value">{{ profile?.email || profile?.phone }}</span>
+          </div>
+        </div>
+        <p class="subline" *ngIf="!profile?.email && !profile?.phone">Roomzo member</p>
+        <span class="member-chip" *ngIf="profile?.usertype">{{ profile?.usertype }}</span>
+      </div>
+
+      <div class="quick-links">
+        <button type="button" class="quick-link" [class.active]="activeSection === 'profile'" (click)="switchSection('profile')">
+          <mat-icon>person</mat-icon> My Profile
+        </button>
+        <a routerLink="/my-listings" class="quick-link" *ngIf="isOwner">
+          <mat-icon>real_estate_agent</mat-icon> Manage Listings
+        </a>
+        <button type="button" class="quick-link" (click)="goToForgotPassword()">
+          <mat-icon>lock_reset</mat-icon> Reset Password
+        </button>
+        <button type="button" class="quick-link quick-link--logout" (click)="logout()">
+          <mat-icon>logout</mat-icon> Logout
+        </button>
+      </div>
+    </aside>
+
+    <main class="profile-main">
+
+      <div class="alert-banner" *ngIf="profileLoadWarning">
+        <mat-icon>info</mat-icon>
+        <p>{{ profileLoadWarning }}</p>
+      </div>
+
+      <div class="loading-block" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Loading your profile…</p>
+      </div>
+
+      <!-- Edit profile -->
+      <section class="content-panel" *ngIf="!isLoading && activeSection === 'profile'">
+        <header class="panel-header">
+          <div>
+            <h2>Personal details</h2>
+            <p>Keep your contact info up to date so owners can reach you faster.</p>
+          </div>
+        </header>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="profile-form">
+          <div class="form-grid">
+            <label class="field">
+              <span>Full name</span>
+              <input type="text" formControlName="name" placeholder="Your full name" autocomplete="name" />
+            </label>
+            <label class="field">
+              <span>Display name</span>
+              <input type="text" formControlName="displayName" placeholder="Shown on your account" />
+            </label>
+            <label class="field">
+              <span>Mobile number</span>
+              <input type="tel" formControlName="phone" placeholder="10-digit mobile" autocomplete="tel" inputmode="tel" />
+            </label>
+            <label class="field field-readonly-wrap">
+              <span>Email</span>
+              <input
+                type="email"
+                formControlName="email"
+                class="field-readonly"
+                readonly
+                tabindex="-1"
+                aria-readonly="true" />
+              <small class="field-hint">Email is linked to your login and cannot be changed here.</small>
+            </label>
+            <label class="field">
+              <span>Age</span>
+              <input type="number" formControlName="age" min="13" max="120" placeholder="e.g. 24" inputmode="numeric" />
+            </label>
+            <label class="field">
+              <span>City</span>
+              <input type="text" formControlName="city" placeholder="e.g. Prayagraj" />
+            </label>
+            <label class="field full-width">
+              <span>Address</span>
+              <textarea formControlName="address" rows="3" placeholder="House no., street, locality"></textarea>
+            </label>
+            <label class="field">
+              <span>State</span>
+              <input type="text" formControlName="state" placeholder="e.g. Uttar Pradesh" />
+            </label>
+          </div>
+
+          <div class="mobile-quick-actions mobile-only">
+            <button type="button" class="ghost-btn" (click)="goToForgotPassword()">
+              <mat-icon>lock_reset</mat-icon> Reset password
+            </button>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save" [disabled]="isSaving || profileForm.invalid">
+              <mat-icon>save</mat-icon>
+              {{ isSaving ? 'Saving…' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Favorites -->
+      <section class="content-panel" *ngIf="!isLoading && activeSection === 'favorites'">
+        <header class="panel-header">
+          <div>
+            <h2>Saved properties</h2>
+            <p>Properties you've bookmarked for later.</p>
+          </div>
+          <a routerLink="/my-listings" [queryParams]="{ tab: 'favorites' }" class="text-link">View all</a>
+        </header>
+
+        <div class="empty-mini" *ngIf="!favoriteListings.length">
+          <mat-icon>favorite_border</mat-icon>
+          <p>No saved properties yet. Browse listings and tap the heart to save.</p>
+          <a routerLink="/explore-listing" class="btn-outline">Browse rentals</a>
+        </div>
+
+        <div class="favorites-grid" *ngIf="favoriteListings.length">
+          <app-listing-card
+            *ngFor="let listing of favoriteListings | slice:0:6"
+            [listing]="listing"
+            [showActions]="false"
+            (view)="viewProperty($event)">
+          </app-listing-card>
+        </div>
+      </section>
+
+      <!-- Activity -->
+      <section class="content-panel" *ngIf="!isLoading && activeSection === 'activity'">
+        <header class="panel-header">
+          <div>
+            <h2>Your activity</h2>
+            <p>Based on your searches and property views in the last 90 days.</p>
+          </div>
+        </header>
+
+        <div class="stats-row" *ngIf="insights">
+          <div class="stat-card">
+            <mat-icon>visibility</mat-icon>
+            <strong>{{ insights.views || 0 }}</strong>
+            <span>Viewed</span>
+          </div>
+          <div class="stat-card">
+            <mat-icon>search</mat-icon>
+            <strong>{{ insights.searches || 0 }}</strong>
+            <span>Searches</span>
+          </div>
+          <div class="stat-card">
+            <mat-icon>call</mat-icon>
+            <strong>{{ insights.contacts || 0 }}</strong>
+            <span>Contacts</span>
+          </div>
+          <div class="stat-card">
+            <mat-icon>share</mat-icon>
+            <strong>{{ insights.shares || 0 }}</strong>
+            <span>Shares</span>
+          </div>
+        </div>
+
+        <div class="insights-grid" *ngIf="insights">
+          <div class="insight-card">
+            <h3><mat-icon>location_city</mat-icon> Most searched cities</h3>
+            <ul *ngIf="insights.topSearchedCities?.length; else noCities">
+              <li *ngFor="let item of insights.topSearchedCities">
+                <span>{{ item.city }}<ng-container *ngIf="item.state">, {{ item.state }}</ng-container></span>
+                <em>{{ item.count }}</em>
+              </li>
+            </ul>
+            <ng-template #noCities><p class="muted">No search data yet.</p></ng-template>
+          </div>
+
+          <div class="insight-card">
+            <h3><mat-icon>manage_search</mat-icon> Top search terms</h3>
+            <ul *ngIf="insights.topSearchQueries?.length; else noQueries">
+              <li *ngFor="let item of insights.topSearchQueries">
+                <span>{{ item.query }}</span>
+                <em>{{ item.count }}×</em>
+              </li>
+            </ul>
+            <ng-template #noQueries><p class="muted">No search terms recorded yet.</p></ng-template>
+          </div>
+        </div>
+
+        <div class="activity-feed" *ngIf="recentActivity.length">
+          <h3>Recent activity</h3>
+          <div class="feed-item" *ngFor="let item of recentActivity">
+            <div class="feed-icon"><mat-icon>{{ formatEventIcon(item.eventType) }}</mat-icon></div>
+            <div class="feed-body">
+              <strong>{{ formatEventLabel(item.eventType) }}</strong>
+              <span *ngIf="item.city"> in {{ item.city }}</span>
+              <span *ngIf="item.searchQuery"> — "{{ item.searchQuery }}"</span>
+              <time>{{ formatActivityTime(item.createdOn) }}</time>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-mini" *ngIf="!recentActivity.length && !insights?.totalEvents">
+          <mat-icon>history</mat-icon>
+          <p>No activity recorded yet. Start browsing rentals to see insights here.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>

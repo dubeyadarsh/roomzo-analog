@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { PropertyService } from '../../services/property.service';
+import { PropertyMediaCarouselComponent } from '../property-media-carousel/property-media-carousel';
+import { getListingPhotoUrls, ListingPhotoInput } from '../../utils/image-seo.util';
 
 export interface ListingCardItem {
   id: number;
@@ -10,6 +12,7 @@ export interface ListingCardItem {
   price: number;
   priceUnit?: string;
   image: string;
+  photos?: ListingPhotoInput[];
   badge: { text: string; color: 'blue' | 'green' | 'purple' };
   specs: { beds: number; baths: number; area: number };
   postedDate?: string;
@@ -23,7 +26,7 @@ export interface ListingCardItem {
 @Component({
   selector: 'app-listing-card',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, PropertyMediaCarouselComponent],
   templateUrl: './listing-card.html',
   styleUrls: ['./listing-card.css']
 })
@@ -95,8 +98,11 @@ export class ListingCardComponent implements OnInit, OnChanges {
 
   getImageUrl(): string {
     if (this.listing?.['image']) return this.listing['image'];
-    if (this.listing?.['photos']?.length) return this.listing['photos'][0].photoUrl;
-    return this.imageFallback;
+    return getListingPhotoUrls(this.listing?.photos, this.imageFallback)[0];
+  }
+
+  getPhotos(): ListingPhotoInput[] | null {
+    return this.listing?.photos ?? null;
   }
 
   getBeds(): number {

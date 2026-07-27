@@ -121,7 +121,19 @@
   gap: 6px;
   cursor: pointer;
   color: white;
+  text-decoration: none;
 }
+
+.profile-btn--link {
+  padding: 4px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-btn--link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
 .rz-header.scrolled .profile-btn {
   background: none;
   border-color: #e5e7eb;

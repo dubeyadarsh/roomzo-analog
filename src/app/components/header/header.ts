@@ -18,8 +18,7 @@ import { Subscription } from 'rxjs';
 export default class HeaderComponent implements OnInit {
   isLoggedIn = false;
   isOwner = false; 
-  isMenuOpen = false; 
-  isDropdownOpen = false; 
+  isMenuOpen = false;
   userMobile = '';
   isScrolled = false;
   isHomePage = true;
@@ -49,10 +48,6 @@ setTimeout(() => {
     }
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) { 
-    this.isDropdownOpen = false;
-  }
 
   ngOnInit() {
     this.authService.isLoggedIn$.subscribe((status) => {
@@ -65,7 +60,6 @@ setTimeout(() => {
         this.isOwner = false;
         this.userMobile = '';
         this.isMenuOpen = false;
-        this.isDropdownOpen = false;
       }
     });
     this.subs.add(
@@ -78,14 +72,11 @@ ngOnDestroy() {
     this.subs.unsubscribe();
   }
   toggleMenu() {
+    if (this.isLoggedIn) {
+      this.router.navigate(['/profile']);
+      return;
+    }
     this.isMenuOpen = !this.isMenuOpen;
-    if (this.isMenuOpen) this.isDropdownOpen = false;
-  }
-
-  toggleDropdown(event: Event) {
-    event.stopPropagation(); 
-    this.isDropdownOpen = !this.isDropdownOpen;
-    if (this.isDropdownOpen) this.isMenuOpen = false;
   }
 
   closeMenu() {
@@ -97,8 +88,7 @@ ngOnDestroy() {
     this.isLoggedIn = false;
     this.isOwner = false;   
     this.userMobile = '';     
-    this.isMenuOpen = false;   
-    this.isDropdownOpen = false; 
+    this.isMenuOpen = false;
     this.router.navigate(['/']);
   }
 

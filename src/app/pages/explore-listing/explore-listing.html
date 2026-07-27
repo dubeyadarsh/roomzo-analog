@@ -160,7 +160,12 @@
       <section class="listings-area">
         
         <div class="results-header">
-          <div class="sort-container">
+          <div class="results-left">
+            <p class="results-summary" *ngIf="!isLoading && listings.length > 0">
+              <strong>{{ totalItems }}</strong> {{ totalItems === 1 ? 'property' : 'properties' }}
+              <span *ngIf="selectedLocation?.city"> in {{ selectedLocation?.city }}</span>
+            </p>
+            <div class="sort-container">
             <label class="sort-label">Sort:</label>
             <div class="pro-dropdown">
               <div class="dropdown-trigger" [class.open]="isDropdownOpen" (click)="toggleDropdown()">
@@ -173,6 +178,7 @@
                 <div class="dropdown-item" [class.active]="filters.sortBy === 'oldest'" (click)="selectSort('oldest')">Oldest First</div>
               </div>
             </div>
+          </div>
           </div>
           
           <button class="mobile-filter-toggle" (click)="toggleMobileFilters()">
@@ -193,18 +199,25 @@
         </div>
 
         <div class="property-grid" *ngIf="!isLoading && listings.length > 0">
-          <app-listing-card
-            *ngFor="let prop of listings"
-            [listing]="prop"
-            [showAvailabilityBadge]="true"
-            [priceUnit]="'/mo'"
-            [locationIcon]="'location_on'"
-            [availabilityLabel]="'Owner listing'"
-            (view)="viewDetails($event.id)"
-            (call)="handleCardContactAction($event, 'call')"
-            (whatsapp)="handleCardContactAction($event, 'whatsapp')"
-            (save)="toggleSavedListing($event)">
-          </app-listing-card>
+          <ng-container *ngFor="let prop of listings; let i = index">
+            <app-listing-card
+              [listing]="prop"
+              [showAvailabilityBadge]="true"
+              [priceUnit]="'/mo'"
+              [locationIcon]="'location_on'"
+              [availabilityLabel]="'Owner listing'"
+              (view)="viewDetails($event.id)"
+              (call)="handleCardContactAction($event, 'call')"
+              (whatsapp)="handleCardContactAction($event, 'whatsapp')"
+              (save)="toggleSavedListing($event)">
+            </app-listing-card>
+
+            <app-in-feed-ad
+              *ngIf="shouldShowInFeedAd(i)"
+              class="grid-ad-slot"
+              [slotIndex]="getInFeedAdSlotIndex(i)">
+            </app-in-feed-ad>
+          </ng-container>
         </div>
 
         <div class="pagination" *ngIf="totalPages > 1 && !isLoading">

@@ -65,19 +65,28 @@ interface Listing {
   styleUrls: ['./home.css']
 })
 export default class HomeComponent implements OnInit {
-  @ViewChild('carouselGrid') carouselGrid!: ElementRef;
+  @ViewChild('featuredCarouselGrid') featuredCarouselGrid!: ElementRef;
+  @ViewChild('recentCarouselGrid') recentCarouselGrid!: ElementRef;
   @ViewChild('nearbyCarouselGrid', { static: false }) nearbyCarouselGrid!: ElementRef;
   
-  listings: Listing[] = [];
-  isLoading: boolean = true;
+  featuredListings: Listing[] = [];
+  recentListings: Listing[] = [];
+  isLoadingFeatured = true;
+  isLoadingRecent = true;
   nearbyListings: Listing[] = [];
-  isLoadingNearby: boolean = false;
-  nearbyIsAtStart: boolean = true;
-  nearbyIsAtEnd: boolean = false;
-  currentCarouselIndex: number = 0;
-  carouselItemsToShow: number = 3; 
-  isAtStart: boolean = true;
-  isAtEnd: boolean = false;
+  isLoadingNearby = false;
+  nearbyIsAtStart = true;
+  nearbyIsAtEnd = false;
+
+  featuredCarouselIndex = 0;
+  featuredItemsToShow = 3;
+  featuredIsAtStart = true;
+  featuredIsAtEnd = false;
+
+  recentCarouselIndex = 0;
+  recentItemsToShow = 3;
+  recentIsAtStart = true;
+  recentIsAtEnd = false;
   
   Math = Math; 
 
@@ -96,6 +105,7 @@ export default class HomeComponent implements OnInit {
   ) {
     afterNextRender(() => {
       this.calculateItemsToShow();
+      this.fetchFeaturedListings();
       this.fetchRecentListings();
       this.fetchNearbyProperties(); 
       if (isPlatformBrowser(this.platformId)) {
@@ -133,88 +143,165 @@ export default class HomeComponent implements OnInit {
     if (!isPlatformBrowser(this.platformId)) return;
     
     const width = window.innerWidth;
-    if (width < 600) {
-      this.carouselItemsToShow = 1; // Mobile
-    } else if (width < 900) {
-      this.carouselItemsToShow = 2; // Tablet
-    } else {
-      this.carouselItemsToShow = 3; // Desktop
-    }
+    const items = width < 600 ? 1 : width < 900 ? 2 : 3;
+    this.featuredItemsToShow = items;
+    this.recentItemsToShow = items;
     
-    this.onScroll();
+    this.onFeaturedScroll();
+    this.onRecentScroll();
     this.cd.detectChanges();
   }
 
-  fetchRecentListings() {
-    this.isLoading = true;
-    
-    this.propertyService.getRecentListings(10).subscribe(
-      (response: any) => {
-        if (response.listings && response.listings.length > 0) {
-          this.listings = mapBackendListingsToUi(response.listings);
+  fetchFeaturedListings(): void {
+    this.isLoadingFeatured = true;
+
+    this.propertyService.getFeaturedListings(10).subscribe({
+      next: (response: any) => {
+        if (response.listings?.length) {
+          this.featuredListings = mapBackendListingsToUi(response.listings);
           this.syncFavoriteStateFromStorage();
           this.calculateItemsToShow();
+        } else {
+          this.featuredListings = [];
         }
-        this.isLoading = false;
-        
+        this.isLoadingFeatured = false;
         this.cd.detectChanges();
-        
-        setTimeout(() => this.onScroll(), 100);
+        setTimeout(() => this.onFeaturedScroll(), 100);
       },
-      (error) => {
-        console.error('Error fetching recent listings:', error);
-        this.isLoading = false;
+      error: (error) => {
+        console.error('Error fetching featured listings:', error);
+        this.isLoadingFeatured = false;
         this.cd.detectChanges();
-      }
-    );
+      },
+    });
   }
 
-  onScroll(): void {
-    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
-    
-    const el = this.carouselGrid.nativeElement;
-    
-    this.isAtStart = el.scrollLeft <= 0;
-    this.isAtEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth;
+  fetchRecentListings(): void {
+    this.isLoadingRecent = true;
 
-    const card = el.querySelector('.listing-card');
-    if (card) {
-      const cardWidth = card.offsetWidth;
-      const gap = parseInt(window.getComputedStyle(el).gap) || 0;
-      this.currentCarouselIndex = Math.round(el.scrollLeft / (cardWidth + gap));
+    this.propertyService.getRecentListings(10).subscribe({
+      next: (response: any) => {
+        if (response.listings?.length) {
+          this.recentListings = mapBackendListingsToUi(response.listings);
+          this.syncFavoriteStateFromStorage();
+          this.calculateItemsToShow();
+        } else {
+          this.recentListings = [];
+        }
+        this.isLoadingRecent = false;
+        this.cd.detectChanges();
+        setTimeout(() => this.onRecentScroll(), 100);
+      },
+      error: (error) => {
+        console.error('Error fetching recent listings:', error);
+        this.isLoadingRecent = false;
+        this.cd.detectChanges();
+      },
+    });
+  }
+
+  onFeaturedScroll(): void {
+    this.updateCarouselScrollState(this.featuredCarouselGrid, 'featured');
+  }
+
+  onRecentScroll(): void {
+    this.updateCarouselScrollState(this.recentCarouselGrid, 'recent');
+  }
+
+  private updateCarouselScrollState(gridRef: ElementRef | undefined, type: 'featured' | 'recent'): void {
+    if (!gridRef || !isPlatformBrowser(this.platformId)) return;
+
+    const el = gridRef.nativeElement as HTMLElement;
+    const isAtStart = el.scrollLeft <= 2;
+    const isAtEnd = Math.ceil(el.scrollLeft + el.clientWidth) >= el.scrollWidth - 2;
+
+    const cards = el.querySelectorAll('app-listing-card');
+    let index = 0;
+    let itemsToShow = 1;
+
+    if (cards.length > 0) {
+      const cardWidth = (cards[0] as HTMLElement).offsetWidth;
+      const styles = window.getComputedStyle(el);
+      const gap = parseFloat(styles.columnGap || styles.gap) || 24;
+      const step = cardWidth + gap;
+      index = Math.min(cards.length - 1, Math.max(0, Math.round(el.scrollLeft / step)));
+      itemsToShow = Math.max(1, Math.round(el.clientWidth / step));
     }
-    
+
+    if (type === 'featured') {
+      this.featuredIsAtStart = isAtStart;
+      this.featuredIsAtEnd = isAtEnd;
+      this.featuredCarouselIndex = index;
+      this.featuredItemsToShow = itemsToShow;
+    } else {
+      this.recentIsAtStart = isAtStart;
+      this.recentIsAtEnd = isAtEnd;
+      this.recentCarouselIndex = index;
+      this.recentItemsToShow = itemsToShow;
+    }
+
     this.cd.detectChanges();
   }
 
-  scrollLeft(): void {
-    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
-    const el = this.carouselGrid.nativeElement;
-    const cardWidth = el.querySelector('.listing-card').offsetWidth;
-    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
-    el.scrollBy({ left: -(cardWidth + gap), behavior: 'smooth' });
+  private getCarouselStep(gridRef: ElementRef | undefined): { step: number } | null {
+    if (!gridRef || !isPlatformBrowser(this.platformId)) return null;
+    const el = gridRef.nativeElement as HTMLElement;
+    const card = el.querySelector('app-listing-card') as HTMLElement | null;
+    if (!card) return null;
+    const styles = window.getComputedStyle(el);
+    const gap = parseFloat(styles.columnGap || styles.gap) || 24;
+    return { step: card.offsetWidth + gap };
   }
 
-  scrollRight(): void {
-    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
-    const el = this.carouselGrid.nativeElement;
-    const cardWidth = el.querySelector('.listing-card').offsetWidth;
-    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
-    el.scrollBy({ left: (cardWidth + gap), behavior: 'smooth' });
+  scrollFeaturedLeft(): void {
+    const metrics = this.getCarouselStep(this.featuredCarouselGrid);
+    if (!metrics || !this.featuredCarouselGrid) return;
+    this.featuredCarouselGrid.nativeElement.scrollBy({ left: -metrics.step, behavior: 'smooth' });
   }
 
-  scrollToIndex(index: number): void {
-    if (!this.carouselGrid || !isPlatformBrowser(this.platformId)) return;
-    const el = this.carouselGrid.nativeElement;
-    const cardWidth = el.querySelector('.listing-card').offsetWidth;
-    const gap = parseInt(window.getComputedStyle(el).gap) || 0;
-    el.scrollTo({ left: index * (cardWidth + gap), behavior: 'smooth' });
+  scrollFeaturedRight(): void {
+    const metrics = this.getCarouselStep(this.featuredCarouselGrid);
+    if (!metrics || !this.featuredCarouselGrid) return;
+    this.featuredCarouselGrid.nativeElement.scrollBy({ left: metrics.step, behavior: 'smooth' });
   }
 
-  getVisibleIndices(): number[] {
-    const visible = [];
-    for (let i = 0; i < this.carouselItemsToShow && this.currentCarouselIndex + i < this.listings.length; i++) {
-      visible.push(this.currentCarouselIndex + i);
+  scrollFeaturedToIndex(index: number): void {
+    const metrics = this.getCarouselStep(this.featuredCarouselGrid);
+    if (!metrics || !this.featuredCarouselGrid) return;
+    this.featuredCarouselGrid.nativeElement.scrollTo({ left: index * metrics.step, behavior: 'smooth' });
+  }
+
+  getFeaturedVisibleIndices(): number[] {
+    return this.getVisibleIndicesFor(this.featuredCarouselIndex, this.featuredItemsToShow, this.featuredListings.length);
+  }
+
+  scrollRecentLeft(): void {
+    const metrics = this.getCarouselStep(this.recentCarouselGrid);
+    if (!metrics || !this.recentCarouselGrid) return;
+    this.recentCarouselGrid.nativeElement.scrollBy({ left: -metrics.step, behavior: 'smooth' });
+  }
+
+  scrollRecentRight(): void {
+    const metrics = this.getCarouselStep(this.recentCarouselGrid);
+    if (!metrics || !this.recentCarouselGrid) return;
+    this.recentCarouselGrid.nativeElement.scrollBy({ left: metrics.step, behavior: 'smooth' });
+  }
+
+  scrollRecentToIndex(index: number): void {
+    const metrics = this.getCarouselStep(this.recentCarouselGrid);
+    if (!metrics || !this.recentCarouselGrid) return;
+    this.recentCarouselGrid.nativeElement.scrollTo({ left: index * metrics.step, behavior: 'smooth' });
+  }
+
+  getRecentVisibleIndices(): number[] {
+    return this.getVisibleIndicesFor(this.recentCarouselIndex, this.recentItemsToShow, this.recentListings.length);
+  }
+
+  private getVisibleIndicesFor(currentIndex: number, itemsToShow: number, total: number): number[] {
+    const visible: number[] = [];
+    const count = Math.max(1, itemsToShow);
+    for (let i = 0; i < count && currentIndex + i < total; i++) {
+      visible.push(currentIndex + i);
     }
     return visible;
   }
@@ -370,7 +457,8 @@ export default class HomeComponent implements OnInit {
     const favoriteIds = this.propertyService.getFavoritePropertyIds();
     const favoriteSet = new Set(favoriteIds.map(String));
 
-    this.listings = this.listings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
+    this.featuredListings = this.featuredListings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
+    this.recentListings = this.recentListings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
     this.nearbyListings = this.nearbyListings.map((listing) => ({ ...listing, isFavorite: favoriteSet.has(String(listing.id)) }));
     this.cd.detectChanges();
   }
@@ -536,22 +624,22 @@ export default class HomeComponent implements OnInit {
   }
 
   navigateToCategory(type: string): void {
-  switch (type) {
-    case 'flatmate':
-      this.router.navigate(['/flatmates']);
-      break;
-    case 'room':
-      this.router.navigate(['/category/rooms-for-rent']);
-      break;
-    case 'pg':
-      this.router.navigate(['/category/pg-for-rent']);
-      break;
-    case 'flat':
-      this.router.navigate(['/category/flats-for-rent']);
-      break;
-    default:
-      this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Any' } });
-      break;
+    switch (type) {
+      case 'flatmate':
+        this.router.navigate(['/flatmates']);
+        break;
+      case 'room':
+        this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Room' } });
+        break;
+      case 'pg':
+        this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'PG' } });
+        break;
+      case 'flat':
+        this.router.navigate(['/explore-listing'], { queryParams: { propertyType: 'Flat' } });
+        break;
+      default:
+        this.router.navigate(['/explore-listing']);
+        break;
+    }
   }
-}
 }

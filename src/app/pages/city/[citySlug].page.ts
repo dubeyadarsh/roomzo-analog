@@ -17,6 +17,9 @@ import {
 import { RelatedSearchesComponent } from '../../components/related-searches/related-searches';
 import { SeoBreadcrumbComponent } from '../../components/seo-breadcrumb/seo-breadcrumb';
 import { ContentGuideComponent } from '../../components/content-guide/content-guide';
+import { PropertyMediaCarouselComponent } from '../../components/property-media-carousel/property-media-carousel';
+import { InFeedAdComponent } from '../../components/in-feed-ad/in-feed-ad';
+import { getInFeedAdSlotIndex, shouldShowInFeedAd } from '../../utils/in-feed-ad.util';
 import { CityGuide, getCityGuide } from '../../content/city-guides';
 import {
   generatePropertyAltText,
@@ -37,11 +40,16 @@ import cityZonesData from '../../../../public/data/city-zones.json';
     RelatedSearchesComponent,
     SeoBreadcrumbComponent,
     ContentGuideComponent,
+    PropertyMediaCarouselComponent,
+    InFeedAdComponent,
   ],
   templateUrl: '../explore-city/explore-city.html',
   styleUrls: ['../explore-city/explore-city.css'],
 })
 export default class CityListingsPage implements OnInit, OnDestroy {
+  readonly shouldShowInFeedAd = shouldShowInFeedAd;
+  readonly getInFeedAdSlotIndex = getInFeedAdSlotIndex;
+
   city = '';
   state = '';
   cityConfig?: RoomzoCity;
